@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>The Paws Tribute</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #F6F3EF;
+  --surface: #FFFFFF;
+  --border: #E6E0D8;
+  --text: #111111;
+  --muted: #6B6560;
+  --accent: #B8845A;
+  --accent-light: #F2E8DC;
+  --pickup: #C94F4F;
+  --pickup-bg: #FEF0F0;
+  --dropoff: #3F86C0;
+  --dropoff-bg: #EDF4FB;
+  --ashes: #7060A0;
+  --ashes-bg: #F1EFF8;
+  --ceremony: #B8845A;
+  --ceremony-bg: #FAF2E8;
+  --hour: 64px;
+  --timecol: 48px;
+  --staffcol: 148px;
+  --avail-col: 110px;
+  --avail-row: 44px;
+}
+
+body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+
+/* ── LOGIN SCREEN ── */
+.login-screen {
+  position:fixed; inset:0; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  z-index:200; padding:32px;
+}
+.login-screen.hidden { display:none; }
+.login-logo { font-family:'DM Serif Display',serif; font-size:28px; color:var(--accent); text-align:center; margin-bottom:4px; }
+.login-sub { font-size:13px; color:var(--muted); text-align:center; margin-bottom:40px; font-style:italic; }
+.login-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; text-align:center; }
+.staff-select-grid { display:flex; flex-direction:column; gap:10px; width:100%; max-width:320px; margin-bottom:32px; }
+.staff-select-btn {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:14px;
+  padding:14px 20px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:500;
+  color:var(--text); cursor:pointer; display:flex; align-items:center; gap:12px;
+  transition:all 0.15s;
+}
+.staff-select-btn:active { border-color:var(--accent); background:var(--accent-light); }
+.staff-select-avatar {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--accent-light); color:var(--accent);
+  font-size:14px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+}
+.pin-screen { display:none; flex-direction:column; align-items:center; width:100%; max-width:320px; }
+.pin-screen.show { display:flex; }
+.pin-name { font-family:'DM Serif Display',serif; font-size:22px; color:var(--text); margin-bottom:4px; }
+.pin-hint { font-size:13px; color:var(--muted); margin-bottom:24px; }
+.pin-dots { display:flex; gap:12px; margin-bottom:24px; }
+.pin-dot { width:14px; height:14px; border-radius:50%; border:2px solid var(--border); background:transparent; transition:all 0.15s; }
+.pin-dot.filled { background:var(--accent); border-color:var(--accent); }
+.pin-pad { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; }
+.pin-key {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:14px;
+  padding:16px; font-size:20px; font-weight:500; cursor:pointer;
+  font-family:'DM Sans',sans-serif; color:var(--text); transition:all 0.1s; text-align:center;
+}
+.pin-key:active { background:var(--accent-light); border-color:var(--accent); }
+.pin-error { color:var(--pickup); font-size:13px; font-weight:500; margin-top:12px; min-height:20px; }
+.pin-back-btn { background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; margin-top:16px; font-family:'DM Sans',sans-serif; }
+
+/* ── TOP BAR ── */
+.topbar { background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; z-index:60; }
+.topbar-inner { display:flex; align-items:center; justify-content:space-between; padding:12px 16px 8px; }
+.logo { font-family:'DM Serif Display',serif; font-size:17px; color:var(--accent); }
+.logo span { font-style:italic; color:var(--muted); font-size:12px; margin-left:4px; }
+.topbar-right { display:flex; align-items:center; gap:8px; }
+.add-btn {
+  background:var(--accent); color:white; border:none; border-radius:20px;
+  padding:8px 14px; font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+  cursor:pointer; display:flex; align-items:center; gap:5px;
+}
+.add-btn.hidden { display:none; }
+.add-btn svg { width:13px; height:13px; }
+.logout-btn {
+  background:var(--bg); border:1px solid var(--border); border-radius:20px;
+  padding:7px 12px; font-size:12px; color:var(--muted); cursor:pointer;
+  font-family:'DM Sans',sans-serif; font-weight:500;
+}
+.date-nav { display:flex; align-items:center; justify-content:space-between; padding:4px 16px 10px; }
+.date-arrow { background:none; border:1px solid var(--border); border-radius:8px; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted); }
+.date-label { font-size:13px; font-weight:500; }
+.today-pill { background:var(--accent-light); color:var(--accent); border:none; border-radius:12px; padding:4px 10px; font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; }
+
+/* ── TABS ── */
+.tabs { display:flex; background:var(--surface); border-bottom:2px solid var(--border); flex-shrink:0; z-index:55; }
+.tab { flex:1; padding:10px; text-align:center; font-size:13px; font-weight:500; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px; transition:all 0.15s; user-select:none; }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ── VIEWS ── */
+.view { display:none; flex:1; overflow:hidden; flex-direction:column; min-height:0; }
+.view.active { display:flex; }
+
+/* ── SCHEDULE ── */
+.schedule-legend { display:flex; gap:12px; padding:7px 16px; background:var(--surface); border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
+.schedule-legend::-webkit-scrollbar { display:none; }
+.legend-item { display:flex; align-items:center; gap:5px; white-space:nowrap; font-size:11px; color:var(--muted); font-weight:500; }
+.legend-dot { width:8px; height:8px; border-radius:2px; }
+.grid-outer { flex:1; overflow:hidden; min-height:0; }
+.grid-scroll { width:100%; height:100%; overflow:auto; -webkit-overflow-scrolling:touch; }
+.grid-scroll::-webkit-scrollbar { display:none; }
+.sched-staff-header { display:flex; position:sticky; top:0; z-index:30; background:var(--surface); border-bottom:1px solid var(--border); margin-left:var(--timecol); }
+.staff-cell { width:var(--staffcol); min-width:var(--staffcol); padding:8px 6px; text-align:center; border-right:1px solid var(--border); flex-shrink:0; }
+.staff-avatar { width:28px; height:28px; border-radius:50%; background:var(--accent-light); color:var(--accent); font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; margin:0 auto 3px; }
+.staff-name { font-size:11px; font-weight:500; }
+.grid-body { display:flex; }
+.time-col { width:var(--timecol); min-width:var(--timecol); flex-shrink:0; position:sticky; left:0; background:#F6F3EF; z-index:20; }
+.time-slot { height:var(--hour); display:flex; align-items:flex-start; justify-content:flex-end; padding:4px 8px 0 0; border-bottom:1px solid var(--border); }
+.time-label { font-size:10px; color:#333; font-weight:600; white-space:nowrap; }
+.staff-cols { display:flex; flex:1; position:relative; }
+.staff-column { width:var(--staffcol); min-width:var(--staffcol); border-right:1px solid var(--border); position:relative; flex-shrink:0; }
+.job-card { position:absolute; border-radius:6px; padding:4px 6px; cursor:pointer; z-index:10; overflow:hidden; border-left:3px solid; box-shadow:0 1px 3px rgba(0,0,0,0.06); transition:transform 0.1s; }
+.job-card:active { transform:scale(0.98); }
+.job-card.pickup  { background:var(--pickup-bg);  border-color:var(--pickup);  }
+.job-card.dropoff { background:var(--dropoff-bg); border-color:var(--dropoff); }
+.job-card.ashes   { background:var(--ashes-bg);   border-color:var(--ashes);   }
+.job-card.ceremony{ background:var(--ceremony-bg);border-color:var(--ceremony);}
+.job-type-label { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:1px; }
+.pickup  .job-type-label { color:var(--pickup);  }
+.dropoff .job-type-label { color:var(--dropoff); }
+.ashes   .job-type-label { color:var(--ashes);   }
+.ceremony .job-type-label{ color:var(--ceremony);}
+.job-owner { font-size:11px; font-weight:700; color:#111; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2; }
+.job-pet { font-size:10px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.job-time-small { font-size:9px; color:#666; margin-top:1px; }
+.job-paid { display:inline-block; font-size:8px; font-weight:600; padding:1px 4px; border-radius:3px; margin-top:2px; }
+.paid   { background:#DCF5E8; color:#2E8050; }
+.unpaid { background:#FDE8DC; color:#C05020; }
+.unavail-block { position:absolute; left:0; right:0; background:repeating-linear-gradient(-45deg,#EEECEC,#EEECEC 5px,#E6E4E4 5px,#E6E4E4 10px); z-index:2; pointer-events:none; }
+.current-time-line { position:absolute; left:0; right:0; height:2px; background:var(--accent); z-index:15; pointer-events:none; }
+.current-time-line::before { content:''; position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--accent); }
+
+/* ── AVAILABILITY ── */
+.avail-view { flex:1; display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+.avail-week-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 16px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.avail-week-label { font-size:13px; font-weight:500; }
+.avail-day-pills { display:flex; gap:6px; padding:8px 12px; background:var(--surface); border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
+.avail-day-pills::-webkit-scrollbar { display:none; }
+.day-pill { border:1.5px solid var(--border); border-radius:20px; padding:5px 12px; font-size:12px; font-weight:600; cursor:pointer; background:var(--surface); color:var(--muted); font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0; transition:all 0.15s; }
+.day-pill.active { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
+.avail-legend { display:flex; gap:16px; padding:7px 16px; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; }
+.avail-legend-item { display:flex; align-items:center; gap:6px; font-size:11px; color:var(--muted); font-weight:500; }
+.avail-legend-box { width:14px; height:14px; border-radius:3px; border:1px solid var(--border); }
+.avail-hint { padding:6px 16px; background:var(--accent-light); font-size:11px; color:var(--accent); font-weight:500; text-align:center; flex-shrink:0; }
+.avail-grid-scroll { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; min-height:0; }
+.avail-grid-scroll::-webkit-scrollbar { display:none; }
+.avail-grid-wrap { flex:1; overflow:hidden; display:flex; flex-direction:column; min-height:0; }
+.avail-col-header { display:flex; flex-shrink:0; border-bottom:1px solid var(--border); background:var(--surface); margin-left:var(--timecol); }
+.avail-staff-name-cell { width:var(--avail-col); min-width:var(--avail-col); padding:8px 6px; text-align:center; border-right:1px solid var(--border); flex-shrink:0; }
+.avail-grid-scroll { flex:1; overflow:auto; -webkit-overflow-scrolling:touch; min-height:0; }
+.avail-grid-scroll::-webkit-scrollbar { display:none; }
+.avail-grid { display:flex; min-width:max-content; }
+.avail-time-col { width:var(--timecol); min-width:var(--timecol); position:sticky; left:0; background:#F6F3EF; z-index:20; flex-shrink:0; }
+.avail-time-row { height:var(--avail-row); min-height:var(--avail-row); display:flex; align-items:center; justify-content:flex-end; padding-right:8px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.avail-time-text { font-size:10px; color:#333; font-weight:600; }
+.avail-staff-cols { display:flex; }
+.avail-staff-col { width:var(--avail-col); min-width:var(--avail-col); border-right:1px solid var(--border); flex-shrink:0; display:flex; flex-direction:column; }
+.avail-cell { width:var(--avail-col); height:var(--avail-row); min-height:var(--avail-row); border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.1s; flex-shrink:0; }
+.avail-cell.available { background:#FFFFFF; }
+.avail-cell.unavailable { background:repeating-linear-gradient(-45deg,#EFEFEF,#EFEFEF 4px,#E6E6E6 4px,#E6E6E6 8px); }
+
+/* ── MODALS ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(28,25,23,0.5); z-index:100; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal { background:var(--surface); border-radius:20px 20px 0 0; width:100%; max-height:90dvh; overflow-y:auto; padding:0 0 32px; transform:translateY(100%); transition:transform 0.25s cubic-bezier(0.32,0.72,0,1); }
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:12px auto 16px; }
+.modal-title { font-family:'DM Serif Display',serif; font-size:20px; color:var(--text); padding:0 20px 16px; border-bottom:1px solid var(--border); }
+.modal-body { padding:20px; display:flex; flex-direction:column; gap:16px; }
+.type-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.type-btn { border:1.5px solid var(--border); border-radius:10px; padding:10px 8px; cursor:pointer; background:var(--surface); font-family:'DM Sans',sans-serif; transition:all 0.15s; text-align:left; }
+.type-btn.sel-pickup   { border-color:var(--pickup);  background:var(--pickup-bg);  }
+.type-btn.sel-dropoff  { border-color:var(--dropoff); background:var(--dropoff-bg); }
+.type-btn.sel-ashes    { border-color:var(--ashes);   background:var(--ashes-bg);   }
+.type-btn.sel-ceremony { border-color:var(--ceremony);background:var(--ceremony-bg);}
+.type-btn-icon { font-size:18px; margin-bottom:4px; }
+.type-btn-label { font-size:12px; font-weight:600; color:var(--text); display:block; }
+.type-btn-dur { font-size:10px; color:var(--muted); }
+.field-group { display:flex; flex-direction:column; gap:6px; }
+.field-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; }
+.req { color:var(--pickup); font-weight:700; }
+.field-input { border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text); background:var(--surface); outline:none; width:100%; transition:border-color 0.15s; }
+.field-input:focus { border-color:var(--accent); }
+.field-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.paid-toggle { display:flex; gap:8px; }
+.toggle-btn { flex:1; border:1.5px solid var(--border); border-radius:10px; padding:9px; font-size:12px; font-weight:600; cursor:pointer; background:var(--surface); font-family:'DM Sans',sans-serif; color:var(--muted); transition:all 0.15s; }
+.toggle-btn.active-paid   { border-color:#2E8050; background:#DCF5E8; color:#2E8050; }
+.toggle-btn.active-unpaid { border-color:#C05020; background:#FDE8DC; color:#C05020; }
+.staff-pills { display:flex; flex-wrap:wrap; gap:8px; }
+.staff-pill { border:1.5px solid var(--border); border-radius:20px; padding:6px 12px; font-size:12px; font-weight:500; cursor:pointer; background:var(--surface); color:var(--muted); transition:all 0.15s; font-family:'DM Sans',sans-serif; }
+.staff-pill.selected { border-color:var(--accent); background:var(--accent-light); color:var(--accent); }
+.cremation-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.crem-btn { border:1.5px solid var(--border); border-radius:10px; padding:10px 6px; cursor:pointer; background:var(--surface); font-family:'DM Sans',sans-serif; transition:all 0.15s; text-align:center; }
+.crem-btn.selected { border-color:var(--accent); background:var(--accent-light); }
+.crem-icon { font-size:18px; margin-bottom:4px; }
+.crem-label { font-size:11px; font-weight:600; color:var(--text); }
+.submit-btn { width:100%; background:var(--accent); color:white; border:none; border-radius:12px; padding:14px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600; cursor:pointer; margin-top:4px; }
+.submit-btn:active { background:#9E6E48; }
+.field-error { color:var(--pickup); font-size:11px; margin-top:2px; font-weight:500; }
+
+/* Loading */
+.loading-overlay { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:300; flex-direction:column; gap:12px; }
+.loading-overlay.hidden { display:none; }
+.loading-spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 0.8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.loading-text { font-size:13px; color:var(--muted); }
+
+/* Toast */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--text); color:white; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:500; z-index:400; transition:transform 0.3s; white-space:nowrap; }
+.toast.show { transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading...</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-logo">The Paws Tribute</div>
+  <div class="login-sub">Staff Scheduler</div>
+
+  <div id="staffSelectView" style="width:100%;max-width:320px;">
+    <div class="login-label">Who are you?</div>
+    <div class="staff-select-grid" id="staffSelectGrid"></div>
+  </div>
+
+  <div class="pin-screen" id="pinView">
+    <div class="pin-name" id="pinName"></div>
+    <div class="pin-hint">Enter your PIN</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="dot0"></div>
+      <div class="pin-dot" id="dot1"></div>
+      <div class="pin-dot" id="dot2"></div>
+      <div class="pin-dot" id="dot3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key" onclick="pinPress('back')" style="font-size:16px;">⌫</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key" onclick="pinPress('clear')" style="font-size:11px;color:var(--muted);">Clear</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <button class="pin-back-btn" onclick="backToStaffSelect()">← Back</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;flex-direction:column;flex:1;overflow:hidden;height:100dvh;">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">The Paws Tribute <span>scheduler</span></div>
+      <div class="topbar-right">
+        <button class="add-btn" id="addJobBtn" onclick="openAddModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Job
+        </button>
+        <button class="logout-btn" onclick="logout()" id="logoutBtn"></button>
+      </div>
+    </div>
+    <div class="date-nav" id="dateNav">
+      <button class="date-arrow" onclick="changeDay(-1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="date-label" id="dateLabel"></div>
+      <button class="today-pill" onclick="goToday()">Today</button>
+      <button class="date-arrow" onclick="changeDay(1)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" id="tab-schedule"     onclick="switchTab('schedule')">📅 Schedule</div>
+    <div class="tab"        id="tab-availability" onclick="switchTab('availability')">🗓 Availability</div>
+  </div>
+
+  <!-- SCHEDULE VIEW -->
+  <div class="view active" id="view-schedule">
+    <div class="schedule-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--pickup)"></div>Home Pickup</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--dropoff)"></div>Office Drop-off</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ashes)"></div>Ashes Pickup</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--ceremony)"></div>Ceremony</div>
+    </div>
+    <div class="grid-outer">
+      <div class="grid-scroll" id="gridScroll">
+        <div class="sched-staff-header" id="schedStaffHeader"></div>
+        <div class="grid-body">
+          <div class="time-col" id="timeCol"></div>
+          <div class="staff-cols" id="staffCols"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AVAILABILITY VIEW -->
+  <div class="view" id="view-availability">
+    <div class="avail-view">
+      <div class="avail-week-bar">
+        <button class="date-arrow" onclick="changeWeek(-1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="avail-week-label" id="weekLabel"></div>
+        <button class="date-arrow" onclick="changeWeek(1)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="avail-day-pills" id="dayPills"></div>
+      <div class="avail-legend">
+        <div class="avail-legend-item"><div class="avail-legend-box" style="background:#fff"></div>Available</div>
+        <div class="avail-legend-item"><div class="avail-legend-box" style="background:repeating-linear-gradient(-45deg,#EFEFEF,#EFEFEF 4px,#E6E6E6 4px,#E6E6E6 8px)"></div>Unavailable</div>
+      </div>
+      <div class="avail-hint" id="availHint">Tap any hour to toggle your availability</div>
+      <div class="avail-grid-wrap">
+        <div class="avail-col-header" id="availStaffHeader"></div>
+        <div class="avail-grid-scroll">
+          <div class="avail-grid">
+            <div class="avail-time-col" id="availTimeCol"></div>
+            <div class="avail-staff-cols" id="availStaffCols"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ADD JOB MODAL -->
+<div class="modal-overlay" id="addOverlay" onclick="handleOverlayClick(event,'addOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">New Job</div>
+    <div class="modal-body">
+      <div class="field-group">
+        <div class="field-label">Job Type <span class="req">*</span></div>
+        <div class="type-grid">
+          <button class="type-btn" id="type-pickup"   onclick="selectType('pickup')">  <div class="type-btn-icon">🚗</div><span class="type-btn-label">Home Pickup</span>     <span class="type-btn-dur">Custom duration</span></button>
+          <button class="type-btn" id="type-dropoff"  onclick="selectType('dropoff')"> <div class="type-btn-icon">🏢</div><span class="type-btn-label">Office Drop-off</span> <span class="type-btn-dur">15 mins</span></button>
+          <button class="type-btn" id="type-ashes"    onclick="selectType('ashes')">   <div class="type-btn-icon">🫙</div><span class="type-btn-label">Ashes Pickup</span>    <span class="type-btn-dur">10 mins</span></button>
+          <button class="type-btn" id="type-ceremony" onclick="selectType('ceremony')"><div class="type-btn-icon">🌸</div><span class="type-btn-label">Ceremony</span>          <span class="type-btn-dur">30 mins</span></button>
+        </div>
+      </div>
+      <div class="field-group" id="cremationGroup">
+        <div class="field-label">Cremation Type <span class="req">*</span></div>
+        <div class="cremation-grid">
+          <button class="crem-btn" id="crem-individual" onclick="selectCremation('individual')"><div class="crem-icon">🕯️</div><div class="crem-label">Individual</div></button>
+          <button class="crem-btn" id="crem-communal"   onclick="selectCremation('communal')">  <div class="crem-icon">🌿</div><div class="crem-label">Communal</div></button>
+          <button class="crem-btn" id="crem-ceremony"   onclick="selectCremation('ceremony_crem')"><div class="crem-icon">🌸</div><div class="crem-label">Ceremony</div></button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Time <span class="req">*</span></div><input type="time" class="field-input" id="jobTime" value="09:00"></div>
+        <div class="field-group"><div class="field-label">Duration (mins) <span class="req">*</span></div><input type="number" class="field-input" id="jobDuration" placeholder="e.g. 45" min="5" max="300"></div>
+      </div>
+      <div id="overlapWarning" style="display:none;background:#FFF8E6;border:1px solid #F0C040;border-radius:10px;padding:10px 12px;font-size:12px;color:#8A6000;font-weight:500;">⚠️ This staff member already has a job at this time. You can still book it.</div>
+      <div class="field-group">
+        <div class="field-label">Assign Staff <span class="req">*</span></div>
+        <div class="staff-pills" id="staffPills"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Owner Name <span class="req">*</span></div><input type="text" class="field-input" id="ownerName" placeholder="Full name"></div>
+        <div class="field-group"><div class="field-label">Phone</div><input type="tel" class="field-input" id="ownerPhone" placeholder="Mobile"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Pet Name</div><input type="text" class="field-input" id="petName" placeholder="Pet's name"></div>
+        <div class="field-group"><div class="field-label">Breed</div><input type="text" class="field-input" id="petBreed" placeholder="Breed"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Weight (lb)</div><input type="number" class="field-input" id="petWeight" placeholder="e.g. 12" step="0.1"></div>
+        <div class="field-group" id="addressGroup" style="display:none"><div class="field-label">Address</div><input type="text" class="field-input" id="ownerAddress" placeholder="Pickup address"></div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Payment</div>
+        <div class="paid-toggle">
+          <button class="toggle-btn" id="paidBtn"   onclick="setPaid(true)">✓ Paid</button>
+          <button class="toggle-btn" id="unpaidBtn" onclick="setPaid(false)">⏳ Unpaid</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Remarks</div>
+        <textarea class="field-input" id="remarks" rows="2" style="resize:none;line-height:1.5"></textarea>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:-4px;"><span class="req">*</span> Required fields</div>
+      <button class="submit-btn" onclick="addJob()">Add to Schedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editOverlay" onclick="handleOverlayClick(event,'editOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 20px 16px;border-bottom:1px solid var(--border);">
+      <div style="font-family:'DM Serif Display',serif;font-size:20px;">Edit Job</div>
+      <button onclick="deleteJob()" style="background:#FDE8DC;color:#C05020;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">Delete</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <div class="field-label">Job Type <span class="req">*</span></div>
+        <div class="type-grid">
+          <button class="type-btn" id="edit-type-pickup"   onclick="editSelectType('pickup')">  <div class="type-btn-icon">🚗</div><span class="type-btn-label">Home Pickup</span>     <span class="type-btn-dur">Custom duration</span></button>
+          <button class="type-btn" id="edit-type-dropoff"  onclick="editSelectType('dropoff')"> <div class="type-btn-icon">🏢</div><span class="type-btn-label">Office Drop-off</span> <span class="type-btn-dur">15 mins</span></button>
+          <button class="type-btn" id="edit-type-ashes"    onclick="editSelectType('ashes')">   <div class="type-btn-icon">🫙</div><span class="type-btn-label">Ashes Pickup</span>    <span class="type-btn-dur">10 mins</span></button>
+          <button class="type-btn" id="edit-type-ceremony" onclick="editSelectType('ceremony')"><div class="type-btn-icon">🌸</div><span class="type-btn-label">Ceremony</span>          <span class="type-btn-dur">30 mins</span></button>
+        </div>
+      </div>
+      <div class="field-group" id="editCremationGroup">
+        <div class="field-label">Cremation Type <span class="req">*</span></div>
+        <div class="cremation-grid">
+          <button class="crem-btn" id="edit-crem-individual" onclick="editSelectCremation('individual')"><div class="crem-icon">🕯️</div><div class="crem-label">Individual</div></button>
+          <button class="crem-btn" id="edit-crem-communal"   onclick="editSelectCremation('communal')">  <div class="crem-icon">🌿</div><div class="crem-label">Communal</div></button>
+          <button class="crem-btn" id="edit-crem-ceremony"   onclick="editSelectCremation('ceremony_crem')"><div class="crem-icon">🌸</div><div class="crem-label">Ceremony</div></button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Time <span class="req">*</span></div><input type="time" class="field-input" id="editJobTime"></div>
+        <div class="field-group"><div class="field-label">Duration (mins) <span class="req">*</span></div><input type="number" class="field-input" id="editJobDuration" min="5" max="300"></div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Assign Staff <span class="req">*</span></div>
+        <div class="staff-pills" id="editStaffPills"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Owner Name <span class="req">*</span></div><input type="text" class="field-input" id="editOwnerName"></div>
+        <div class="field-group"><div class="field-label">Phone</div><input type="tel" class="field-input" id="editOwnerPhone"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Pet Name</div><input type="text" class="field-input" id="editPetName"></div>
+        <div class="field-group"><div class="field-label">Breed</div><input type="text" class="field-input" id="editPetBreed"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">Weight (lb)</div><input type="number" class="field-input" id="editPetWeight" step="0.1"></div>
+        <div class="field-group" id="editAddressGroup"><div class="field-label">Address</div><input type="text" class="field-input" id="editOwnerAddress"></div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Payment</div>
+        <div class="paid-toggle">
+          <button class="toggle-btn" id="editPaidBtn"   onclick="editSetPaid(true)">✓ Paid</button>
+          <button class="toggle-btn" id="editUnpaidBtn" onclick="editSetPaid(false)">⏳ Unpaid</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">Remarks</div>
+        <textarea class="field-input" id="editRemarks" rows="2" style="resize:none;line-height:1.5"></textarea>
+      </div>
+      <button class="submit-btn" onclick="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// SUPABASE INIT
+// ══════════════════════════════════════════
+const SUPABASE_URL = 'https://viitjebfitccdhmpwfhu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpaXRqZWJmaXRjY2RobXB3Zmh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNzQ5NzQsImV4cCI6MjA5Mzg1MDk3NH0.vwUhL1Du6mHa0H-DxJZSOF9klVnOBXqiZ1CNlmi7wLQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const HOURS_START = 7, HOURS_END = 22, HOUR_PX = 64;
+let currentDate      = new Date();
+let currentWeekStart = getMonday(new Date());
+let currentAvailDay  = Math.max(0, new Date().getDay() === 0 ? 6 : new Date().getDay()-1);
+let currentUser      = null; // { id, name, role }
+let staffList        = [];
+let jobs             = [];
+let availability     = {};
+let selectedType=null, selectedStaff=null, isPaid=null, selectedCremation=null;
+let editingJobId=null, editType=null, editCremation=null, editStaff=null, editPaidVal=null;
+let pinEntry='', pinTarget=null;
+
+const TYPE_CONFIG = {
+  pickup:   { label:'Home Pickup',    icon:'🚗', color:'var(--pickup)',   bg:'var(--pickup-bg)',   defaultDur:60 },
+  dropoff:  { label:'Office Drop-off',icon:'🏢', color:'var(--dropoff)',  bg:'var(--dropoff-bg)', defaultDur:15 },
+  ashes:    { label:'Ashes Pickup',   icon:'🫙', color:'var(--ashes)',    bg:'var(--ashes-bg)',   defaultDur:10 },
+  ceremony: { label:'Ceremony',       icon:'🌸', color:'var(--ceremony)', bg:'var(--ceremony-bg)',defaultDur:30 },
+};
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+async function init() {
+  showLoading(true);
+  // Check session
+  const saved = sessionStorage.getItem('pawsUser');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    await loadStaff();
+    showApp();
+  } else {
+    await loadStaff();
+    showLogin();
+  }
+  showLoading(false);
+}
+
+async function loadStaff() {
+  const { data } = await sb.from('staff').select('*').order('name');
+  staffList = data || [];
+}
+
+// ══════════════════════════════════════════
+// LOGIN
+// ══════════════════════════════════════════
+function showLogin() {
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('mainApp').style.display = 'none';
+  renderStaffSelect();
+}
+
+function renderStaffSelect() {
+  const grid = document.getElementById('staffSelectGrid');
+  grid.innerHTML = '';
+  staffList.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'staff-select-btn';
+    btn.innerHTML = `<div class="staff-select-avatar">${s.name[0]}</div><span>${s.name}</span>`;
+    btn.onclick = () => startPin(s);
+    grid.appendChild(btn);
+  });
+}
+
+function startPin(staffMember) {
+  pinTarget  = staffMember;
+  pinEntry   = '';
+  document.getElementById('pinName').textContent = staffMember.name;
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+  document.getElementById('staffSelectView').style.display = 'none';
+  document.getElementById('pinView').classList.add('show');
+}
+
+function backToStaffSelect() {
+  pinEntry = '';
+  pinTarget = null;
+  document.getElementById('staffSelectView').style.display = 'block';
+  document.getElementById('pinView').classList.remove('show');
+}
+
+function pinPress(key) {
+  if (key === 'back')  { pinEntry = pinEntry.slice(0,-1); }
+  else if (key === 'clear') { pinEntry = ''; }
+  else if (pinEntry.length < 4) { pinEntry += key; }
+  updatePinDots();
+  document.getElementById('pinError').textContent = '';
+  if (pinEntry.length === 4) setTimeout(checkPin, 100);
+}
+
+function updatePinDots() {
+  for (let i=0; i<4; i++) {
+    document.getElementById(`dot${i}`).classList.toggle('filled', i < pinEntry.length);
+  }
+}
+
+async function checkPin() {
+  if (pinEntry === pinTarget.pin) {
+    currentUser = { id: pinTarget.id, name: pinTarget.name, role: pinTarget.role };
+    sessionStorage.setItem('pawsUser', JSON.stringify(currentUser));
+    document.getElementById('loginScreen').classList.add('hidden');
+    showApp();
+  } else {
+    document.getElementById('pinError').textContent = 'Wrong PIN. Try again.';
+    pinEntry = '';
+    updatePinDots();
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('pawsUser');
+  currentUser = null;
+  jobs = [];
+  availability = {};
+  backToStaffSelect();
+  showLogin();
+}
+
+// ══════════════════════════════════════════
+// SHOW APP
+// ══════════════════════════════════════════
+async function showApp() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  const app = document.getElementById('mainApp');
+  app.style.display = 'flex';
+
+  // Set logout button label
+  document.getElementById('logoutBtn').textContent = currentUser.name + ' ↩';
+
+  // Admin sees Add Job, staff don't
+  const addBtn = document.getElementById('addJobBtn');
+  if (currentUser.role === 'admin') {
+    addBtn.classList.remove('hidden');
+  } else {
+    addBtn.classList.add('hidden');
+  }
+
+  // Build staff pills for add/edit modals
+  renderStaffPills('staffPills');
+  renderStaffPills('editStaffPills');
+
+  renderDateLabel();
+  renderWeekLabel();
+  await loadJobs();
+  await loadAvailability();
+  renderGrid();
+  renderAvailability();
+  subscribeRealtime();
+}
+
+function renderStaffPills(containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  staffList.filter(s => s.role === 'staff').forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'staff-pill';
+    btn.textContent = s.name;
+    const prefix = containerId === 'staffPills' ? '' : 'edit-';
+    btn.onclick = () => containerId === 'staffPills' ? toggleStaff(btn, s.name) : editToggleStaff(btn, s.name);
+    container.appendChild(btn);
+  });
+}
+
+// ══════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════
+async function loadJobs() {
+  const dateStr = formatDateKey(currentDate);
+  const { data, error } = await sb.from('jobs').select('*').eq('job_date', dateStr);
+  if (!error) jobs = data || [];
+}
+
+async function loadAvailability() {
+  const weekDates = getWeekDates(currentWeekStart);
+  const dates = weekDates.map(formatDateKey);
+  const { data } = await sb.from('availability').select('*').in('avail_date', dates);
+  availability = {};
+  (data||[]).forEach(r => {
+    availability[`${r.staff_name}_${r.avail_date}_${r.hour_slot}`] = r.is_available;
+  });
+}
+
+// ══════════════════════════════════════════
+// REALTIME
+// ══════════════════════════════════════════
+function subscribeRealtime() {
+  sb.channel('jobs-changes')
+    .on('postgres_changes', { event:'*', schema:'public', table:'jobs' }, async () => {
+      await loadJobs();
+      renderGrid();
+    })
+    .subscribe();
+
+  sb.channel('avail-changes')
+    .on('postgres_changes', { event:'*', schema:'public', table:'availability' }, async () => {
+      await loadAvailability();
+      renderGrid();
+      if (document.getElementById('tab-availability').classList.contains('active')) renderAvailability();
+    })
+    .subscribe();
+}
+
+// ══════════════════════════════════════════
+// DATE HELPERS
+// ══════════════════════════════════════════
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  date.setDate(date.getDate() - day + (day===0?-6:1));
+  date.setHours(0,0,0,0);
+  return date;
+}
+function formatDateKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function formatDate(d) {
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+}
+function formatWeekRange(start) {
+  const end = new Date(start); end.setDate(end.getDate()+6);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${start.getDate()} ${months[start.getMonth()]} – ${end.getDate()} ${months[end.getMonth()]}`;
+}
+function getWeekDates(ws) {
+  return Array.from({length:7},(_,i)=>{const d=new Date(ws);d.setDate(d.getDate()+i);return d;});
+}
+function timeToMins(t) { const[h,m]=t.split(':').map(Number);return h*60+m; }
+function minsToPx(m)   { return (m/60)*HOUR_PX; }
+
+async function changeDay(n) {
+  currentDate = new Date(currentDate);
+  currentDate.setDate(currentDate.getDate()+n);
+  renderDateLabel();
+  await loadJobs();
+  renderGrid();
+}
+async function goToday() {
+  currentDate = new Date();
+  renderDateLabel();
+  await loadJobs();
+  renderGrid();
+}
+async function changeWeek(n) {
+  currentWeekStart = new Date(currentWeekStart);
+  currentWeekStart.setDate(currentWeekStart.getDate()+n*7);
+  await loadAvailability();
+  renderAvailability();
+}
+function renderDateLabel() { document.getElementById('dateLabel').textContent = formatDate(currentDate); }
+function renderWeekLabel()  { document.getElementById('weekLabel').textContent = formatWeekRange(currentWeekStart); }
+
+// ══════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════
+async function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.getElementById(`view-${tab}`).classList.add('active');
+  const addBtn  = document.getElementById('addJobBtn');
+  const dateNav = document.getElementById('dateNav');
+  if (tab==='schedule') {
+    if (currentUser.role==='admin') addBtn.classList.remove('hidden');
+    dateNav.style.display='flex';
+  } else {
+    addBtn.classList.add('hidden');
+    dateNav.style.display='none';
+    await loadAvailability();
+    renderAvailability();
+  }
+}
+
+// ══════════════════════════════════════════
+// SCHEDULE GRID
+// ══════════════════════════════════════════
+function renderGrid() {
+  if (!currentUser) return;
+  const HOURS   = HOURS_END - HOURS_START;
+  const dateStr = formatDateKey(currentDate);
+
+  // Determine which staff to show
+  const visibleStaff = currentUser.role==='admin'
+    ? staffList.filter(s=>s.role==='staff').map(s=>s.name)
+    : staffList.filter(s=>s.name===currentUser.name).map(s=>s.name);
+
+  // Staff header
+  const hdr = document.getElementById('schedStaffHeader');
+  hdr.innerHTML = '';
+  visibleStaff.forEach(name => {
+    const c = document.createElement('div');
+    c.className = 'staff-cell';
+    c.style.background = 'var(--surface)';
+    c.innerHTML = `<div class="staff-avatar">${name[0]}</div><div class="staff-name">${name}</div>`;
+    hdr.appendChild(c);
+  });
+
+  // Time col
+  const tc = document.getElementById('timeCol');
+  tc.innerHTML = '';
+  for (let h=HOURS_START;h<HOURS_END;h++) {
+    const s=document.createElement('div'); s.className='time-slot';
+    const lbl=h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
+    s.innerHTML=`<span class="time-label">${lbl}</span>`;
+    tc.appendChild(s);
+  }
+
+  // Staff columns
+  const sc = document.getElementById('staffCols');
+  sc.innerHTML = '';
+
+  visibleStaff.forEach(name => {
+    const col = document.createElement('div');
+    col.className = 'staff-column';
+    col.style.height = `${HOURS*HOUR_PX}px`;
+
+    for (let h=0;h<HOURS;h++) {
+      const row=document.createElement('div');
+      row.style.cssText=`position:absolute;left:0;right:0;top:${h*HOUR_PX}px;height:${HOUR_PX}px;border-bottom:1px solid var(--border);`;
+      const half=document.createElement('div');
+      half.style.cssText='position:absolute;left:0;right:0;top:50%;border-bottom:1px dashed var(--border);opacity:0.4;';
+      row.appendChild(half); col.appendChild(row);
+    }
+
+    // Unavailability
+    for (let h=HOURS_START;h<HOURS_END;h++) {
+      if (availability[`${name}_${dateStr}_${h}`]===false) {
+        const block=document.createElement('div');
+        block.className='unavail-block';
+        block.style.top=`${(h-HOURS_START)*HOUR_PX}px`;
+        block.style.height=`${HOUR_PX}px`;
+        col.appendChild(block);
+      }
+    }
+
+    // Jobs with overlap detection
+    const staffJobs = jobs.filter(j=>j.staff_name===name).sort((a,b)=>a.job_time.localeCompare(b.job_time));
+    const subCols=[];
+    staffJobs.forEach(job=>{
+      const start=timeToMins(job.job_time.slice(0,5));
+      const end=start+job.duration_mins;
+      let placed=false;
+      for (let i=0;i<subCols.length;i++) {
+        if (!subCols[i].some(s=>start<s.end&&end>s.start)) {
+          subCols[i].push({start,end,job}); placed=true; break;
+        }
+      }
+      if (!placed) subCols.push([{start,end,job}]);
+    });
+
+    const total=subCols.length||1;
+    subCols.forEach((subCol,si)=>{
+      subCol.forEach(({job})=>{
+        const top=minsToPx(timeToMins(job.job_time.slice(0,5))-HOURS_START*60);
+        const height=Math.max(minsToPx(job.duration_mins),20);
+        const card=document.createElement('div');
+        card.className=`job-card ${job.type}`;
+        const pct=100/total;
+        card.style.cssText=`top:${top}px;height:${height}px;left:calc(${si*pct}% + 2px);width:calc(${pct}% - 4px);right:auto;`;
+        if (currentUser.role==='admin') card.onclick=()=>openEditModal(job);
+        const big=height>=44,mid=height>=24;
+        card.innerHTML=`
+          ${big?`<div class="job-type-label">${TYPE_CONFIG[job.type].label}</div>`:''}
+          ${mid?`<div class="job-owner">${job.owner_name.split(' ')[0]}</div>`:''}
+          ${big&&job.pet_name?`<div class="job-pet">${job.pet_name}${job.pet_breed?' · '+job.pet_breed:''}</div>`:''}
+          ${big?`<div class="job-time-small">${job.job_time.slice(0,5)} · ${job.duration_mins}m</div>`:''}
+          ${big?`<span class="job-paid ${job.paid?'paid':'unpaid'}">${job.paid?'Paid':'Unpaid'}</span>`:''}
+        `;
+        col.appendChild(card);
+      });
+    });
+
+    sc.appendChild(col);
+  });
+
+  // Current time line
+  const now=new Date();
+  if (now.toDateString()===currentDate.toDateString()) {
+    const nowMins=now.getHours()*60+now.getMinutes()-HOURS_START*60;
+    if (nowMins>=0&&nowMins<=HOURS*60) {
+      const line=document.createElement('div');
+      line.className='current-time-line';
+      line.style.top=`${minsToPx(nowMins)}px`;
+      sc.appendChild(line);
+    }
+  }
+
+  document.getElementById('gridScroll').scrollTop=minsToPx(60);
+}
+
+// ══════════════════════════════════════════
+// AVAILABILITY GRID
+// ══════════════════════════════════════════
+function renderAvailability() {
+  if (!currentUser) return;
+  renderWeekLabel();
+  const weekDates=getWeekDates(currentWeekStart);
+
+  // Hint changes based on role
+  document.getElementById('availHint').textContent =
+    currentUser.role==='admin'
+      ? 'Viewing team availability — staff update their own hours'
+      : 'Tap any hour to toggle your availability';
+
+  // Day pills
+  const pillsEl=document.getElementById('dayPills');
+  pillsEl.innerHTML='';
+  const dayLabels=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  weekDates.forEach((date,i)=>{
+    const pill=document.createElement('button');
+    pill.className='day-pill'+(i===currentAvailDay?' active':'');
+    pill.textContent=`${dayLabels[i]} ${date.getDate()}`;
+    pill.onclick=()=>{currentAvailDay=i;renderAvailability();};
+    pillsEl.appendChild(pill);
+  });
+
+  const selectedDate=weekDates[currentAvailDay];
+  const dateStr=formatDateKey(selectedDate);
+
+  // Time col
+  const tc=document.getElementById('availTimeCol');
+  tc.innerHTML='';
+  for (let h=HOURS_START;h<HOURS_END;h++) {
+    const row=document.createElement('div'); row.className='avail-time-row';
+    const lbl=h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
+    row.innerHTML=`<span class="avail-time-text">${lbl}</span>`;
+    tc.appendChild(row);
+  }
+
+  const visibleStaffAvail = currentUser.role==='admin'
+    ? staffList.filter(s=>s.role==='staff').map(s=>s.name)
+    : [currentUser.name];
+
+  // Staff header
+  const hdr=document.getElementById('availStaffHeader');
+  hdr.innerHTML='';
+  visibleStaffAvail.forEach(name=>{
+    const cell=document.createElement('div'); cell.className='avail-staff-name-cell';
+    cell.innerHTML=`<div class="staff-avatar" style="margin:0 auto 3px">${name[0]}</div><div class="staff-name">${name}</div>`;
+    hdr.appendChild(cell);
+  });
+
+  // Staff columns
+  const cols=document.getElementById('availStaffCols');
+  cols.innerHTML='';
+  visibleStaffAvail.forEach(name=>{
+    const col=document.createElement('div'); col.className='avail-staff-col';
+    for (let h=HOURS_START;h<HOURS_END;h++) {
+      const key=`${name}_${dateStr}_${h}`;
+      const isAvail=availability[key]!==false;
+      const cell=document.createElement('div');
+      cell.className=`avail-cell ${isAvail?'available':'unavailable'}`;
+      // Only allow own staff to edit, or admin can edit anyone
+      const canEdit = currentUser.role==='admin' || currentUser.name===name;
+      if (canEdit) {
+        cell.onclick=()=>toggleAvailability(name,dateStr,h,cell);
+      }
+      col.appendChild(cell);
+    }
+    cols.appendChild(col);
+  });
+}
+
+async function toggleAvailability(staffName, dateStr, hour, cell) {
+  const key=`${staffName}_${dateStr}_${hour}`;
+  const current=availability[key]!==false;
+  const newVal=!current;
+  availability[key]=newVal;
+  cell.className=`avail-cell ${newVal?'available':'unavailable'}`;
+
+  // Upsert to Supabase
+  await sb.from('availability').upsert({
+    staff_name: staffName,
+    avail_date: dateStr,
+    hour_slot:  hour,
+    is_available: newVal,
+  }, { onConflict: 'staff_name,avail_date,hour_slot' });
+}
+
+// ══════════════════════════════════════════
+// ADD JOB
+// ══════════════════════════════════════════
+function openAddModal() {
+  document.getElementById('addOverlay').classList.add('open');
+  selectedType=null; selectedStaff=null; isPaid=null; selectedCremation=null;
+  ['pickup','dropoff','ashes','ceremony'].forEach(t=>document.getElementById(`type-${t}`).className='type-btn');
+  document.querySelectorAll('#staffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('#cremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('paidBtn').className='toggle-btn';
+  document.getElementById('unpaidBtn').className='toggle-btn';
+  document.getElementById('overlapWarning').style.display='none';
+  document.getElementById('cremationGroup').style.display='block';
+  document.getElementById('addressGroup').style.display='none';
+  ['jobTime','jobDuration','ownerName','ownerPhone','petName','petBreed','petWeight','ownerAddress','remarks']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='jobTime'?'09:00':'';});
+  document.getElementById('jobTime').oninput=checkOverlap;
+  document.getElementById('jobDuration').oninput=checkOverlap;
+}
+
+function selectType(type) {
+  selectedType=type;
+  ['pickup','dropoff','ashes','ceremony'].forEach(t=>
+    document.getElementById(`type-${t}`).className='type-btn'+(t===type?` sel-${t}`:'')
+  );
+  document.getElementById('jobDuration').value=TYPE_CONFIG[type].defaultDur;
+  document.getElementById('addressGroup').style.display=type==='pickup'?'flex':'none';
+  document.getElementById('cremationGroup').style.display=type==='ashes'?'none':'block';
+  if (type==='ashes'){selectedCremation=null;document.querySelectorAll('#cremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));}
+  checkOverlap();
+}
+
+function selectCremation(type) {
+  selectedCremation=type;
+  const idMap={individual:'crem-individual',communal:'crem-communal',ceremony_crem:'crem-ceremony'};
+  Object.entries(idMap).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===type));
+}
+
+function checkOverlap() {
+  const warning=document.getElementById('overlapWarning');
+  const timeVal=document.getElementById('jobTime').value;
+  const durVal=document.getElementById('jobDuration').value;
+  if (!selectedStaff||!timeVal||!durVal){warning.style.display='none';return;}
+  const newStart=timeToMins(timeVal), newEnd=newStart+parseInt(durVal);
+  const hasOverlap=jobs.some(j=>{
+    if (j.staff_name!==selectedStaff) return false;
+    const jStart=timeToMins(j.job_time.slice(0,5)), jEnd=jStart+j.duration_mins;
+    return newStart<jEnd&&newEnd>jStart;
+  });
+  warning.style.display=hasOverlap?'block':'none';
+}
+
+function toggleStaff(btn,name) {
+  document.querySelectorAll('#staffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+  btn.classList.add('selected'); selectedStaff=name; checkOverlap();
+}
+
+function setPaid(val) {
+  isPaid=val;
+  document.getElementById('paidBtn').className='toggle-btn'+(val?' active-paid':'');
+  document.getElementById('unpaidBtn').className='toggle-btn'+(!val?' active-unpaid':'');
+}
+
+async function addJob() {
+  document.querySelectorAll('.field-error').forEach(e=>e.remove());
+  let valid=true;
+  function err(id,msg){
+    const el=document.getElementById(id); if(!el)return;
+    const e=document.createElement('div'); e.className='field-error'; e.textContent='⚠ '+msg;
+    el.parentNode.appendChild(e); valid=false;
+  }
+  if (!selectedType)                                  err('type-pickup','Please select a job type');
+  if (!selectedCremation&&selectedType!=='ashes')     err('crem-individual','Please select a cremation type');
+  if (!selectedStaff)                                 err('staffPills','Please assign a staff member');
+  if (!document.getElementById('jobDuration').value) err('jobDuration','Please enter a duration');
+  if (!document.getElementById('ownerName').value.trim()) err('ownerName','Please enter owner name');
+  if (!valid) return;
+
+  const { error } = await sb.from('jobs').insert({
+    type:            selectedType,
+    cremation_type:  selectedCremation,
+    staff_name:      selectedStaff,
+    job_date:        formatDateKey(currentDate),
+    job_time:        document.getElementById('jobTime').value+':00',
+    duration_mins:   parseInt(document.getElementById('jobDuration').value)||30,
+    owner_name:      document.getElementById('ownerName').value.trim(),
+    owner_phone:     document.getElementById('ownerPhone').value,
+    pet_name:        document.getElementById('petName').value,
+    pet_breed:       document.getElementById('petBreed').value,
+    pet_weight:      parseFloat(document.getElementById('petWeight').value)||null,
+    address:         document.getElementById('ownerAddress').value,
+    paid:            isPaid===true,
+    remarks:         document.getElementById('remarks').value,
+  });
+
+  if (error) { showToast('Error saving job. Try again.'); return; }
+  document.getElementById('addOverlay').classList.remove('open');
+  showToast('Job added ✓');
+  await loadJobs();
+  renderGrid();
+}
+
+// ══════════════════════════════════════════
+// EDIT JOB
+// ══════════════════════════════════════════
+function openEditModal(job) {
+  editingJobId=job.id; editType=job.type; editCremation=job.cremation_type; editStaff=job.staff_name; editPaidVal=job.paid;
+  ['pickup','dropoff','ashes','ceremony'].forEach(t=>
+    document.getElementById(`edit-type-${t}`).className='type-btn'+(t===job.type?` sel-${t}`:'')
+  );
+  document.getElementById('editCremationGroup').style.display=job.type==='ashes'?'none':'block';
+  document.getElementById('editAddressGroup').style.display=job.type==='pickup'?'flex':'none';
+  const idMap={individual:'edit-crem-individual',communal:'edit-crem-communal',ceremony_crem:'edit-crem-ceremony'};
+  Object.entries(idMap).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===job.cremation_type));
+  document.querySelectorAll('#editStaffPills .staff-pill').forEach(p=>p.classList.toggle('selected',p.textContent===job.staff_name));
+  document.getElementById('editPaidBtn').className='toggle-btn'+(job.paid?' active-paid':'');
+  document.getElementById('editUnpaidBtn').className='toggle-btn'+(!job.paid?' active-unpaid':'');
+  document.getElementById('editJobTime').value=job.job_time.slice(0,5);
+  document.getElementById('editJobDuration').value=job.duration_mins;
+  document.getElementById('editOwnerName').value=job.owner_name||'';
+  document.getElementById('editOwnerPhone').value=job.owner_phone||'';
+  document.getElementById('editPetName').value=job.pet_name||'';
+  document.getElementById('editPetBreed').value=job.pet_breed||'';
+  document.getElementById('editPetWeight').value=job.pet_weight||'';
+  document.getElementById('editOwnerAddress').value=job.address||'';
+  document.getElementById('editRemarks').value=job.remarks||'';
+  document.getElementById('editOverlay').classList.add('open');
+}
+
+function editSelectType(type) {
+  editType=type;
+  ['pickup','dropoff','ashes','ceremony'].forEach(t=>
+    document.getElementById(`edit-type-${t}`).className='type-btn'+(t===type?` sel-${t}`:'')
+  );
+  document.getElementById('editAddressGroup').style.display=type==='pickup'?'flex':'none';
+  document.getElementById('editCremationGroup').style.display=type==='ashes'?'none':'block';
+  if (type==='ashes'){editCremation=null;document.querySelectorAll('#editCremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));}
+}
+
+function editSelectCremation(type) {
+  editCremation=type;
+  const idMap={individual:'edit-crem-individual',communal:'edit-crem-communal',ceremony_crem:'edit-crem-ceremony'};
+  Object.entries(idMap).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===type));
+}
+
+function editToggleStaff(btn,name) {
+  document.querySelectorAll('#editStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+  btn.classList.add('selected'); editStaff=name;
+}
+
+function editSetPaid(val) {
+  editPaidVal=val;
+  document.getElementById('editPaidBtn').className='toggle-btn'+(val?' active-paid':'');
+  document.getElementById('editUnpaidBtn').className='toggle-btn'+(!val?' active-unpaid':'');
+}
+
+async function saveEdit() {
+  if (!editType||!editStaff||!document.getElementById('editOwnerName').value.trim()) {
+    showToast('Please fill required fields'); return;
+  }
+  const { error } = await sb.from('jobs').update({
+    type:           editType,
+    cremation_type: editCremation,
+    staff_name:     editStaff,
+    job_time:       document.getElementById('editJobTime').value+':00',
+    duration_mins:  parseInt(document.getElementById('editJobDuration').value)||30,
+    owner_name:     document.getElementById('editOwnerName').value.trim(),
+    owner_phone:    document.getElementById('editOwnerPhone').value,
+    pet_name:       document.getElementById('editPetName').value,
+    pet_breed:      document.getElementById('editPetBreed').value,
+    pet_weight:     parseFloat(document.getElementById('editPetWeight').value)||null,
+    address:        document.getElementById('editOwnerAddress').value,
+    paid:           editPaidVal===true,
+    remarks:        document.getElementById('editRemarks').value,
+    updated_at:     new Date().toISOString(),
+  }).eq('id', editingJobId);
+
+  if (error) { showToast('Error saving. Try again.'); return; }
+  document.getElementById('editOverlay').classList.remove('open');
+  showToast('Changes saved ✓');
+  await loadJobs();
+  renderGrid();
+}
+
+async function deleteJob() {
+  if (!editingJobId) return;
+  const { error } = await sb.from('jobs').delete().eq('id', editingJobId);
+  if (error) { showToast('Error deleting. Try again.'); return; }
+  document.getElementById('editOverlay').classList.remove('open');
+  showToast('Job deleted');
+  await loadJobs();
+  renderGrid();
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function handleOverlayClick(e,id) {
+  if (e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open');
+}
+
+function showLoading(show) {
+  document.getElementById('loadingOverlay').classList.toggle('hidden',!show);
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════
+// START
+// ══════════════════════════════════════════
+init();
+setInterval(() => { if (currentUser) renderGrid(); }, 60000);
+</script>
+</body>
+</html>
