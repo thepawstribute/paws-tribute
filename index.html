@@ -312,6 +312,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   <div class="tabs">
     <div class="tab active" id="tab-schedule"     onclick="switchTab('schedule')">📅 Schedule</div>
     <div class="tab"        id="tab-availability" onclick="switchTab('availability')">🗓 Availability</div>
+    <div class="tab"        id="tab-pricing"      onclick="switchTab('pricing')">💲 Pricing</div>
   </div>
 
   <!-- SCHEDULE VIEW -->
@@ -321,6 +322,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
       <div class="legend-item"><div class="legend-dot" style="background:var(--dropoff)"></div>Office Drop-off</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--ashes)"></div>Ashes Pickup</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--ceremony)"></div>Ceremony</div>
+      <button onclick="openExportModal()" style="margin-left:auto;flex-shrink:0;background:var(--accent-light);color:var(--accent);border:none;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">⬇ Export</button>
     </div>
     <div class="grid-outer">
       <div class="grid-scroll" id="gridScroll">
@@ -362,10 +364,39 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
       </div>
     </div>
   </div>
+  <!-- PRICING VIEW -->
+  <div class="view" id="view-pricing">
+    <div style="flex:1;overflow-y:auto;padding:16px;">
+      <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent);margin-bottom:4px;">Pricing Reference</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:20px;">Quick reference for staff. Admin can update anytime.</div>
+      <div id="pricingContent"></div>
+    </div>
+  </div>
 
 </div>
 
-<!-- ADD JOB MODAL -->
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="exportOverlay" onclick="handleOverlayClick(event,'exportOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Export Jobs</div>
+    <div class="modal-body">
+      <div class="field-group">
+        <div class="field-label">Date Range</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <button class="crem-btn" id="exp-today"   onclick="setExportRange('today')"  >📅<div class="crem-label">Today</div></button>
+          <button class="crem-btn" id="exp-week"    onclick="setExportRange('week')"   >📅<div class="crem-label">This Week</div></button>
+          <button class="crem-btn" id="exp-month"   onclick="setExportRange('month')"  >📅<div class="crem-label">This Month</div></button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><div class="field-label">From</div><input type="date" class="field-input" id="exportFrom"></div>
+        <div class="field-group"><div class="field-label">To</div><input type="date" class="field-input" id="exportTo"></div>
+      </div>
+      <button class="submit-btn" onclick="exportToExcel()">⬇ Download Excel</button>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="addOverlay" onclick="handleOverlayClick(event,'addOverlay')">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -499,7 +530,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ══════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════
-const HOURS_START = 7, HOURS_END = 22, HOUR_PX = 64;
+const HOURS_START = 7, HOURS_END = 24, HOUR_PX = 64;
 let currentDate      = new Date();
 let currentWeekStart = getMonday(new Date());
 let currentAvailDay  = Math.max(0, new Date().getDay() === 0 ? 6 : new Date().getDay()-1);
@@ -726,6 +757,12 @@ function formatWeekRange(start) {
 function getWeekDates(ws) {
   return Array.from({length:7},(_,i)=>{const d=new Date(ws);d.setDate(d.getDate()+i);return d;});
 }
+function formatHour(h) {
+  if (h === 0 || h === 24) return '12am';
+  if (h < 12) return `${h}am`;
+  if (h === 12) return '12pm';
+  return `${h-12}pm`;
+}
 function timeToMins(t) { const[h,m]=t.split(':').map(Number);return h*60+m; }
 function minsToPx(m)   { return (m/60)*HOUR_PX; }
 
@@ -776,11 +813,15 @@ async function switchTab(tab) {
   if (tab==='schedule') {
     if (currentUser.role==='admin') addBtn.classList.remove('hidden');
     dateNav.style.display='flex';
-  } else {
+  } else if (tab==='availability') {
     addBtn.classList.add('hidden');
     dateNav.style.display='none';
     await loadAvailability();
     renderAvailability();
+  } else if (tab==='pricing') {
+    addBtn.classList.add('hidden');
+    dateNav.style.display='none';
+    renderPricing();
   }
 }
 
@@ -813,8 +854,7 @@ function renderGrid() {
   tc.innerHTML = '';
   for (let h=HOURS_START;h<HOURS_END;h++) {
     const s=document.createElement('div'); s.className='time-slot';
-    const lbl=h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
-    s.innerHTML=`<span class="time-label">${lbl}</span>`;
+    s.innerHTML=`<span class="time-label">${formatHour(h)}</span>`;
     tc.appendChild(s);
   }
 
@@ -935,8 +975,7 @@ function renderAvailability() {
   tc.innerHTML='';
   for (let h=HOURS_START;h<HOURS_END;h++) {
     const row=document.createElement('div'); row.className='avail-time-row';
-    const lbl=h<12?`${h}am`:h===12?'12pm':`${h-12}pm`;
-    row.innerHTML=`<span class="avail-time-text">${lbl}</span>`;
+    row.innerHTML=`<span class="avail-time-text">${formatHour(h)}</span>`;
     tc.appendChild(row);
   }
 
@@ -1185,8 +1224,200 @@ async function deleteJob() {
 }
 
 // ══════════════════════════════════════════
-// UTILS
+// PRICING TAB
 // ══════════════════════════════════════════
+function renderPricing() {
+  const el = document.getElementById('pricingContent');
+  el.innerHTML = `
+
+    <!-- CREMATION PRICING TABLE -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Cremation Services</div>
+      <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border);">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:320px;">
+          <thead>
+            <tr style="background:#FAF2E8;">
+              <th style="padding:10px 8px;text-align:left;font-weight:700;color:#111;border-bottom:1px solid var(--border);">Pet Size</th>
+              <th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--ashes);border-bottom:1px solid var(--border);">Shared<br>Farewell</th>
+              <th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--dropoff);border-bottom:1px solid var(--border);">Individual<br>Farewell</th>
+              <th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--ceremony);border-bottom:1px solid var(--border);">Private<br>Ceremony</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 8px;font-weight:500;color:#111;">Small<br><span style="color:var(--muted);font-size:11px;">Under 5 lbs</span></td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$125</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$250</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$450</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);background:#FAFAFA;">
+              <td style="padding:10px 8px;font-weight:500;color:#111;">Medium<br><span style="color:var(--muted);font-size:11px;">5–20 lbs</span></td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$150</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$350</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$495</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 8px;font-weight:500;color:#111;">Large<br><span style="color:var(--muted);font-size:11px;">21–50 lbs</span></td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$200</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$420</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$550</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--border);background:#FAFAFA;">
+              <td style="padding:10px 8px;font-weight:500;color:#111;">Extra Large<br><span style="color:var(--muted);font-size:11px;">50–100 lbs</span></td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$250</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$480</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$580</td>
+            </tr>
+            <tr>
+              <td style="padding:10px 8px;font-weight:500;color:#111;">Giant<br><span style="color:var(--muted);font-size:11px;">100+ lbs</span></td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$280</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$520</td>
+              <td style="padding:10px 8px;text-align:center;font-weight:600;color:#111;">$620</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:8px;padding:0 2px;">
+        ✦ Individual Farewell includes a standard urn &nbsp;·&nbsp; Ceremony is 30 mins, +$28 per additional 30 mins
+      </div>
+    </div>
+
+    <!-- PARTNERS -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Cremation Partners</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border);">
+          <div style="font-size:13px;font-weight:700;color:#111;">AMS — Gilroy</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Communal cremation partner</div>
+        </div>
+        <div style="padding:12px 14px;">
+          <div style="font-size:13px;font-weight:700;color:#111;">Oceans of Love</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px;">Communal cremation — ashes scattered in the sea off Southern California</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- URNS -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Standard Urns — Included with Individual Farewell</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:6px;">🪵</div>
+          <div style="font-size:12px;font-weight:700;color:#111;">Wood Collection</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Options 1 & 2<br>Personalisation available<br><span style="font-size:10px;">Name + date, or name + birthday</span></div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;">
+          <div style="font-size:20px;margin-bottom:6px;">🏺</div>
+          <div style="font-size:12px;font-weight:700;color:#111;">Metal Collection</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Options 3 & 4<br>First name engraving<br><span style="font-size:10px;">Optional</span></div>
+        </div>
+      </div>
+      <div style="background:#F2E8DC;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--accent);font-weight:600;">
+        🎁 Personalised urns from website — 20% off for clients
+      </div>
+    </div>
+
+    <!-- ADD-ONS -->
+    <div style="margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Add-ons</div>
+      ${[
+        { name:'Wooden Paw / Nose Print — Small', price:'$70' },
+        { name:'Wooden Paw / Nose Print — Large', price:'$80' },
+        { name:'Fur Clipping',                    price:'$30' },
+      ].map(item => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-radius:10px;margin-bottom:6px;border:1px solid var(--border);">
+          <span style="font-size:13px;font-weight:500;color:#111;">${item.name}</span>
+          <span style="font-size:14px;font-weight:700;color:var(--accent);">${item.price}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- CONTACT -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin-bottom:24px;">
+      <div style="font-size:12px;font-weight:700;color:#111;margin-bottom:4px;">We're Here to Help — Call Anytime</div>
+      <div style="font-size:15px;font-weight:700;color:var(--accent);">(510) 505-8102</div>
+    </div>
+
+  `;
+}
+
+// ══════════════════════════════════════════
+// EXPORT
+// ══════════════════════════════════════════
+let exportRange = 'today';
+
+function openExportModal() {
+  setExportRange('today');
+  document.getElementById('exportOverlay').classList.add('open');
+}
+
+function setExportRange(range) {
+  exportRange = range;
+  ['today','week','month'].forEach(r =>
+    document.getElementById(`exp-${r}`).classList.toggle('selected', r===range)
+  );
+  const now = new Date();
+  let from, to;
+  if (range==='today') {
+    from = to = formatDateKey(now);
+  } else if (range==='week') {
+    const mon = getMonday(now);
+    const sun = new Date(mon); sun.setDate(sun.getDate()+6);
+    from = formatDateKey(mon); to = formatDateKey(sun);
+  } else {
+    from = formatDateKey(new Date(now.getFullYear(), now.getMonth(), 1));
+    to   = formatDateKey(new Date(now.getFullYear(), now.getMonth()+1, 0));
+  }
+  document.getElementById('exportFrom').value = from;
+  document.getElementById('exportTo').value   = to;
+}
+
+async function exportToExcel() {
+  const from = document.getElementById('exportFrom').value;
+  const to   = document.getElementById('exportTo').value;
+  if (!from || !to) { showToast('Please select a date range'); return; }
+
+  showToast('Preparing export...');
+  const { data, error } = await sb.from('jobs').select('*')
+    .gte('job_date', from).lte('job_date', to)
+    .order('job_date').order('job_time');
+
+  if (error || !data) { showToast('Error fetching data'); return; }
+
+  // Build CSV
+  const headers = ['Date','Time','Duration (mins)','Job Type','Cremation Type','Staff','Owner Name','Phone','Pet Name','Breed','Weight (lb)','Address','Paid','Remarks'];
+  const rows = data.map(j => [
+    j.job_date,
+    j.job_time ? j.job_time.slice(0,5) : '',
+    j.duration_mins,
+    TYPE_CONFIG[j.type]?.label || j.type,
+    j.cremation_type || '',
+    j.staff_name,
+    j.owner_name,
+    j.owner_phone || '',
+    j.pet_name || '',
+    j.pet_breed || '',
+    j.pet_weight || '',
+    j.address || '',
+    j.paid ? 'Paid' : 'Unpaid',
+    j.remarks || '',
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type:'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `paws-tribute-jobs-${from}-to-${to}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  document.getElementById('exportOverlay').classList.remove('open');
+  showToast(`Exported ${data.length} jobs ✓`);
+}
 function handleOverlayClick(e,id) {
   if (e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open');
 }
