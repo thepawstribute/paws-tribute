@@ -171,9 +171,10 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 .avail-time-text { font-size:10px; color:#333; font-weight:600; }
 .avail-staff-cols { display:flex; }
 .avail-staff-col { width:var(--avail-col); min-width:var(--avail-col); border-right:1px solid var(--border); flex-shrink:0; display:flex; flex-direction:column; }
-.avail-cell { width:var(--avail-col); height:var(--avail-row); min-height:var(--avail-row); border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.1s; flex-shrink:0; }
-.avail-cell.available { background:#FFFFFF; }
-.avail-cell.unavailable { background:repeating-linear-gradient(-45deg,#EFEFEF,#EFEFEF 4px,#E6E6E6 4px,#E6E6E6 8px); }
+.avail-cell { width:var(--avail-col); height:var(--avail-row); min-height:var(--avail-row); border-bottom:1px solid var(--border); cursor:pointer; transition:background 0.15s; flex-shrink:0; }
+.avail-cell.available { background:#E8F5E9; }
+.avail-cell.available:active { background:#C8E6C9; }
+.avail-cell.unavailable { background:repeating-linear-gradient(-45deg,#BBBBBB,#BBBBBB 5px,#CCCCCC 5px,#CCCCCC 10px); }
 
 /* ── MODALS ── */
 .modal-overlay { position:fixed; inset:0; background:rgba(28,25,23,0.5); z-index:100; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity 0.2s; }
@@ -349,10 +350,10 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
       </div>
       <div class="avail-day-pills" id="dayPills"></div>
       <div class="avail-legend">
-        <div class="avail-legend-item"><div class="avail-legend-box" style="background:#fff"></div>Available</div>
-        <div class="avail-legend-item"><div class="avail-legend-box" style="background:repeating-linear-gradient(-45deg,#EFEFEF,#EFEFEF 4px,#E6E6E6 4px,#E6E6E6 8px)"></div>Unavailable</div>
+        <div class="avail-legend-item"><div class="avail-legend-box" style="background:#E8F5E9;border-color:#C8E6C9;"></div>Working</div>
+        <div class="avail-legend-item"><div class="avail-legend-box" style="background:repeating-linear-gradient(-45deg,#BBBBBB,#BBBBBB 5px,#CCCCCC 5px,#CCCCCC 10px);"></div>Not Working</div>
       </div>
-      <div class="avail-hint" id="availHint">Tap any hour to toggle your availability</div>
+      <div class="avail-hint" id="availHint">Tap hours you are working this day</div>
       <div class="avail-grid-wrap">
         <div class="avail-col-header" id="availStaffHeader"></div>
         <div class="avail-grid-scroll">
