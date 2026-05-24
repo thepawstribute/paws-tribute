@@ -131,6 +131,8 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 .job-card.dropoff { background:var(--dropoff-bg); border-color:var(--dropoff); }
 .job-card.ashes   { background:var(--ashes-bg);   border-color:var(--ashes);   }
 .job-card.ceremony{ background:var(--ceremony-bg);border-color:var(--ceremony);}
+.job-card.ams     { background:#E8F5E9;          border-color:#2E7D32;        }
+.ams .job-type-label{ color:#2E7D32;}
 .job-type-label { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:1px; }
 .pickup  .job-type-label { color:var(--pickup);  }
 .dropoff .job-type-label { color:var(--dropoff); }
@@ -190,6 +192,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
 .type-btn.sel-dropoff  { border-color:var(--dropoff); background:var(--dropoff-bg); }
 .type-btn.sel-ashes    { border-color:var(--ashes);   background:var(--ashes-bg);   }
 .type-btn.sel-ceremony { border-color:var(--ceremony);background:var(--ceremony-bg);}
+.type-btn.sel-ams      { border-color:#2E7D32;        background:#E8F5E9;          }
 .type-btn-icon { font-size:18px; margin-bottom:4px; }
 .type-btn-label { font-size:12px; font-weight:600; color:var(--text); display:block; }
 .type-btn-dur { font-size:10px; color:var(--muted); }
@@ -323,6 +326,7 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
       <div class="legend-item"><div class="legend-dot" style="background:var(--dropoff)"></div>Office Drop-off</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--ashes)"></div>Ashes Pickup</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--ceremony)"></div>Ceremony</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#2E7D32"></div>AMS Pickup</div>
       <button onclick="openExportModal()" style="margin-left:auto;flex-shrink:0;background:var(--accent-light);color:var(--accent);border:none;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">⬇ Export</button>
     </div>
     <div class="grid-outer">
@@ -405,11 +409,12 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
     <div class="modal-body">
       <div class="field-group">
         <div class="field-label">Job Type <span class="req">*</span></div>
-        <div class="type-grid">
+        <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <button class="type-btn" id="type-pickup"   onclick="selectType('pickup')">  <div class="type-btn-icon">🚗</div><span class="type-btn-label">Home Pickup</span>     <span class="type-btn-dur">Custom duration</span></button>
           <button class="type-btn" id="type-dropoff"  onclick="selectType('dropoff')"> <div class="type-btn-icon">🏢</div><span class="type-btn-label">Office Drop-off</span> <span class="type-btn-dur">15 mins</span></button>
           <button class="type-btn" id="type-ashes"    onclick="selectType('ashes')">   <div class="type-btn-icon">🫙</div><span class="type-btn-label">Ashes Pickup</span>    <span class="type-btn-dur">10 mins</span></button>
           <button class="type-btn" id="type-ceremony" onclick="selectType('ceremony')"><div class="type-btn-icon">🌸</div><span class="type-btn-label">Ceremony</span>          <span class="type-btn-dur">30 mins</span></button>
+          <button class="type-btn" id="type-ams"      onclick="selectType('ams')">     <div class="type-btn-icon">🚐</div><span class="type-btn-label">AMS Pickup</span>       <span class="type-btn-dur">15 mins</span></button>
         </div>
       </div>
       <div class="field-group" id="cremationGroup">
@@ -469,11 +474,12 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
     <div class="modal-body">
       <div class="field-group">
         <div class="field-label">Job Type <span class="req">*</span></div>
-        <div class="type-grid">
+        <div class="type-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <button class="type-btn" id="edit-type-pickup"   onclick="editSelectType('pickup')">  <div class="type-btn-icon">🚗</div><span class="type-btn-label">Home Pickup</span>     <span class="type-btn-dur">Custom duration</span></button>
           <button class="type-btn" id="edit-type-dropoff"  onclick="editSelectType('dropoff')"> <div class="type-btn-icon">🏢</div><span class="type-btn-label">Office Drop-off</span> <span class="type-btn-dur">15 mins</span></button>
           <button class="type-btn" id="edit-type-ashes"    onclick="editSelectType('ashes')">   <div class="type-btn-icon">🫙</div><span class="type-btn-label">Ashes Pickup</span>    <span class="type-btn-dur">10 mins</span></button>
           <button class="type-btn" id="edit-type-ceremony" onclick="editSelectType('ceremony')"><div class="type-btn-icon">🌸</div><span class="type-btn-label">Ceremony</span>          <span class="type-btn-dur">30 mins</span></button>
+          <button class="type-btn" id="edit-type-ams"      onclick="editSelectType('ams')">     <div class="type-btn-icon">🚐</div><span class="type-btn-label">AMS Pickup</span>       <span class="type-btn-dur">15 mins</span></button>
         </div>
       </div>
       <div class="field-group" id="editCremationGroup">
@@ -548,6 +554,7 @@ const TYPE_CONFIG = {
   dropoff:  { label:'Office Drop-off',icon:'🏢', color:'var(--dropoff)',  bg:'var(--dropoff-bg)', defaultDur:15 },
   ashes:    { label:'Ashes Pickup',   icon:'🫙', color:'var(--ashes)',    bg:'var(--ashes-bg)',   defaultDur:10 },
   ceremony: { label:'Ceremony',       icon:'🌸', color:'var(--ceremony)', bg:'var(--ceremony-bg)',defaultDur:30 },
+  ams:      { label:'AMS Pickup',     icon:'🚐', color:'#2E7D32',         bg:'#E8F5E9',           defaultDur:15 },
 };
 
 // ══════════════════════════════════════════
@@ -1052,13 +1059,14 @@ function openAddModal() {
 
 function selectType(type) {
   selectedType=type;
-  ['pickup','dropoff','ashes','ceremony'].forEach(t=>
+  ['pickup','dropoff','ashes','ceremony','ams'].forEach(t=>
     document.getElementById(`type-${t}`).className='type-btn'+(t===type?` sel-${t}`:'')
   );
   document.getElementById('jobDuration').value=TYPE_CONFIG[type].defaultDur;
   document.getElementById('addressGroup').style.display=type==='pickup'?'flex':'none';
-  document.getElementById('cremationGroup').style.display=type==='ashes'?'none':'block';
-  if (type==='ashes'){selectedCremation=null;document.querySelectorAll('#cremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));}
+  const hideCremation = type==='ashes' || type==='ams';
+  document.getElementById('cremationGroup').style.display=hideCremation?'none':'block';
+  if (hideCremation){selectedCremation=null;document.querySelectorAll('#cremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));}
   checkOverlap();
 }
 
@@ -1161,12 +1169,13 @@ function openEditModal(job) {
 
 function editSelectType(type) {
   editType=type;
-  ['pickup','dropoff','ashes','ceremony'].forEach(t=>
+  ['pickup','dropoff','ashes','ceremony','ams'].forEach(t=>
     document.getElementById(`edit-type-${t}`).className='type-btn'+(t===type?` sel-${t}`:'')
   );
   document.getElementById('editAddressGroup').style.display=type==='pickup'?'flex':'none';
-  document.getElementById('editCremationGroup').style.display=type==='ashes'?'none':'block';
-  if (type==='ashes'){editCremation=null;document.querySelectorAll('#editCremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));}
+  const hideCremation = type==='ashes' || type==='ams';
+  document.getElementById('editCremationGroup').style.display=hideCremation?'none':'block';
+  if (hideCremation){editCremation=null;document.querySelectorAll('#editCremationGroup .crem-btn').forEach(b=>b.classList.remove('selected'));}
 }
 
 function editSelectCremation(type) {
