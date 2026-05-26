@@ -463,6 +463,15 @@ body { font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text)
   </div>
 </div>
 
+<!-- VIEW MODAL (staff) -->
+<div class="modal-overlay" id="viewOverlay" onclick="handleOverlayClick(event,'viewOverlay')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="viewHeader" style="padding:20px 20px 16px;border-bottom:1px solid var(--border);"></div>
+    <div id="viewBody"   style="padding:16px 20px;display:flex;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
+
 <!-- EDIT MODAL -->
 <div class="modal-overlay" id="editOverlay" onclick="handleOverlayClick(event,'editOverlay')">
   <div class="modal">
@@ -918,7 +927,11 @@ function renderGrid() {
         card.className=`job-card ${job.type}`;
         const pct=100/total;
         card.style.cssText=`top:${top}px;height:${height}px;left:calc(${si*pct}% + 2px);width:calc(${pct}% - 4px);right:auto;`;
-        if (currentUser.role==='admin') card.onclick=()=>openEditModal(job);
+        if (currentUser.role==='admin') {
+          card.onclick=()=>openEditModal(job);
+        } else {
+          card.onclick=()=>openViewModal(job);
+        }
         const big=height>=44,mid=height>=24;
         card.innerHTML=`
           ${big?`<div class="job-type-label">${TYPE_CONFIG[job.type].label}</div>`:''}
@@ -1430,6 +1443,35 @@ async function exportToExcel() {
 }
 function handleOverlayClick(e,id) {
   if (e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open');
+}
+
+// ══════════════════════════════════════════
+// VIEW MODAL (staff)
+// ══════════════════════════════════════════
+const CREMATION_LABELS = { individual:'Individual Cremation', communal:'Communal Cremation', ceremony_crem:'Ceremony' };
+
+function openViewModal(job) {
+  const cfg = TYPE_CONFIG[job.type];
+  document.getElementById('viewHeader').innerHTML = `
+    <div style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;margin-bottom:8px;background:${cfg.bg};color:${cfg.color}">${cfg.icon} ${cfg.label}</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--text);margin-bottom:2px;">${job.owner_name}</div>
+    <div style="font-size:14px;color:var(--muted);">${job.pet_name||''}${job.pet_breed?' · '+job.pet_breed:''}${job.pet_weight?' · '+job.pet_weight+'lb':''}</div>
+  `;
+  const row = (icon,label,value) => `
+    <div style="display:flex;align-items:flex-start;gap:10px;">
+      <div style="width:32px;height:32px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">${icon}</div>
+      <div><div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">${label}</div><div style="font-size:14px;font-weight:500;color:var(--text);">${value}</div></div>
+    </div>`;
+  let body = '';
+  body += row('⏰','Time & Duration', `${job.job_time.slice(0,5)} · ${job.duration_mins} mins`);
+  body += row('👤','Assigned To', job.staff_name);
+  if (job.cremation_type) body += row('🕯️','Cremation Type', CREMATION_LABELS[job.cremation_type]||job.cremation_type);
+  if (job.owner_phone)    body += row('📞','Phone', job.owner_phone);
+  if (job.address)        body += row('📍','Address', job.address);
+  body += row(job.paid?'✅':'⏳','Payment', job.paid?'Paid':'Unpaid');
+  if (job.remarks)        body += row('📝','Remarks', job.remarks);
+  document.getElementById('viewBody').innerHTML = body;
+  document.getElementById('viewOverlay').classList.add('open');
 }
 
 function showLoading(show) {
