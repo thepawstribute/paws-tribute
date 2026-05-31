@@ -203,7 +203,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .today-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:"DM Sans",sans-serif}
 .date-picker{position:absolute;opacity:0;width:1px;height:1px}
 .staff-view{display:none;position:absolute;left:0;right:0;bottom:0;overflow:hidden;flex-direction:column;box-sizing:border-box}
-.staff-view.active{display:flex}
+.staff-view.active{display:flex;flex-direction:column}
 .sched-legend{display:flex;gap:10px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
 .sched-legend::-webkit-scrollbar{display:none}
 .leg-item{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;white-space:nowrap;color:var(--muted)}
@@ -876,7 +876,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- ORDERS VIEW (admin only) -->
-  <div class="staff-view" id="view-orders" style="position:absolute;left:0;right:0;bottom:0;flex-direction:column;overflow:hidden;display:flex">
+  <div class="staff-view" id="view-orders" style="position:absolute;left:0;right:0;bottom:0;flex-direction:column;overflow:hidden">
     <div class="orders-hdr">
       <div class="orders-title">Order Tracker</div>
       <div class="orders-date" id="orders-date"></div>
@@ -1950,7 +1950,7 @@ async function switchTab(tab){
   else document.getElementById('addJobBtn').classList.add('hidden');
   if(tab==='availability'){await loadAvailability();renderAvailability();}
   if(tab==='pricing')renderPricing();
-  if(tab==='orders'){await loadOrders();renderOrders();}
+  if(tab==='orders'){await loadOrders();renderOrders();setTimeout(fixOrdersScroll,50);}
   if(tab==='payroll'){setPayRange('week');renderPayrollHoursInputs();}
   setTimeout(positionActiveView,10);
 }
@@ -2137,6 +2137,20 @@ function openViewModal(job){
 // ═══════════════════════════════════════
 // ORDERS
 // ═══════════════════════════════════════
+function fixOrdersScroll(){
+  const view=document.getElementById('view-orders');
+  const scroll=document.getElementById('orders-scroll');
+  if(!view||!scroll)return;
+  // Measure all fixed children above scroll
+  let usedHeight=0;
+  Array.from(view.children).forEach(c=>{
+    if(c!==scroll&&c.id!=='orders-scroll'){
+      usedHeight+=c.offsetHeight;
+    }
+  });
+  scroll.style.height=(view.offsetHeight-usedHeight)+'px';
+  scroll.style.flex='none';
+}
 async function loadOrders(){
   const{data}=await sb.from('orders').select('*').order('submitted_at',{ascending:false}).limit(300);
   orders=data||[];
