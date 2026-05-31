@@ -1361,6 +1361,21 @@ window.addEventListener('load',async()=>{
   document.getElementById('phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,10)});
   showLoading(true);
   await loadStaff();
+  // Pre-render form staff pills so they show when client form is opened
+  const fp=document.getElementById('formStaffPills');
+  if(fp){
+    fp.innerHTML='';
+    staffList.filter(s=>s.role==='staff').forEach(s=>{
+      const btn=document.createElement('button');
+      btn.type='button';btn.className='staff-pill';btn.textContent=s.name;
+      btn.onclick=()=>{
+        document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+        btn.classList.add('selected');formStaff=s.name;
+        document.getElementById('e-form-staff').classList.remove('show');
+      };
+      fp.appendChild(btn);
+    });
+  }
   const saved=sessionStorage.getItem('pawsUser');
   if(saved){currentUser=JSON.parse(saved);showScr('staff-app');showApp();}
   else{showScr('client');showLanding();}
@@ -1425,9 +1440,8 @@ function startForm(type){
   document.getElementById('pay-btn').style.display='block';
   formStaff=null;paymentMethod='Pending';
   document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(el=>el.classList.remove('sel'));
-  // Render staff pills for form
-  const fp=document.getElementById('formStaffPills');
-  if(fp){fp.innerHTML='';staffList.filter(s=>s.role==='staff').forEach(s=>{const btn=document.createElement('button');btn.type='button';btn.className='staff-pill';btn.textContent=s.name;btn.onclick=()=>{document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));btn.classList.add('selected');formStaff=s.name;document.getElementById('e-form-staff').classList.remove('show');};fp.appendChild(btn);});}
+  // Reset staff pill selection (pills already rendered on init)
+  document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   setTimeout(()=>setupSig(),100);
   showPage(1);
 }
