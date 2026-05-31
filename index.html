@@ -1761,7 +1761,6 @@ function buildSummary(){
 // FORM SUBMIT
 // ═══════════════════════════════════════
 async function doSubmit(){
-  console.log('doSubmit called — email-intake value:', document.getElementById('email-intake')?.value);
   const svcL={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Farewell Ceremony'};
   const retL={na:'N/A',pickup:'Pick up at office',delivery:'We deliver to you'};
   const sz=document.querySelector('input[name="ks-size"]:checked'),nm=gv('ks-name');
@@ -1798,7 +1797,7 @@ async function doSubmit(){
       alert('Save error: '+error.message+' (code: '+error.code+')');
       throw error;
     }
-    console.log('Order saved successfully, ref:',ref);
+
   }catch(err){
     console.error('Submit error full:',err);
     alert('Submit failed: '+(err.message||JSON.stringify(err)));
@@ -1807,11 +1806,9 @@ async function doSubmit(){
   window._lastSub={ref,toName:gv('fn')+' '+gv('ln'),petName:gv('pet-name'),service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',keepsake:ksStr==='None'?'—':ksStr,furClipping:fur?'Yes — $27':'—',total:total>0?'$'+total:'To be confirmed',returnMethod:retL[sRet]||'—',submittedDate:new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})};
   // Auto-send if email provided
   const em=gv('email-intake');
-  console.log('Email check — em value:', em, '— _lastSub:', window._lastSub);
   if(em&&em.includes('@')){
     try{
       const s=window._lastSub;
-      console.log('Attempting emailjs.send to:', em);
       await emailjs.send(EMAILJS_SVC,EMAILJS_TPL,{
         to_email:em,
         to_name:s.toName,
@@ -1827,7 +1824,6 @@ async function doSubmit(){
         office_phone:'(510) 505-8102',
         office_email:'hello@thepawstribute.com'
       });
-      console.log('Email sent successfully');
     }catch(e){console.error('Email error:',e);}
     document.getElementById('ty-email-sec').style.display='none';
   }
@@ -2154,7 +2150,34 @@ function renderOrders(){
   document.getElementById('pending-list').innerHTML=pending.slice(0,5).map(o=>`<div class="pending-item"><div class="pending-ttl">${o.pet_name} — ${o.first_name} ${o.last_name}</div><div class="pending-sub">${o.ref} · ${o.service} · ${o.form_type==='pickup'?'🏠 Home Pickup':'🏢 Drop-Off'} · ${o.submitted_at?new Date(o.submitted_at).toLocaleDateString():'—'}</div><button class="confirm-btn" onclick="openOrderDetail('${o.id}',true)">View &amp; Schedule →</button></div>`).join('');
   let list=curOFilter==='all'?orders:orders.filter(o=>o.status===curOFilter);
   const bc={'New / Received':'b-new','In Progress':'b-prog','Ready for Collection':'b-ready','Completed':'b-done'};
-  document.getElementById('orders-scroll').innerHTML=list.length===0?'<div style="padding:32px;text-align:center;font-size:14px;color:var(--muted)">No orders found</div>':list.map(o=>`<div class="order-row" onclick="openOrderDetail('${o.id}',false)"><div class="order-main"><div class="order-pet">${o.pet_name||'—'}</div><div class="order-owner">${o.first_name} ${o.last_name} · ${o.phone||'—'}</div><div class="order-svc">${o.service||'—'} · ${o.ref}</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="obadge ${bc[o.status]||'b-new'}">${o.status==='New / Received'?'🟡 New':o.status==='In Progress'?'🔵 Progress':o.status==='Ready for Collection'?'🟣 Ready':'🟢 Done'}</span><span class="order-total">${o.total_amount?'$'+o.total_amount:'—'}</span></div></div>`).join('');
+  document.getElementById('orders-scroll').innerHTML=list.length===0?'<div style="padding:32px;text-align:center;font-size:14px;color:var(--muted)">No orders found</div>':list.map(o=>{
+    const statusLabel=o.status==='New / Received'?'🟡 New':o.status==='In Progress'?'🔵 Progress':o.status==='Ready for Collection'?'🟣 Ready':'🟢 Done';
+    const date=o.submitted_at?new Date(o.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
+    return `<div class="order-row" onclick="openOrderDetail('${o.id}',false)" style="padding:16px;flex-direction:column;align-items:stretch;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:16px;font-weight:700;color:#111">${o.pet_name||'—'} <span style="font-size:13px;font-weight:400;color:var(--muted)">${o.pet_type||''}</span></div>
+        <span class="obadge ${bc[o.status]||'b-new'}">${statusLabel}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:14px;color:#111;font-weight:600">${o.first_name} ${o.last_name}</div>
+          <div style="font-size:13px;color:var(--muted);margin-top:2px">${o.phone||'—'}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:15px;font-weight:700;color:var(--pink-deep)">${o.total_amount?'$'+o.total_amount:'—'}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${o.payment_status||'Unpaid'}</div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap">
+        <span>${o.service||'—'}</span>
+        <span>·</span>
+        <span>${o.ref}</span>
+        <span>·</span>
+        <span>${date}</span>
+        ${o.form_type==='pickup'?'<span>· 🏠 Home Pickup</span>':''}
+      </div>
+    </div>`;
+  }).join('');
 }
 function oTab(f,el){curOFilter=f;document.querySelectorAll('.otab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderOrders();}
 function openOrderDetail(id,showSched){
