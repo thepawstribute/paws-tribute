@@ -259,16 +259,16 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .avail-cell.available{background:#fce8ec;border-bottom:1px solid #e8b8c0}
 .avail-cell.unavailable{background:#b8b4b4;border-bottom:1px solid #9e9a9a}
 .tab-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block}
-.orders-hdr{padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
-.orders-title{font-size:18px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
+.orders-hdr{padding:8px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
+.orders-title{font-size:16px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
 .orders-date{font-size:13px;color:var(--muted);margin-top:2px}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center}
-.stat-n{font-size:22px;font-weight:700;color:#111}
-.stat-l{font-size:11px;color:var(--muted);margin-top:2px;font-weight:500}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center}
+.stat-n{font-size:18px;font-weight:700;color:#111}
+.stat-l{font-size:10px;color:var(--muted);margin-top:1px;font-weight:500}
 .otabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .otabs::-webkit-scrollbar{display:none}
-.otab{padding:10px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-family:"DM Sans",sans-serif;flex-shrink:0}
+.otab{padding:8px 12px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-family:"DM Sans",sans-serif;flex-shrink:0}
 .otab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .orders-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
 .order-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -280,9 +280,9 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .order-owner{font-size:13px;color:var(--muted);margin-top:1px}
 .order-svc{font-size:12px;color:var(--muted);margin-top:1px}
 .order-total{font-size:15px;font-weight:700;color:var(--pink-deep);white-space:nowrap}
-.pending-banner{background:#fff8e1;border-bottom:2px solid #f0c040;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.pending-banner{background:#fff8e1;border-bottom:1px solid #f0c040;padding:6px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .pending-text{font-size:13px;font-weight:700;color:#856404;flex:1}
-.pending-item{background:#fffbf0;border:2px solid #f0c040;border-radius:12px;margin:10px 16px;padding:14px}
+.pending-item{background:#fffbf0;border:1px solid #f0c040;border-radius:8px;margin:6px 12px;padding:10px}
 .pending-ttl{font-size:15px;font-weight:700;color:#111;margin-bottom:4px}
 .pending-sub{font-size:13px;color:var(--muted);margin-bottom:10px}
 .confirm-btn{background:var(--pink);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif}
@@ -882,7 +882,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="orders-date" id="orders-date"></div>
     </div>
     <div class="stats-row" id="stats-row"></div>
-    <div id="pending-section" style="display:none;flex-shrink:0;max-height:200px;overflow-y:auto">
+    <div id="pending-section" style="display:none;flex-shrink:0;max-height:120px;overflow-y:auto">
       <div class="pending-banner"><span style="font-size:16px">🔔</span><div class="pending-text">New client intakes — tap to review &amp; schedule</div></div>
       <div id="pending-list"></div>
     </div>
