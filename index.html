@@ -185,7 +185,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .back-to-client{font-size:13px;color:var(--text-hint);background:none;border:none;cursor:pointer;margin-top:20px;font-family:"DM Sans",sans-serif}
 
 /* ── STAFF APP ── */
-#screen-staff-app{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:var(--bg)}
+#screen-staff-app{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:var(--bg);position:relative}
 #screen-staff-app.active{display:flex}
 .app-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .app-logo{font-family:"DM Serif Display",serif;font-size:17px;color:var(--pink-deep)}
@@ -202,8 +202,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .date-label{flex:1;font-size:14px;font-weight:700;color:#111;text-align:center;cursor:pointer}
 .today-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:"DM Sans",sans-serif}
 .date-picker{position:absolute;opacity:0;width:1px;height:1px}
-.staff-view{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column;box-sizing:border-box}
-.staff-view.active{display:flex;flex-direction:column}
+.staff-view{display:none;position:absolute;left:0;right:0;bottom:0;overflow:hidden;flex-direction:column;box-sizing:border-box}
+.staff-view.active{display:flex}
 .sched-legend{display:flex;gap:10px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
 .sched-legend::-webkit-scrollbar{display:none}
 .leg-item{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;white-space:nowrap;color:var(--muted)}
@@ -837,15 +837,15 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- SCHEDULE VIEW -->
-  <div class="staff-view active" id="view-schedule">
-    <div class="sched-legend">
+  <div class="staff-view active" id="view-schedule" style="position:absolute;left:0;right:0;bottom:0">
+    <div class="sched-legend" style="flex-shrink:0">
       <div class="leg-item"><div class="leg-dot" style="background:var(--pickup)"></div>Home Pickup</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--dropoff)"></div>Drop-off</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--ashes)"></div>Ashes Pickup</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--ceremony)"></div>Ceremony</div>
       <div class="leg-item"><div class="leg-dot" style="background:#2e7d32"></div>AMS</div>
     </div>
-    <div id="gridScroll" style="overflow:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0">
+    <div id="gridScroll" style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;min-height:0">
       <table id="gridTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%;margin-bottom:20px">
         <thead id="gridHead" style="position:sticky;top:0;z-index:20;background:var(--surface)"></thead>
         <tbody id="gridBody"></tbody>
@@ -854,7 +854,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- AVAILABILITY VIEW -->
-  <div class="staff-view" id="view-availability">
+  <div class="staff-view" id="view-availability" style="position:absolute;left:0;right:0;bottom:0">
     <div class="avail-hint" id="availHint"></div>
     <div style="display:flex;gap:16px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2e7d32"><div style="width:16px;height:16px;border-radius:3px;background:#f0faf0;border:1px solid #d4edda;flex-shrink:0"></div>Available</div>
@@ -867,7 +867,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
     </div>
     <div class="day-pills" id="dayPills"></div>
-    <div id="availScroll" style="overflow:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0">
+    <div id="availScroll" style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;min-height:0">
       <table id="availTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%">
         <thead id="availHead" style="position:sticky;top:0;z-index:10;background:var(--surface)"></thead>
         <tbody id="availBody"></tbody>
@@ -876,7 +876,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- ORDERS VIEW (admin only) -->
-  <div class="staff-view" id="view-orders" style="flex-direction:column;overflow:hidden">
+  <div class="staff-view" id="view-orders" style="position:absolute;left:0;right:0;bottom:0;flex-direction:column;overflow:hidden">
     <div class="orders-hdr">
       <div class="orders-title">Order Tracker</div>
       <div class="orders-date" id="orders-date"></div>
@@ -893,17 +893,17 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="otab" onclick="oTab('Ready for Collection',this)">🟣 Ready</div>
       <div class="otab" onclick="oTab('Completed',this)">🟢 Done</div>
     </div>
-    <div class="orders-scroll" id="orders-scroll" style="overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0"></div>
+    <div class="orders-scroll" id="orders-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0"></div>
   </div>
 
   <!-- PRICING VIEW -->
-  <div class="staff-view" id="view-pricing">
-    <div id="pricingContent" style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;flex:1;min-height:0"></div>
+  <div class="staff-view" id="view-pricing" style="overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <div id="pricingContent" style="padding:16px"></div>
   </div>
 
   <!-- QUOTE CALC VIEW (admin only) -->
-  <div class="staff-view" id="view-calc">
-    <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;flex:1;min-height:0">
+  <div class="staff-view" id="view-calc" style="overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <div style="padding:16px">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:4px">🚗 Quick Quote Calculator</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Use when clients call to ask about fees — before they fill out the form.</div>
@@ -942,8 +942,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- VA GUIDE VIEW -->
-  <div class="staff-view" id="view-guide">
-    <div style="overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 60px;flex:1;min-height:0">
+  <div class="staff-view" id="view-guide" style="overflow-y:auto;-webkit-overflow-scrolling:touch">
+    <div style="padding:16px 16px 60px">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pink-deep);margin-bottom:4px">VA Script &amp; Guide</div>
         <div style="background:#e8f5e9;border:2px solid #4caf50;border-radius:12px;padding:14px;margin-bottom:20px">
@@ -1059,7 +1059,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- PAYROLL VIEW (admin only) -->
-  <div class="staff-view" id="view-payroll" style="flex-direction:column;overflow:hidden">
+  <div class="staff-view" id="view-payroll" style="overflow-y:auto;-webkit-overflow-scrolling:touch">
     <div style="padding:16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0">
       <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pink-deep);margin-bottom:4px">Staff Payroll</div>
       <div style="font-size:13px;color:var(--muted)">$20/hr per job · home pickup &amp; delivery adds driver pay</div>
@@ -1891,7 +1891,7 @@ async function showApp(){
   renderStaffPills('staffPills');renderStaffPills('editStaffPills');renderStaffPills('schedStaffPills');
   renderDateLabel();renderWeekLabel();
   await loadJobs();await loadAvailability();
-  renderGrid();renderAvailability();subscribeRealtime();
+  renderGrid();renderAvailability();subscribeRealtime();setTimeout(positionActiveView,50);
   document.getElementById('orders-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
 function renderStaffPills(cid){
@@ -1904,18 +1904,31 @@ function renderStaffPills(cid){
     c.appendChild(btn);
   });
 }
+function getStaffViewTop(){
+  const hdr=document.querySelector('.app-hdr');
+  const tabs=document.querySelector('.tab-bar');
+  const dateNav=document.getElementById('dateNav');
+  let top=(hdr?hdr.offsetHeight:52)+(tabs?tabs.offsetHeight:44);
+  if(dateNav&&dateNav.style.display!=='none') top+=dateNav.offsetHeight;
+  return top;
+}
+function positionActiveView(){
+  const top=getStaffViewTop();
+  document.querySelectorAll('.staff-view.active').forEach(v=>{v.style.top=top+'px';});
+}
 async function switchTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.staff-view').forEach(v=>v.classList.remove('active'));
   const te=document.getElementById('tab-'+tab);if(te)te.classList.add('active');
   const ve=document.getElementById('view-'+tab);if(ve)ve.classList.add('active');
-  document.getElementById('dateNav').style.display=tab==='schedule'?'flex':'none';
+  document.getElementById('dateNav').style.display=tab==='schedule'?'flex':'none';setTimeout(positionActiveView,10);
   if(tab==='schedule'&&currentUser.role==='admin')document.getElementById('addJobBtn').classList.remove('hidden');
   else document.getElementById('addJobBtn').classList.add('hidden');
   if(tab==='availability'){await loadAvailability();renderAvailability();}
   if(tab==='pricing')renderPricing();
   if(tab==='orders'){await loadOrders();renderOrders();}
   if(tab==='payroll'){setPayRange('week');renderPayrollHoursInputs();}
+  setTimeout(positionActiveView,10);
 }
 
 // ═══════════════════════════════════════
