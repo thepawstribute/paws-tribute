@@ -1761,6 +1761,7 @@ function buildSummary(){
 // FORM SUBMIT
 // ═══════════════════════════════════════
 async function doSubmit(){
+  console.log('doSubmit called — email-intake value:', document.getElementById('email-intake')?.value);
   const svcL={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Farewell Ceremony'};
   const retL={na:'N/A',pickup:'Pick up at office',delivery:'We deliver to you'};
   const sz=document.querySelector('input[name="ks-size"]:checked'),nm=gv('ks-name');
@@ -1806,9 +1807,11 @@ async function doSubmit(){
   window._lastSub={ref,toName:gv('fn')+' '+gv('ln'),petName:gv('pet-name'),service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',keepsake:ksStr==='None'?'—':ksStr,furClipping:fur?'Yes — $27':'—',total:total>0?'$'+total:'To be confirmed',returnMethod:retL[sRet]||'—',submittedDate:new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})};
   // Auto-send if email provided
   const em=gv('email-intake');
+  console.log('Email check — em value:', em, '— _lastSub:', window._lastSub);
   if(em&&em.includes('@')){
     try{
       const s=window._lastSub;
+      console.log('Attempting emailjs.send to:', em);
       await emailjs.send(EMAILJS_SVC,EMAILJS_TPL,{
         to_email:em,
         to_name:s.toName,
