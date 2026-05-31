@@ -1317,7 +1317,7 @@ const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 const SQUARE_ACCESS_TOKEN='YOUR_SQUARE_ACCESS_TOKEN_HERE';
 const SQUARE_LOCATION_ID='YOUR_SQUARE_LOCATION_ID_HERE';
 const EMAILJS_PK='WqHdEuq5z_zyjKeVg';
-const EMAILJS_SVC='service_18hcppk';
+const EMAILJS_SVC='service_s0uk0tq';
 const EMAILJS_TPL='template_lly2vcw';
 const FREMONT_OFFICE='200 Brown Rd, Fremont, CA 94538';
 
@@ -1749,7 +1749,7 @@ function buildSummary(){
   document.getElementById('summary-lines').innerHTML=html;
   const total=calcTotal();
   document.getElementById('sv-total').textContent=total>0?'$'+total:'—';
-  document.getElementById('payment-amount').textContent=total>0?'$'+total:'—';
+  const paEl=document.getElementById('payment-amount');if(paEl)paEl.textContent=total>0?'$'+total:'—';
 }
 
 // ═══════════════════════════════════════
