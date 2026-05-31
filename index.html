@@ -202,7 +202,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .date-label{flex:1;font-size:14px;font-weight:700;color:#111;text-align:center;cursor:pointer}
 .today-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:"DM Sans",sans-serif}
 .date-picker{position:absolute;opacity:0;width:1px;height:1px}
-.staff-view{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column}
+.staff-view{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column;position:relative}
 .staff-view.active{display:flex}
 .sched-legend{display:flex;gap:10px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
 .sched-legend::-webkit-scrollbar{display:none}
@@ -845,7 +845,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="leg-item"><div class="leg-dot" style="background:var(--ceremony)"></div>Ceremony</div>
       <div class="leg-item"><div class="leg-dot" style="background:#2e7d32"></div>AMS</div>
     </div>
-    <div id="gridScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative">
+    <div id="gridScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative;width:100%">
       <table id="gridTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%">
         <thead id="gridHead" style="position:sticky;top:0;z-index:20;background:var(--surface)"></thead>
         <tbody id="gridBody"></tbody>
@@ -1328,11 +1328,11 @@ const WT_LABEL={under5:'Under 5 lbs','5to20':'5–20 lbs','21to50':'21–50 lbs'
 // Home pickup fees by zone and weight (two-way trip, more responsibility)
 // under50 = under 50lb, over50 = 50-80lb, over80 = over 80lb
 const PU_FEES={
-  fremont:  {under50:{c:65, d:48},  over50:{c:90, d:66},  over80:{c:130,d:96}},
-  milpitas: {under50:{c:80, d:58},  over50:{c:110,d:80},  over80:{c:155,d:114}},
-  sanjose:  {under50:{c:105,d:76},  over50:{c:140,d:102}, over80:{c:195,d:142}},
-  peninsula:{under50:{c:135,d:98},  over50:{c:180,d:130}, over80:{c:240,d:175}},
-  sf:       {under50:{c:175,d:128}, over50:{c:235,d:172}, over80:{c:300,d:220}}
+  fremont:  {under50:{c:85, d:62},  over50:{c:108,d:78},  over80:{c:148,d:108}},
+  milpitas: {under50:{c:98, d:72},  over50:{c:128,d:94},  over80:{c:150,d:110}},
+  sanjose:  {under50:{c:122,d:90},  over50:{c:160,d:118}, over80:{c:172,d:126}},
+  peninsula:{under50:{c:140,d:103}, over50:{c:185,d:136}, over80:{c:172,d:126}},
+  sf:       {under50:{c:195,d:144}, over50:{c:235,d:172}, over80:{c:220,d:162}}
 };
 // Ashes delivery fees — miles based (driver gets stated amount, you keep the rest)
 const DEL_FEES_MILES=[
@@ -1580,7 +1580,7 @@ async function getDrivingMiles(dest){
     });
   });
 }
-function feeZone(miles){if(miles<=8)return'fremont';if(miles<=18)return'milpitas';if(miles<=30)return'sanjose';if(miles<=40)return'peninsula';if(miles<=55)return'sf';return null;}
+function feeZone(miles){if(miles<=10)return'fremont';if(miles<=18)return'milpitas';if(miles<=30)return'sanjose';if(miles<=40)return'peninsula';if(miles<=55)return'sf';return null;}
 function wtTier(w){if(w==='under5'||w==='5to20'||w==='21to50')return'under50';if(w==='51to100')return'over50';return'over80';}
 function puFeeByMiles(miles,wKey){const z=feeZone(miles);if(!z)return null;const t=wtTier(wKey);const f=PU_FEES[z][t];return{clientFee:f.c,driverPay:f.d,zone:z,miles};}
 function delFeeByMiles(miles){
@@ -1638,21 +1638,23 @@ const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getPuFee()+getDelFe
 // SIGNATURE
 // ═══════════════════════════════════════
 function setupSig(){
-  // Use requestAnimationFrame to ensure DOM is painted before measuring
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  // Retry until we get a real width (handles mobile scroll containers)
+  let attempts=0;
+  function trySetup(){
     const wrap=document.getElementById('sig-wrap');
     if(!wrap)return;
-    const w=wrap.offsetWidth||wrap.getBoundingClientRect().width||320;
-    _doSetupSig(w);
-  }));
+    const w=wrap.getBoundingClientRect().width;
+    if(w>10){_doSetupSig(Math.floor(w));}
+    else if(attempts++<20){setTimeout(trySetup,100);}
+  }
+  setTimeout(trySetup,200);
 }
-function _doSetupSig(forcedWidth){
-  const wrap=document.getElementById('sig-wrap'),old=document.getElementById('sig-canvas');
+function _doSetupSig(fw){
+  const wrap=document.getElementById('sig-wrap'),oldC=document.getElementById('sig-canvas');
   const c=document.createElement('canvas');c.id='sig-canvas';
   c.style.cssText='display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent';
-  wrap.replaceChild(c,old);
-  c.width=forcedWidth||320;
-  c.height=130;
+  if(oldC)wrap.replaceChild(c,oldC);else wrap.appendChild(c);
+  c.width=fw;c.height=130;
   sigCtx=c.getContext('2d');sigCtx.strokeStyle='#7a3344';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';
   sigDrawn=false;document.getElementById('sig-hint').style.display='flex';
   const pos=e=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return[s.clientX-r.left,s.clientY-r.top]};
@@ -1666,9 +1668,19 @@ function _doSetupSig(forcedWidth){
 function markSig(){if(!sigDrawn){sigDrawn=true;document.getElementById('sig-hint').style.display='none';document.getElementById('e-sig').classList.remove('show');}}
 function clearSig(){const c=document.getElementById('sig-canvas');if(c&&sigCtx)sigCtx.clearRect(0,0,c.width,c.height);sigDrawn=false;document.getElementById('sig-hint').style.display='flex';}
 function setupCollSig(){
+  let attempts=0;
+  function trySetup(){
+    const wrap=document.getElementById('coll-sig-wrap');if(!wrap)return;
+    const w=wrap.getBoundingClientRect().width;
+    if(w>10){_doSetupCollSig(Math.floor(w));}
+    else if(attempts++<20){setTimeout(trySetup,100);}
+  }
+  setTimeout(trySetup,200);
+}
+function _doSetupCollSig(fw){
   const wrap=document.getElementById('coll-sig-wrap'),old=document.getElementById('coll-sig-canvas');
-  const c=document.createElement('canvas');c.id='coll-sig-canvas';c.style.cssText='display:block;width:100%;height:120px;cursor:crosshair;touch-action:none';
-  wrap.replaceChild(c,old);c.width=wrap.clientWidth||320;c.height=120;
+  const c=document.createElement('canvas');c.id='coll-sig-canvas';c.style.cssText='display:block;width:100%;height:120px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none';
+  if(old)wrap.replaceChild(c,old);else wrap.appendChild(c);c.width=fw;c.height=120;
   collSigCtx=c.getContext('2d');collSigCtx.strokeStyle='#7a3344';collSigCtx.lineWidth=2.5;collSigCtx.lineCap='round';collSigCtx.lineJoin='round';
   collSigDrawn=false;document.getElementById('coll-sig-hint').style.display='flex';
   const pos=e=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return[s.clientX-r.left,s.clientY-r.top]};
@@ -2203,6 +2215,18 @@ function renderPricing(){
   <div style="margin-bottom:24px">
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add-ons</div>
     ${[{n:'Wooden Paw / Nose Print — Small',p:'$70'},{n:'Wooden Paw / Nose Print — Large',p:'$80'},{n:'Fur Clipping (if not Private)',p:'$27'}].map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-radius:10px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;font-weight:500;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
+  <div style="margin-bottom:24px">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Home Pickup Fees</div>
+    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:400px">
+      <thead><tr style="background:#faf2e8"><th style="padding:8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Zone</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Under 50lb</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">50–80lb</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Over 80lb</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">Fremont (≤10mi)</td><td style="padding:8px;text-align:center">$85 <span style="color:var(--muted);font-size:11px">(drv $62)</span></td><td style="padding:8px;text-align:center">$108 <span style="color:var(--muted);font-size:11px">(drv $78)</span></td><td style="padding:8px;text-align:center">$148 <span style="color:var(--muted);font-size:11px">(drv $108)</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">Milpitas (≤18mi)</td><td style="padding:8px;text-align:center">$98 <span style="color:var(--muted);font-size:11px">(drv $72)</span></td><td style="padding:8px;text-align:center">$128 <span style="color:var(--muted);font-size:11px">(drv $94)</span></td><td style="padding:8px;text-align:center">$150 <span style="color:var(--muted);font-size:11px">(drv $110)</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">San Jose (≤30mi)</td><td style="padding:8px;text-align:center">$122 <span style="color:var(--muted);font-size:11px">(drv $90)</span></td><td style="padding:8px;text-align:center">$160 <span style="color:var(--muted);font-size:11px">(drv $118)</span></td><td style="padding:8px;text-align:center">$172 <span style="color:var(--muted);font-size:11px">(drv $126)</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">Peninsula (≤40mi)</td><td style="padding:8px;text-align:center">$140 <span style="color:var(--muted);font-size:11px">(drv $103)</span></td><td style="padding:8px;text-align:center">$185 <span style="color:var(--muted);font-size:11px">(drv $136)</span></td><td style="padding:8px;text-align:center">$172 <span style="color:var(--muted);font-size:11px">(drv $126)</span></td></tr>
+        <tr><td style="padding:8px;font-weight:600">SF (≤55mi)</td><td style="padding:8px;text-align:center">$195 <span style="color:var(--muted);font-size:11px">(drv $144)</span></td><td style="padding:8px;text-align:center">$235 <span style="color:var(--muted);font-size:11px">(drv $172)</span></td><td style="padding:8px;text-align:center">$220 <span style="color:var(--muted);font-size:11px">(drv $162)</span></td></tr>
+      </tbody></table></div>
+  </div>
   </div>
   <div style="margin-bottom:24px">
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cremation Partners</div>
