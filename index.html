@@ -262,11 +262,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .orders-hdr{padding:8px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .orders-title{font-size:16px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
 .orders-date{font-size:13px;color:var(--muted);margin-top:2px}
-.stats-row{display:flex;gap:6px;padding:6px 12px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.stats-row{display:flex;gap:4px;flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .stats-row::-webkit-scrollbar{display:none}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px;text-align:center;transition:all .15s;flex-shrink:0;min-width:60px}
-.stat-n{font-size:16px;font-weight:700;color:#111}
-.stat-l{font-size:10px;color:var(--muted);margin-top:1px;font-weight:500}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;text-align:center;transition:all .15s;flex-shrink:0;min-width:44px}
+.stat-n{font-size:14px;font-weight:700;color:#111;line-height:1.2}
+.stat-l{font-size:9px;color:var(--muted);font-weight:500}
 .otabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .otabs::-webkit-scrollbar{display:none}
 .otab{padding:8px 12px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-family:"DM Sans",sans-serif;flex-shrink:0}
@@ -281,12 +281,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .order-owner{font-size:13px;color:var(--muted);margin-top:1px}
 .order-svc{font-size:12px;color:var(--muted);margin-top:1px}
 .order-total{font-size:15px;font-weight:700;color:var(--pink-deep);white-space:nowrap}
-.pending-banner{background:#fff8e1;border-bottom:1px solid #f0c040;padding:6px 12px;display:flex;align-items:center;gap:8px;flex-shrink:0}
-.pending-text{font-size:13px;font-weight:700;color:#856404;flex:1}
-.pending-item{background:#fffbf0;border:1px solid #f0c040;border-radius:8px;margin:6px 12px;padding:10px}
-.pending-ttl{font-size:15px;font-weight:700;color:#111;margin-bottom:4px}
-.pending-sub{font-size:13px;color:var(--muted);margin-bottom:10px}
-.confirm-btn{background:var(--pink);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif}
+.pending-banner{background:#fff8e1;border-bottom:1px solid #f0c040;padding:5px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.pending-text{font-size:12px;font-weight:600;color:#856404;flex:1}
+.pending-item{background:#fffbf0;border-bottom:1px solid #f0c040;padding:8px 12px;display:flex;align-items:center;gap:10px}
+.pending-ttl{font-size:13px;font-weight:700;color:#111;flex:1}
+.pending-sub{display:none}
+.confirm-btn{background:var(--pink);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif;white-space:nowrap}
 .guide-sec{margin-bottom:24px}
 .guide-title{font-size:14px;font-weight:700;color:var(--pink-deep);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--pink-mid)}
 .guide-bullets{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
@@ -878,22 +878,18 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 
   <!-- ORDERS VIEW (admin only) -->
   <div class="staff-view" id="view-orders" style="position:absolute;left:0;right:0;bottom:0;flex-direction:column;overflow:hidden">
-    <div class="orders-hdr">
-      <div class="orders-title">Order Tracker</div>
-      <div class="orders-date" id="orders-date"></div>
+    <div class="orders-hdr" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <div class="orders-title">Order Tracker</div>
+        <div class="orders-date" id="orders-date"></div>
+      </div>
+      <div class="stats-row" id="stats-row" style="border:none;padding:0;margin:0;flex-shrink:0;background:transparent"></div>
     </div>
-    <div class="stats-row" id="stats-row"></div>
     <div id="pending-section" style="display:none;flex-shrink:0;max-height:120px;overflow-y:auto">
       <div class="pending-banner"><span style="font-size:16px">🔔</span><div class="pending-text">New client intakes — tap to review &amp; schedule</div></div>
       <div id="pending-list"></div>
     </div>
-    <div class="otabs">
-      <div class="otab active" onclick="oTab('all',this)">All</div>
-      <div class="otab" onclick="oTab('New / Received',this)">🟡 New</div>
-      <div class="otab" onclick="oTab('In Progress',this)">🔵 Progress</div>
-      <div class="otab" onclick="oTab('Ready for Collection',this)">🟣 Ready</div>
-      <div class="otab" onclick="oTab('Completed',this)">🟢 Done</div>
-    </div>
+
     <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
   </div>
 
