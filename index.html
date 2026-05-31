@@ -235,7 +235,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .job-time-s{font-size:9px;color:#666;margin-top:1px}
 .job-paid{display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;margin-top:2px}
 .job-paid.paid{background:#e8f5e9;color:#2e7d32}.job-paid.unpaid{background:#fff3e0;color:#e65100}
-.unavail-block{position:absolute;left:0;right:0;background:repeating-linear-gradient(45deg,#f5f5f5,#f5f5f5 4px,#ebebeb 4px,#ebebeb 8px);z-index:5}
+.unavail-block{position:absolute;left:0;right:0;background:rgba(180,170,170,0.35);z-index:5;border-bottom:1px solid rgba(150,140,140,0.2)}
 .now-line{position:absolute;left:0;right:0;height:2px;background:#f44336;z-index:15}
 .now-line::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:#f44336}
 .avail-hint{padding:10px 16px;font-size:13px;color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border);font-weight:500}
@@ -251,13 +251,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .avail-tc{width:var(--avcol);flex-shrink:0;position:sticky;left:0;background:var(--bg);z-index:10}
 .avail-tr{height:44px;display:flex;align-items:center;border-bottom:1px solid var(--border)}
 .avail-tt{font-size:11px;font-weight:500;color:var(--muted);padding-left:8px}
-.avail-staff-hdr{display:flex;position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);margin-left:var(--avcol)}
+.avail-staff-hdr{display:flex;background:var(--surface);border-bottom:1px solid var(--border)}
 .avail-sname{width:var(--avcol);min-width:var(--avcol);padding:8px 6px;text-align:center;border-right:1px solid var(--border);flex-shrink:0}
 .avail-scols{display:flex}
 .avail-scol{width:var(--avcol);min-width:var(--avcol);border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column}
 .avail-cell{height:44px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
-.avail-cell.available{background:rgba(196,104,122,.12)}
-.avail-cell.unavailable{background:repeating-linear-gradient(45deg,#f5f5f5,#f5f5f5 3px,#ebebeb 3px,#ebebeb 6px)}
+.avail-cell.available{background:#f0faf0;border-bottom:1px solid #d4edda}
+.avail-cell.unavailable{background:#d0cece;border-bottom:1px solid #b8b5b5}
 .tab-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
 .orders-hdr{padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .orders-title{font-size:18px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
@@ -859,6 +859,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   <!-- AVAILABILITY VIEW -->
   <div class="staff-view" id="view-availability">
     <div class="avail-hint" id="availHint"></div>
+    <div style="display:flex;gap:16px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2e7d32"><div style="width:16px;height:16px;border-radius:3px;background:#f0faf0;border:1px solid #d4edda;flex-shrink:0"></div>Available</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#555"><div style="width:16px;height:16px;border-radius:3px;background:#d0cece;flex-shrink:0"></div>Unavailable (blocked)</div>
+      <div style="font-size:12px;color:var(--muted);font-style:italic">Tap any hour to toggle</div>
+    </div>
     <div class="week-nav">
       <button class="week-nav-btn" onclick="changeWeek(-1)">‹</button>
       <div class="week-label" id="weekLabel"></div>
@@ -898,13 +903,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- PRICING VIEW -->
-  <div class="staff-view" id="view-pricing">
-    <div class="tab-content" id="pricingContent"></div>
+  <div class="staff-view" id="view-pricing" style="overflow:hidden">
+    <div class="tab-content" id="pricingContent" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px"></div>
   </div>
 
   <!-- QUOTE CALC VIEW (admin only) -->
-  <div class="staff-view" id="view-calc">
-    <div class="tab-content">
+  <div class="staff-view" id="view-calc" style="overflow:hidden">
+    <div class="tab-content" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:4px">🚗 Quick Quote Calculator</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Use when clients call to ask about fees — before they fill out the form.</div>
@@ -943,8 +948,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- VA GUIDE VIEW -->
-  <div class="staff-view" id="view-guide">
-    <div class="tab-content">
+  <div class="staff-view" id="view-guide" style="overflow:hidden">
+    <div class="tab-content" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pink-deep);margin-bottom:4px">VA Script &amp; Guide</div>
         <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">Use when answering calls. Stay warm, speak slowly, never rush a grieving family. <em>Italic = for your eyes only.</em></div>
@@ -1315,6 +1320,7 @@ const EMAILJS_TPL='template_lly2vcw';
 const FREMONT_OFFICE='200 Brown Rd, Fremont, CA 94538';
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const STAFF_ORDER=['Saskia','Jesse','Sophie','Claire','K','Jamie'];
 
 // ═══════════════════════════════════════
 // PRICING
@@ -1636,13 +1642,20 @@ const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getPuFee()+getDelFe
 // SIGNATURE
 // ═══════════════════════════════════════
 function setupSig(){
-  // Small delay to ensure layout is rendered before measuring width
-  setTimeout(_doSetupSig, 80);
+  setTimeout(()=>{
+    const wrap=document.getElementById('sig-wrap');
+    if(!wrap)return;
+    // Force layout recalc
+    const w=wrap.getBoundingClientRect().width||wrap.offsetWidth||320;
+    _doSetupSig(w);
+  },150);
 }
-function _doSetupSig(){
+function _doSetupSig(forcedWidth){
   const wrap=document.getElementById('sig-wrap'),old=document.getElementById('sig-canvas');
-  const c=document.createElement('canvas');c.id='sig-canvas';c.style.cssText='display:block;width:100%;height:130px;cursor:crosshair;touch-action:none';
-  wrap.replaceChild(c,old);c.width=wrap.clientWidth||320;c.height=130;
+  const c=document.createElement('canvas');c.id='sig-canvas';c.style.cssText='display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none';
+  wrap.replaceChild(c,old);
+  c.width=forcedWidth||wrap.getBoundingClientRect().width||wrap.offsetWidth||320;
+  c.height=130;
   sigCtx=c.getContext('2d');sigCtx.strokeStyle='#7a3344';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';
   sigDrawn=false;document.getElementById('sig-hint').style.display='flex';
   const pos=e=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return[s.clientX-r.left,s.clientY-r.top]};
@@ -1833,7 +1846,7 @@ async function loadStaff(){const{data}=await sb.from('staff').select('*').order(
 function renderStaffSel(){
   const grid=document.getElementById('staffSelGrid');grid.innerHTML='';
   document.getElementById('staffSelView').style.display='block';document.getElementById('pinView').classList.remove('show');
-  staffList.forEach(s=>{
+  staffList.slice().sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).forEach(s=>{
     const btn=document.createElement('button');btn.className='staff-sel-btn';
     btn.innerHTML=`<div class="staff-sel-av">${s.name[0]}</div><span>${s.name}</span>`;
     btn.onclick=()=>startPin(s);grid.appendChild(btn);
@@ -1906,7 +1919,7 @@ function subscribeRealtime(){
 function renderGrid(){
   if(!currentUser)return;
   const H=H_END-H_START,ds=fmtDateKey(curDate);
-  const vis=currentUser.role==='admin'?staffList.filter(s=>s.role==='staff').map(s=>s.name):staffList.filter(s=>s.name===currentUser.name).map(s=>s.name);
+  const vis=currentUser.role==='admin'?staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name):staffList.filter(s=>s.name===currentUser.name).map(s=>s.name);
   const hdr=document.getElementById('schedStaffHdr');hdr.innerHTML='';
   vis.forEach(n=>{const c=document.createElement('div');c.className='staff-cell';c.innerHTML=`<div class="staff-av">${n[0]}</div><div class="staff-nm">${n}</div>`;hdr.appendChild(c);});
   const tc=document.getElementById('timeCol');tc.innerHTML='';
@@ -1942,7 +1955,7 @@ function renderAvailability(){
   const sd=wk[curAvailDay],ds=fmtDateKey(sd);
   const tc=document.getElementById('availTC');tc.innerHTML='';
   for(let h=H_START;h<H_END;h++){const r=document.createElement('div');r.className='avail-tr';r.innerHTML=`<span class="avail-tt">${fmtHour(h)}</span>`;tc.appendChild(r);}
-  const vis=currentUser.role==='admin'?staffList.filter(s=>s.role==='staff').map(s=>s.name):[currentUser.name];
+  const vis=currentUser.role==='admin'?staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name):[currentUser.name];
   const shdr=document.getElementById('availStaffHdr');shdr.innerHTML='';
   vis.forEach(n=>{const c=document.createElement('div');c.className='avail-sname';c.innerHTML=`<div class="staff-av" style="margin:0 auto 3px">${n[0]}</div><div class="staff-nm">${n}</div>`;shdr.appendChild(c);});
   const scols=document.getElementById('availScols');scols.innerHTML='';
@@ -2277,7 +2290,7 @@ async function generatePayroll(){
   });
 
   // Build payroll per staff
-  const allStaff=new Set([...staffList.filter(s=>s.role==='staff').map(s=>s.name),...Object.keys(driverPayByStaff)]);
+  const allStaff=new Set([...staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name),...Object.keys(driverPayByStaff)]);
   let grandTotal=0;let html='';
   Array.from(allStaff).sort().forEach(name=>{
     const hrs=staffHours[name]||0;
