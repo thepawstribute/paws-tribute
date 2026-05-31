@@ -256,8 +256,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .avail-scols{display:flex}
 .avail-scol{width:var(--avcol);min-width:var(--avcol);border-right:1px solid var(--border);flex-shrink:0;display:flex;flex-direction:column}
 .avail-cell{height:44px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
-.avail-cell.available{background:#f0faf0;border-bottom:1px solid #d4edda}
-.avail-cell.unavailable{background:#d0cece;border-bottom:1px solid #b8b5b5}
+.avail-cell.available{background:#fce8ec;border-bottom:1px solid #e8b8c0}
+.avail-cell.unavailable{background:#b8b4b4;border-bottom:1px solid #9e9a9a}
 .tab-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block}
 .orders-hdr{padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .orders-title{font-size:18px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
@@ -857,8 +857,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   <div class="staff-view" id="view-availability" style="position:absolute;left:0;right:0;bottom:0">
     <div class="avail-hint" id="availHint"></div>
     <div style="display:flex;gap:16px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2e7d32"><div style="width:16px;height:16px;border-radius:3px;background:#f0faf0;border:1px solid #d4edda;flex-shrink:0"></div>Available</div>
-      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#555"><div style="width:16px;height:16px;border-radius:3px;background:#d0cece;flex-shrink:0"></div>Unavailable (blocked)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#2e7d32"><div style="width:16px;height:16px;border-radius:3px;background:#fce8ec;border:1px solid #e8b8c0;flex-shrink:0"></div>Available</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#555"><div style="width:16px;height:16px;border-radius:3px;background:#b8b4b4;flex-shrink:0"></div>Unavailable (blocked)</div>
       <div style="font-size:12px;color:var(--muted);font-style:italic">Tap any hour to toggle</div>
     </div>
     <div class="week-nav">
@@ -1792,8 +1792,16 @@ async function doSubmit(){
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
       payment_status:paymentMethod==='Pending'?'Unpaid':paymentMethod,staff_name:formStaff,status:'New / Received',notes:'',submitted_at:new Date().toISOString()
     });
-    if(error)throw error;
-  }catch(err){console.error('Submit error:',err);}
+    if(error){
+      console.error('Supabase insert error:',JSON.stringify(error));
+      alert('Save error: '+error.message+' (code: '+error.code+')');
+      throw error;
+    }
+    console.log('Order saved successfully, ref:',ref);
+  }catch(err){
+    console.error('Submit error full:',err);
+    alert('Submit failed: '+(err.message||JSON.stringify(err)));
+  }
   nb.disabled=false;
   window._lastSub={ref,toName:gv('fn')+' '+gv('ln'),petName:gv('pet-name'),service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',keepsake:ksStr==='None'?'—':ksStr,furClipping:fur?'Yes — $27':'—',total:total>0?'$'+total:'To be confirmed',returnMethod:retL[sRet]||'—',submittedDate:new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})};
   // Auto-send if email provided
@@ -1989,11 +1997,11 @@ function renderGrid(){
     bHTML+=`<tr style="height:${H_PX}px">`;
     // Time cell
     const isNowRow=isToday&&nowMins>=h*60&&nowMins<(h+1)*60;
-    bHTML+=`<td style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;padding-top:4px"><span style="font-size:11px;font-weight:500;color:var(--muted);padding-left:6px">${fmtHour(h)}</span>${isNowRow?'<div style="position:absolute;left:0;right:0;height:2px;background:#f44336;z-index:5"></div>':''}</td>`;
+    bHTML+=`<td style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;z-index:10;background:var(--bg);border-bottom:1px solid #d0ccc8;border-right:1px solid #d0ccc8;vertical-align:top;padding-top:4px"><span style="font-size:11px;font-weight:500;color:var(--muted);padding-left:6px">${fmtHour(h)}</span>${isNowRow?'<div style="position:absolute;left:0;right:0;height:2px;background:#f44336;z-index:5"></div>':''}</td>`;
     vis.forEach(n=>{
       const isUnavail=availability[`${n}_${ds}_${h}`]===false;
       const bg=isUnavail?'background:rgba(180,170,170,0.4);':'';
-      bHTML+=`<td style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);position:relative;vertical-align:top;${bg}">`;
+      bHTML+=`<td style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid #d0ccc8;border-right:1px solid #d0ccc8;position:relative;vertical-align:top;${bg}">`;
       // Draw job cards that START in this hour
       staffJobs[n].forEach((sub,si)=>sub.forEach(({s:st,e:en,job})=>{
         if(Math.floor(st/60)===h){
@@ -2039,13 +2047,13 @@ function renderAvailability(){
   let bHTML='';
   for(let h=H_START;h<H_END;h++){
     bHTML+=`<tr style="height:44px">`;
-    bHTML+=`<td style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;background:var(--bg);border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:middle;padding-left:8px"><span style="font-size:11px;font-weight:500;color:var(--muted)">${fmtHour(h)}</span></td>`;
+    bHTML+=`<td style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;background:var(--bg);border-bottom:1px solid #d0ccc8;border-right:1px solid #d0ccc8;vertical-align:middle;padding-left:8px"><span style="font-size:11px;font-weight:500;color:var(--muted)">${fmtHour(h)}</span></td>`;
     vis.forEach(n=>{
       const key=`${n}_${ds}_${h}`;const av=availability[key]!==false;
       const canEdit=currentUser.role==='admin'||currentUser.name===n;
-      const bg=av?'background:var(--pink-light);':'background:#c8c4c4;';
+      const bg=av?'background:#fce8ec;border-bottom:1px solid #e8b8c0;':'background:#b8b4b4;border-bottom:1px solid #9e9a9a;';
       const click=canEdit?`onclick="toggleAvailCell('${n}','${ds}',${h},this)"`:''
-      bHTML+=`<td ${click} style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);${bg}cursor:${canEdit?'pointer':'default'}" data-av="${av}"></td>`;
+      bHTML+=`<td ${click} style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid #d0ccc8;border-right:1px solid #d0ccc8;${bg}cursor:${canEdit?'pointer':'default'}" data-av="${av}"></td>`;
     });
     bHTML+='</tr>';
   }
@@ -2055,7 +2063,7 @@ async function toggleAvailCell(sn,ds,h,cell){
   const cur=cell.dataset.av==='true';const nv=!cur;
   availability[`${sn}_${ds}_${h}`]=nv;
   cell.dataset.av=nv;
-  cell.style.background=nv?'var(--pink-light)':'#c8c4c4';
+  cell.style.background=nv?'#fce8ec':'#b8b4b4';
   await sb.from('availability').upsert({staff_name:sn,avail_date:ds,hour_slot:h,is_available:nv},{onConflict:'staff_name,avail_date,hour_slot'});
 }
 
