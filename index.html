@@ -262,9 +262,10 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .orders-hdr{padding:8px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .orders-title{font-size:16px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
 .orders-date{font-size:13px;color:var(--muted);margin-top:2px}
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center;transition:all .15s}
-.stat-n{font-size:18px;font-weight:700;color:#111}
+.stats-row{display:flex;gap:6px;padding:6px 12px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.stats-row::-webkit-scrollbar{display:none}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:5px 10px;text-align:center;transition:all .15s;flex-shrink:0;min-width:60px}
+.stat-n{font-size:16px;font-weight:700;color:#111}
 .stat-l{font-size:10px;color:var(--muted);margin-top:1px;font-weight:500}
 .otabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .otabs::-webkit-scrollbar{display:none}
