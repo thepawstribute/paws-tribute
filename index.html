@@ -534,10 +534,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <img class="urn-img" src="https://res.cloudinary.com/dgbwpvvan/image/upload/v1779170504/Scattering_Tube_q9z8c9.png" alt="Scattering Tube">
             <div class="urn-lbl">Scattering Tube</div>
           </div>
-          <div class="urn-card" id="uc-later" onclick="selUrn('I will choose later','uc-later','none')">
-            <div style="font-size:28px;margin:10px 0">🤍</div>
-            <div class="urn-lbl">Choose later</div>
-          </div>
+
         </div>
         <div id="eng-box" style="display:none">
           <div class="eng-banner"><span style="font-size:18px">✏️</span><span style="font-size:14px;font-weight:700;color:#fff">Add engraving (optional)</span></div>
@@ -681,14 +678,25 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="staff-pills" id="formStaffPills"></div>
         <div class="ferr" id="e-form-staff" style="margin-top:6px">Please select who is helping today.</div>
       </div>
-      <!-- Square Payment -->
-      <div class="square-section">
-        <div class="square-title">💳 Payment</div>
-        <div class="square-sub">Tap below to pay securely via Square. You can also pay in person.</div>
-        <div class="square-amount" id="payment-amount">—</div>
-        <button class="square-btn" id="pay-btn" onclick="openSquarePayment()">Pay with Square →</button>
-        <div class="paid-badge" id="paid-badge" style="display:none">✅ Payment complete — thank you!</div>
-        <div style="font-size:12px;color:var(--text-hint);margin-top:10px;text-align:center">Tap "Submit" below to continue without paying now.</div>
+      <!-- Payment -->
+      <div style="margin-top:20px;padding-top:20px;border-top:2px solid var(--pink-mid)">
+        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:4px">💳 Payment</div>
+        <div style="font-size:14px;color:var(--text-muted);margin-bottom:14px">Select payment method</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="wopt" id="pay-cash" onclick="selPayment('Cash',this)" style="padding:14px 8px">
+            <div style="font-size:20px;margin-bottom:4px">💵</div>
+            <div class="wopt-label">Cash</div>
+          </div>
+          <div class="wopt" id="pay-card" onclick="selPayment('Card',this)" style="padding:14px 8px">
+            <div style="font-size:20px;margin-bottom:4px">💳</div>
+            <div class="wopt-label">Card</div>
+          </div>
+          <div class="wopt" id="pay-pending" onclick="selPayment('Pending',this)" style="padding:14px 8px">
+            <div style="font-size:20px;margin-bottom:4px">⏳</div>
+            <div class="wopt-label">Pending</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text-hint);margin-top:10px;text-align:center">Card payment taken on Square reader separately</div>
       </div>
     </div>
 
@@ -1273,8 +1281,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 // ═══════════════════════════════════════
 const SUPABASE_URL='https://viitjebfitccdhmpwfhu.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpaXRqZWJmaXRjY2RobXB3Zmh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyNzQ5NzQsImV4cCI6MjA5Mzg1MDk3NH0.vwUhL1Du6mHa0H-DxJZSOF9klVnOBXqiZ1CNlmi7wLQ';
-const SQUARE_ACCESS_TOKEN='EAAAl3VsbEyH6QvkfC9S17zIRphTjFfu_oaJz6dxXg4lROwxd0hHRKNE-I3gk8vh';
-const SQUARE_LOCATION_ID='LD65PQJKAWGVZ';
+const SQUARE_ACCESS_TOKEN='YOUR_SQUARE_ACCESS_TOKEN_HERE';
+const SQUARE_LOCATION_ID='YOUR_SQUARE_LOCATION_ID_HERE';
 const EMAILJS_PK='WqHdEuq5z_zyjKeVg';
 const EMAILJS_SVC='service_18hcppk';
 const EMAILJS_TPL='template_lly2vcw';
@@ -1292,13 +1300,20 @@ const SVC_PRICE={
 };
 const WT_LABEL={under5:'Under 5 lbs','5to20':'5–20 lbs','21to50':'21–50 lbs','51to100':'51–100 lbs',over100:'Over 100 lbs'};
 const PU_FEES={
-  fremont:{under5:{c:55,d:40},mid:{c:85,d:60},large:{c:120,d:90}},
-  milpitas:{under5:{c:70,d:50},mid:{c:100,d:70},large:{c:140,d:105}},
-  sanjose:{under5:{c:95,d:65},mid:{c:130,d:90},large:{c:180,d:135}},
-  peninsula:{under5:{c:120,d:85},mid:{c:165,d:120},large:{c:220,d:165}},
-  sf:{under5:{c:160,d:115},mid:{c:220,d:160},large:{c:280,d:210}}
+  fremont:{under50:{c:55,d:40},over50:{c:85,d:60},over80:{c:120,d:90}},
+  milpitas:{under50:{c:70,d:50},over50:{c:100,d:70},over80:{c:140,d:105}},
+  sanjose:{under50:{c:95,d:65},over50:{c:130,d:90},over80:{c:180,d:135}},
+  peninsula:{under50:{c:120,d:85},over50:{c:165,d:120},over80:{c:220,d:165}},
+  sf:{under50:{c:160,d:115},over50:{c:220,d:160},over80:{c:280,d:210}}
 };
-const DEL_FEES={fremont:{c:25,d:20},milpitas:{c:35,d:25},sanjose:{c:45,d:35},peninsula:{c:50,d:40},sf:{c:80,d:70}};
+// Ashes delivery fees — miles based (driver gets stated amount, you keep the rest)
+const DEL_FEES_MILES=[
+  {maxMiles:10, client:25, driver:20},
+  {maxMiles:20, client:38, driver:30},
+  {maxMiles:30, client:48, driver:38},
+  {maxMiles:40, client:58, driver:46},
+  {maxMiles:55, client:72, driver:60},
+];
 
 // ═══════════════════════════════════════
 // SCHEDULER CONFIG
@@ -1323,7 +1338,7 @@ let pinEntry='',pinTarget=null;
 let schedOrderId=null,schedStaff=null,schedIsAshes=false;
 let orders=[],openOrderId=null,curOFilter='all';
 // Form
-let formType='dropoff',fPage=1,formStaff=null;
+let formType='dropoff',fPage=1,formStaff=null,paymentMethod='Pending';
 let sSvc='',sUrn='',sUrnEng='',sKs='none',sRet='',sSlot='',sPetType='',sWeight='';
 let ksQty=1,overtimeAuth=0;
 let puFeeData=null,delFeeData=null;
@@ -1400,7 +1415,8 @@ function startForm(type){
   document.getElementById('private-fur-note').style.display='none';
   document.getElementById('paid-badge').style.display='none';
   document.getElementById('pay-btn').style.display='block';
-  formStaff=null;
+  formStaff=null;paymentMethod='Pending';
+  document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(el=>el.classList.remove('sel'));
   // Render staff pills for form
   const fp=document.getElementById('formStaffPills');
   if(fp){fp.innerHTML='';staffList.filter(s=>s.role==='staff').forEach(s=>{const btn=document.createElement('button');btn.type='button';btn.className='staff-pill';btn.textContent=s.name;btn.onclick=()=>{document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));btn.classList.add('selected');formStaff=s.name;document.getElementById('e-form-staff').classList.remove('show');};fp.appendChild(btn);});}
@@ -1495,6 +1511,7 @@ function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.
 function selRet(r,card){sRet=r;document.querySelectorAll('.ret-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('e-ret').classList.remove('show');document.getElementById('slot-sec').style.display=r==='pickup'?'block':'none';document.getElementById('del-sec').style.display=r==='delivery'?'block':'none';}
 function selSlot(s,id){sSlot=s;document.querySelectorAll('.slot').forEach(sl=>sl.classList.remove('sel'));document.getElementById(id).classList.add('sel');}
 function selOvertime(n,el){overtimeAuth=n;document.querySelectorAll('[id^="ot-"]').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');}
+function selPayment(method,el){paymentMethod=method;document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
 function chgQty(d){ksQty=Math.max(1,ksQty+d);document.getElementById('ks-qty').textContent=ksQty;}
 function updatePrice(){}
 
@@ -1513,9 +1530,14 @@ async function getDrivingMiles(dest){
   });
 }
 function feeZone(miles){if(miles<=8)return'fremont';if(miles<=18)return'milpitas';if(miles<=30)return'sanjose';if(miles<=40)return'peninsula';if(miles<=55)return'sf';return null;}
-function wtTier(w){if(w==='under5'||w==='5to20'||w==='21to50')return'under5';if(w==='51to100')return'mid';return'large';}
+function wtTier(w){if(w==='under5'||w==='5to20'||w==='21to50')return'under50';if(w==='51to100')return'over50';return'over80';}
 function puFeeByMiles(miles,wKey){const z=feeZone(miles);if(!z)return null;const t=wtTier(wKey);const f=PU_FEES[z][t];return{clientFee:f.c,driverPay:f.d,zone:z,miles};}
-function delFeeByMiles(miles){const z=feeZone(miles);if(!z)return null;const f=DEL_FEES[z];return{fee:f.c,driver:f.d,zone:z,miles};}
+function delFeeByMiles(miles){
+  if(miles===0)miles=1;
+  const bracket=DEL_FEES_MILES.find(b=>miles<=b.maxMiles);
+  if(!bracket)return null;
+  return{fee:bracket.client,driver:bracket.driver,you:bracket.client-bracket.driver,miles};
+}
 function puFeeByZip(zip,wKey){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.09));return puFeeByMiles(m,wKey);}
 function delFeeByZip(zip){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.09));return delFeeByMiles(m);}
 async function calcPickupFee(){
@@ -1690,7 +1712,7 @@ async function doSubmit(){
       return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
-      payment_status:squarePaid?'Paid':'Unpaid',status:'New / Received',notes:'',submitted_at:new Date().toISOString()
+      payment_status:paymentMethod==='Pending'?'Unpaid':paymentMethod,staff_name:formStaff,status:'New / Received',notes:'',submitted_at:new Date().toISOString()
     });
     if(error)throw error;
   }catch(err){console.error('Submit error:',err);}
