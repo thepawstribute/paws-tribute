@@ -611,12 +611,19 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           </div>
         </div>
         <div id="slot-sec" style="display:none">
-          <label class="fl" style="margin-bottom:8px">Preferred pick-up window — we'll confirm by phone</label>
-          <div class="slot-grid">
-            <div class="slot" id="sl-mon" onclick="selSlot('Monday 11:00–11:30 am','sl-mon')"><div class="slot-day">Monday</div><div class="slot-time">11:00 – 11:30 am</div></div>
-            <div class="slot" id="sl-tue" onclick="selSlot('Tuesday 6:00–6:30 pm','sl-tue')"><div class="slot-day">Tuesday</div><div class="slot-time">6:00 – 6:30 pm</div></div>
-            <div class="slot" id="sl-thu" onclick="selSlot('Thursday 8:00–8:30 am','sl-thu')"><div class="slot-day">Thursday</div><div class="slot-time">8:00 – 8:30 am</div></div>
-            <div class="slot" id="sl-flex" onclick="selSlot('Flexible — we\'ll coordinate','sl-flex')"><div class="slot-day">Flexible</div><div class="slot-time">We'll reach out</div></div>
+          <label class="fl" style="margin-bottom:4px">Preferred collection time — we'll call to confirm</label>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Select all that apply</div>
+          <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Day</div>
+          <div class="pill-row" style="margin-bottom:16px">
+            <button type="button" class="pill" id="day-weekday" onclick="togSlotPill(this,'day-weekday')">Weekday</button>
+            <button type="button" class="pill" id="day-weekend" onclick="togSlotPill(this,'day-weekend')">Weekend</button>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Time</div>
+          <div class="pill-row">
+            <button type="button" class="pill" id="time-morning" onclick="togSlotPill(this,'time-morning')">Morning (9am–12pm)</button>
+            <button type="button" class="pill" id="time-afternoon" onclick="togSlotPill(this,'time-afternoon')">Afternoon (12pm–5pm)</button>
+            <button type="button" class="pill" id="time-evening" onclick="togSlotPill(this,'time-evening')">Evening (5pm–7pm)</button>
+            <button type="button" class="pill" id="time-after7" onclick="togSlotPill(this,'time-after7')">After 7pm</button>
           </div>
         </div>
         <div id="del-sec" style="display:none">
@@ -1406,6 +1413,7 @@ function startForm(type){
   document.getElementById('eng-box').style.display='none';
   document.getElementById('ks-details').style.display='none';
   document.getElementById('slot-sec').style.display='none';
+  ['day-weekday','day-weekend','time-morning','time-afternoon','time-evening','time-after7'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('sel');});
   document.getElementById('del-sec').style.display='none';
   document.getElementById('ret-opts').style.display='none';
   document.getElementById('shared-msg').style.display='none';
@@ -1509,7 +1517,15 @@ function selUrn(u,id,et){
 }
 function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('ks-details').style.display=(k==='paw'||k==='nose')?'block':'none';}
 function selRet(r,card){sRet=r;document.querySelectorAll('.ret-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('e-ret').classList.remove('show');document.getElementById('slot-sec').style.display=r==='pickup'?'block':'none';document.getElementById('del-sec').style.display=r==='delivery'?'block':'none';}
-function selSlot(s,id){sSlot=s;document.querySelectorAll('.slot').forEach(sl=>sl.classList.remove('sel'));document.getElementById(id).classList.add('sel');}
+function togSlotPill(btn,id){btn.classList.toggle('sel');buildSlotString();}
+function buildSlotString(){
+  const days=[{id:'day-weekday',label:'Weekday'},{id:'day-weekend',label:'Weekend'}].filter(d=>document.getElementById(d.id)?.classList.contains('sel')).map(d=>d.label);
+  const times=[{id:'time-morning',label:'Morning (9am–12pm)'},{id:'time-afternoon',label:'Afternoon (12pm–5pm)'},{id:'time-evening',label:'Evening (5pm–7pm)'},{id:'time-after7',label:'After 7pm'}].filter(t=>document.getElementById(t.id)?.classList.contains('sel')).map(t=>t.label);
+  const parts=[];
+  if(days.length)parts.push(days.join(' or '));
+  if(times.length)parts.push(times.join(' or '));
+  sSlot=parts.join(' · ')||'';
+}
 function selOvertime(n,el){overtimeAuth=n;document.querySelectorAll('[id^="ot-"]').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');}
 function selPayment(method,el){paymentMethod=method;document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
 function chgQty(d){ksQty=Math.max(1,ksQty+d);document.getElementById('ks-qty').textContent=ksQty;}
