@@ -1799,8 +1799,25 @@ async function doSubmit(){
   // Auto-send if email provided
   const em=gv('email-intake');
   if(em&&em.includes('@')){
-    try{await emailjs.send(EMAILJS_SVC,EMAILJS_TPL,{to_email:em,to_name:subData.toName,pet_name:subData.petName,ref_number:ref,service:subData.service,urn:subData.urn,keepsake:subData.keepsake,fur_clipping:subData.furClipping,total:subData.total,return_method:subData.returnMethod,submitted_date:subData.submittedDate,office_phone:'(510) 505-8102',office_email:'hello@thepawstribute.com'});}
-    catch(e){console.error('Email:',e);}
+    try{
+      const s=window._lastSub;
+      await emailjs.send(EMAILJS_SVC,EMAILJS_TPL,{
+        to_email:em,
+        to_name:s.toName,
+        pet_name:s.petName,
+        ref_number:ref,
+        service:s.service,
+        urn:s.urn,
+        keepsake:s.keepsake,
+        fur_clipping:s.furClipping,
+        total:s.total,
+        return_method:s.returnMethod,
+        submitted_date:s.submittedDate,
+        office_phone:'(510) 505-8102',
+        office_email:'hello@thepawstribute.com'
+      });
+      console.log('Email sent successfully');
+    }catch(e){console.error('Email error:',e);}
     document.getElementById('ty-email-sec').style.display='none';
   }
   document.getElementById('ty-pet').textContent=gv('pet-name');
