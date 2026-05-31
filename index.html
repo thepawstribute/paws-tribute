@@ -46,9 +46,9 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .lcard-sub{font-size:14px;color:var(--text-muted)}
 
 /* ── FORM ── */
-.form-view{display:none;flex-direction:column;min-height:calc(100vh - 52px)}
+.form-view{display:none;flex-direction:column;min-height:calc(100vh - 52px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .form-view.active{display:flex}
-.form-shell{flex:1;display:flex;justify-content:center;padding:16px 16px 100px}
+.form-shell{flex:1;display:flex;justify-content:center;padding:16px 16px 120px;width:100%}
 .form-card{background:#fff;border-radius:20px;border:1px solid var(--pink-border);width:100%;max-width:540px;box-shadow:0 4px 24px rgba(196,104,122,.1)}
 .form-hdr{padding:14px 20px 12px;border-bottom:1px solid var(--pink-mid);background:var(--pink-light);border-radius:20px 20px 0 0}
 .back-btn{background:none;border:none;font-size:13px;font-weight:600;color:var(--pink);cursor:pointer;font-family:"DM Sans",sans-serif;padding:0;margin-bottom:8px;display:flex;align-items:center;gap:4px}
@@ -113,8 +113,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .slot.sel{border-color:var(--pink);background:var(--pink-light)}
 .slot-day{font-size:14px;font-weight:700;color:#111}
 .slot-time{font-size:12px;color:var(--text-muted);margin-top:2px}
-.sig-wrap{border:2px solid var(--border);border-radius:var(--rs);background:#fff;position:relative;margin-bottom:8px;overflow:hidden}
-.sig-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#bbb;pointer-events:none}
+.sig-wrap{border:2px solid var(--border);border-radius:var(--rs);background:#fff;position:relative;margin-bottom:8px;overflow:visible;display:block}
+.sig-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#bbb;pointer-events:none;z-index:1}
 .sig-clear{font-size:13px;color:var(--pink);background:none;border:none;cursor:pointer;font-family:"DM Sans",sans-serif;font-weight:600;padding:0}
 .legal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;font-size:13px;color:var(--text-muted);line-height:1.7;max-height:220px;overflow-y:auto}
 .sum-sec{margin-bottom:16px}
@@ -185,7 +185,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .back-to-client{font-size:13px;color:var(--text-hint);background:none;border:none;cursor:pointer;margin-top:20px;font-family:"DM Sans",sans-serif}
 
 /* ── STAFF APP ── */
-#screen-staff-app{display:none;flex-direction:column;height:100vh;overflow:hidden;background:var(--bg)}
+#screen-staff-app{display:none;flex-direction:column;height:100dvh;min-height:0;overflow:hidden;background:var(--bg);contain:strict}
 #screen-staff-app.active{display:flex}
 .app-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .app-logo{font-family:"DM Serif Display",serif;font-size:17px;color:var(--pink-deep)}
@@ -202,7 +202,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .date-label{flex:1;font-size:14px;font-weight:700;color:#111;text-align:center;cursor:pointer}
 .today-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:"DM Sans",sans-serif}
 .date-picker{position:absolute;opacity:0;width:1px;height:1px}
-.staff-view{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column;position:relative}
+.staff-view{display:none;flex:1;min-height:0;overflow:hidden;flex-direction:column;position:relative;max-height:100%}
 .staff-view.active{display:flex}
 .sched-legend{display:flex;gap:10px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
 .sched-legend::-webkit-scrollbar{display:none}
@@ -246,7 +246,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .week-nav{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .week-nav-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:13px;cursor:pointer;color:#111}
 .week-label{flex:1;font-size:13px;font-weight:600;color:#111;text-align:center}
-.avail-grid-scroll{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.avail-grid-scroll{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;display:block}
 .avail-inner{display:flex}
 .avail-tc{width:var(--avcol);flex-shrink:0;position:sticky;left:0;background:var(--bg);z-index:10}
 .avail-tr{height:44px;display:flex;align-items:center;border-bottom:1px solid var(--border)}
@@ -258,7 +258,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .avail-cell{height:44px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
 .avail-cell.available{background:#f0faf0;border-bottom:1px solid #d4edda}
 .avail-cell.unavailable{background:#d0cece;border-bottom:1px solid #b8b5b5}
-.tab-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px}
+.tab-content{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block}
 .orders-hdr{padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .orders-title{font-size:18px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
 .orders-date{font-size:13px;color:var(--muted);margin-top:2px}
@@ -668,8 +668,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       </div>
       <label class="fl">Sign below <span class="req">*</span></label>
       <div class="sig-wrap" id="sig-wrap" style="height:130px">
-        <canvas id="sig-canvas" style="display:block;width:100%;height:130px;cursor:crosshair;touch-action:none"></canvas>
         <div class="sig-hint" id="sig-hint">Sign here with your finger or mouse</div>
+        <canvas id="sig-canvas" style="display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;position:relative;z-index:2"></canvas>
       </div>
       <button class="sig-clear" onclick="clearSig()">Clear signature</button>
       <div class="ferr" id="e-sig" style="margin-bottom:14px">Please sign to continue.</div>
@@ -893,17 +893,17 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="otab" onclick="oTab('Ready for Collection',this)">🟣 Ready</div>
       <div class="otab" onclick="oTab('Completed',this)">🟢 Done</div>
     </div>
-    <div class="orders-scroll" id="orders-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
+    <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block"></div>
   </div>
 
   <!-- PRICING VIEW -->
-  <div class="staff-view" id="view-pricing" style="overflow:hidden">
-    <div class="tab-content" id="pricingContent" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px"></div>
+  <div class="staff-view" id="view-pricing">
+    <div id="pricingContent" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block"></div>
   </div>
 
   <!-- QUOTE CALC VIEW (admin only) -->
-  <div class="staff-view" id="view-calc" style="overflow:hidden">
-    <div class="tab-content" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px">
+  <div class="staff-view" id="view-calc">
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:4px">🚗 Quick Quote Calculator</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Use when clients call to ask about fees — before they fill out the form.</div>
@@ -942,8 +942,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- VA GUIDE VIEW -->
-  <div class="staff-view" id="view-guide" style="overflow:hidden">
-    <div class="tab-content" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px">
+  <div class="staff-view" id="view-guide">
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pink-deep);margin-bottom:4px">VA Script &amp; Guide</div>
         <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">Use when answering calls. Stay warm, speak slowly, never rush a grieving family. <em>Italic = for your eyes only.</em></div>
@@ -1073,7 +1073,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       </div>
       <button onclick="generatePayroll()" style="width:100%;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:var(--rs);font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Generate Payroll →</button>
     </div>
-    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px" id="payroll-results">
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block" id="payroll-results">
       <div style="text-align:center;font-size:14px;color:var(--muted);padding:32px 0">Select a date range and tap Generate.</div>
     </div>
   </div>
@@ -1371,7 +1371,7 @@ let sSvc='',sUrn='',sUrnEng='',sKs='none',sRet='',sSlot='',sPetType='',sWeight='
 let ksQty=1,overtimeAuth=0;
 let puFeeData=null,delFeeData=null;
 let sigCtx=null,sigDrawn=false,sigDrawing=false,sigLX=0,sigLY=0;
-let squarePaid=false;
+
 let collOrderId=null,collSigCtx=null,collSigDrawn=false,collSigDrawing=false,collSigLX=0,collSigLY=0;
 
 // ═══════════════════════════════════════
@@ -1426,7 +1426,7 @@ function showLanding(){
 function startForm(type){
   formType=type;fPage=1;
   sSvc='';sUrn='';sUrnEng='';sKs='none';sRet='';sSlot='';sPetType='';sWeight='';
-  ksQty=1;overtimeAuth=0;puFeeData=null;delFeeData=null;squarePaid=false;
+  ksQty=1;overtimeAuth=0;puFeeData=null;delFeeData=null;
   document.getElementById('client-landing').style.display='none';
   document.getElementById('form-view').classList.add('active');
   document.getElementById('ty-view').classList.remove('active');
@@ -1457,8 +1457,7 @@ function startForm(type){
   document.getElementById('pu-quote-box').style.display='none';
   document.getElementById('fur-sec').style.display='block';
   document.getElementById('private-fur-note').style.display='none';
-  document.getElementById('paid-badge').style.display='none';
-  document.getElementById('pay-btn').style.display='block';
+  // payment handled by Cash/Card/Pending toggle
   formStaff=null;paymentMethod='Pending';
   document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(el=>el.classList.remove('sel'));
   // Reset staff pill selection (pills already rendered on init)
@@ -1727,34 +1726,7 @@ function buildSummary(){
 // ═══════════════════════════════════════
 // SQUARE PAYMENT
 // ═══════════════════════════════════════
-async function openSquarePayment(){
-  const total=calcTotal();if(total<=0){showToast('No amount to charge');return;}
-  const btn=document.getElementById('pay-btn');btn.disabled=true;btn.textContent='Generating link…';
-  try{
-    const body={
-      idempotency_key:Date.now()+Math.random().toString(36).slice(2),
-      quick_pay:{name:'The Paws Tribute — Services',price_money:{amount:total*100,currency:'USD'},location_id:SQUARE_LOCATION_ID},
-      pre_populated_data:{buyer_email:gv('email-intake')||undefined,buyer_address:{first_name:gv('fn'),last_name:gv('ln')}}
-    };
-    const resp=await fetch('https://connect.squareup.com/v2/online-checkout/payment-links',{
-      method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SQUARE_ACCESS_TOKEN,'Square-Version':'2024-01-18'},
-      body:JSON.stringify(body)
-    });
-    const data=await resp.json();
-    if(data.payment_link?.url){
-      window.open(data.payment_link.url,'_blank');
-      btn.disabled=false;btn.textContent='Pay with Square →';
-      const markBtn=document.createElement('button');
-      markBtn.className='btn-next';markBtn.style.cssText='width:100%;margin-top:8px;background:#4caf50;border:none;border-radius:var(--rs);padding:13px;font-size:16px;font-weight:700;color:#fff;cursor:pointer;font-family:"DM Sans",sans-serif';
-      markBtn.textContent="✅ I've completed payment";
-      markBtn.onclick=()=>{squarePaid=true;document.getElementById('paid-badge').style.display='block';markBtn.remove();btn.style.display='none';};
-      document.querySelector('.square-section').appendChild(markBtn);
-    } else throw new Error(JSON.stringify(data.errors||data));
-  }catch(e){
-    console.error('Square:',e);showToast('Could not generate link — pay in person.');
-    btn.disabled=false;btn.textContent='Pay with Square →';
-  }
-}
+// Square payment removed — payment taken in person via Square reader
 
 // ═══════════════════════════════════════
 // FORM SUBMIT
