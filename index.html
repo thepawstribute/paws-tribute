@@ -263,7 +263,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .orders-title{font-size:16px;font-weight:700;color:#111;font-family:"DM Serif Display",serif}
 .orders-date{font-size:13px;color:var(--muted);margin-top:2px}
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center;transition:all .15s}
 .stat-n{font-size:18px;font-weight:700;color:#111}
 .stat-l{font-size:10px;color:var(--muted);margin-top:1px;font-weight:500}
 .otabs{display:flex;overflow-x:auto;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -2156,7 +2156,13 @@ async function loadOrders(){
   orders=data||[];
   const all=orders.length,nw=orders.filter(o=>o.status==='New / Received').length,pr=orders.filter(o=>o.status==='In Progress').length,rd=orders.filter(o=>o.status==='Ready for Collection').length,dn=orders.filter(o=>o.status==='Completed').length;
   const rev=orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+(o.total_amount||0),0);
-  document.getElementById('stats-row').innerHTML=`<div class="stat-box"><div class="stat-n">${all}</div><div class="stat-l">All</div></div><div class="stat-box"><div class="stat-n" style="color:#856404">${nw}</div><div class="stat-l">🟡 New</div></div><div class="stat-box"><div class="stat-n" style="color:#1565c0">${pr}</div><div class="stat-l">🔵 Progress</div></div><div class="stat-box"><div class="stat-n" style="color:#6b3a8c">${rd}</div><div class="stat-l">🟣 Ready</div></div><div class="stat-box"><div class="stat-n" style="color:#2e7d32">${dn}</div><div class="stat-l">🟢 Done</div></div><div class="stat-box"><div class="stat-n" style="color:var(--pink-deep);font-size:16px">$${rev.toLocaleString()}</div><div class="stat-l">💰 Revenue</div></div>`;
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-box" onclick="oTabDirect('all')" style="cursor:pointer"><div class="stat-n">${all}</div><div class="stat-l">All</div></div>
+    <div class="stat-box" onclick="oTabDirect('New / Received')" style="cursor:pointer"><div class="stat-n" style="color:#856404">${nw}</div><div class="stat-l">🟡 New</div></div>
+    <div class="stat-box" onclick="oTabDirect('In Progress')" style="cursor:pointer"><div class="stat-n" style="color:#1565c0">${pr}</div><div class="stat-l">🔵 Progress</div></div>
+    <div class="stat-box" onclick="oTabDirect('Ready for Collection')" style="cursor:pointer"><div class="stat-n" style="color:#6b3a8c">${rd}</div><div class="stat-l">🟣 Ready</div></div>
+    <div class="stat-box" onclick="oTabDirect('Completed')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${dn}</div><div class="stat-l">🟢 Done</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:var(--pink-deep);font-size:14px">$${rev.toLocaleString()}</div><div class="stat-l">💰 Revenue</div></div>`;
 }
 function renderOrders(){
   const pending=orders.filter(o=>o.status==='New / Received');
@@ -2193,7 +2199,16 @@ function renderOrders(){
     </div>`;
   }).join('');
 }
-function oTab(f,el){curOFilter=f;document.querySelectorAll('.otab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderOrders();}
+function oTab(f,el){curOFilter=f;document.querySelectorAll('.otab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');renderOrders();setTimeout(fixOrdersScroll,50);}
+function oTabDirect(f){
+  curOFilter=f;
+  // Highlight the active stat box
+  document.querySelectorAll('#stats-row .stat-box').forEach(b=>b.style.outline='');
+  const idx={all:0,'New / Received':1,'In Progress':2,'Ready for Collection':3,'Completed':4}[f];
+  const boxes=document.querySelectorAll('#stats-row .stat-box');
+  if(boxes[idx])boxes[idx].style.outline='2px solid var(--accent)';
+  renderOrders();setTimeout(fixOrdersScroll,50);
+}
 function openOrderDetail(id,showSched){
   const o=orders.find(x=>x.id==id);if(!o)return;
   openOrderId=id;
