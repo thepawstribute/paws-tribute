@@ -270,7 +270,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .otabs::-webkit-scrollbar{display:none}
 .otab{padding:10px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;font-family:"DM Sans",sans-serif;flex-shrink:0}
 .otab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.orders-scroll{flex:1;overflow-y:auto}
+.orders-scroll{flex:1;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
 .order-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .order-row:active{background:var(--pink-light)}
 .obadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
@@ -876,13 +876,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
 
   <!-- ORDERS VIEW (admin only) -->
-  <div class="staff-view" id="view-orders" style="position:absolute;left:0;right:0;bottom:0;flex-direction:column;overflow:hidden">
+  <div class="staff-view" id="view-orders" style="position:absolute;left:0;right:0;bottom:0;flex-direction:column;overflow:hidden;display:flex">
     <div class="orders-hdr">
       <div class="orders-title">Order Tracker</div>
       <div class="orders-date" id="orders-date"></div>
     </div>
     <div class="stats-row" id="stats-row"></div>
-    <div id="pending-section" style="display:none">
+    <div id="pending-section" style="display:none;flex-shrink:0;max-height:200px;overflow-y:auto">
       <div class="pending-banner"><span style="font-size:16px">🔔</span><div class="pending-text">New client intakes — tap to review &amp; schedule</div></div>
       <div id="pending-list"></div>
     </div>
@@ -893,7 +893,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="otab" onclick="oTab('Ready for Collection',this)">🟣 Ready</div>
       <div class="otab" onclick="oTab('Completed',this)">🟢 Done</div>
     </div>
-    <div class="orders-scroll" id="orders-scroll" style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0"></div>
+    <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
   </div>
 
   <!-- PRICING VIEW -->
