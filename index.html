@@ -235,7 +235,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .job-time-s{font-size:9px;color:#666;margin-top:1px}
 .job-paid{display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;margin-top:2px}
 .job-paid.paid{background:#e8f5e9;color:#2e7d32}.job-paid.unpaid{background:#fff3e0;color:#e65100}
-.unavail-block{position:absolute;left:0;right:0;background:rgba(180,170,170,0.35);z-index:5;border-bottom:1px solid rgba(150,140,140,0.2)}
+.unavail-block{position:absolute;left:0;right:0;background:rgba(140,130,130,0.55);z-index:5;border-bottom:1px solid rgba(120,110,110,0.3)}
 .now-line{position:absolute;left:0;right:0;height:2px;background:#f44336;z-index:15}
 .now-line::before{content:"";position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:#f44336}
 .avail-hint{padding:10px 16px;font-size:13px;color:var(--muted);background:var(--surface);border-bottom:1px solid var(--border);font-weight:500}
@@ -667,9 +667,9 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         </div>
       </div>
       <label class="fl">Sign below <span class="req">*</span></label>
-      <div class="sig-wrap" id="sig-wrap" style="height:130px">
-        <div class="sig-hint" id="sig-hint">Sign here with your finger or mouse</div>
-        <canvas id="sig-canvas" style="display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;position:relative;z-index:2"></canvas>
+      <div id="sig-wrap" style="border:2px solid var(--border);border-radius:var(--rs);background:#fff;height:140px;position:relative;cursor:crosshair;touch-action:none;-webkit-user-select:none;user-select:none;margin-bottom:8px">
+        <svg id="sig-svg" style="position:absolute;inset:0;width:100%;height:100%;display:block" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div id="sig-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#bbb;pointer-events:none">Sign here with your finger or mouse</div>
       </div>
       <button class="sig-clear" onclick="clearSig()">Clear signature</button>
       <div class="ferr" id="e-sig" style="margin-bottom:14px">Please sign to continue.</div>
@@ -946,6 +946,14 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pink-deep);margin-bottom:4px">VA Script &amp; Guide</div>
+        <div style="background:#e8f5e9;border:2px solid #4caf50;border-radius:12px;padding:14px;margin-bottom:20px">
+          <div style="font-size:14px;font-weight:700;color:#2e7d32;margin-bottom:8px">📬 Calling to say ashes are ready</div>
+          <div style="font-size:14px;color:#111;line-height:1.8">"Hi [Name], this is [Your Name] from The Paws Tribute. I'm calling about [Pet Name]"<br>"[His/Her] ashes are ready — just wanted to let you know"<br>"Whenever you feel ready, we'd love to set up a time for you to come in"<br>"There's no rush at all — just whenever you're ready"</div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid #a5d6a7">
+            <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:4px">📱 Text template</div>
+            <div style="font-size:13px;color:#111;background:#fff;border-radius:8px;padding:10px;line-height:1.7">Hi [Name], just wanted to let you know [Pet Name]'s ashes are ready. Whenever you feel ready, give us a call — (510) 505-8102. No rush at all.</div>
+          </div>
+        </div>
         <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">Use when answering calls. Stay warm, speak slowly, never rush a grieving family. <em>Italic = for your eyes only.</em></div>
         <div class="guide-sec">
           <div class="guide-title" style="background:var(--pink-light);padding:10px 12px;border-radius:8px;border:none;color:var(--pink-deep)">💧 We do Water Cremation only — no flame cremation</div>
@@ -1346,7 +1354,7 @@ const DEL_FEES_MILES=[
 // ═══════════════════════════════════════
 // SCHEDULER CONFIG
 // ═══════════════════════════════════════
-const H_START=7,H_END=24,H_PX=64;
+const H_START=7,H_END=25,H_PX=64;
 const TYPE_CFG={
   pickup:{label:'Home Pickup',icon:'🚗',color:'var(--pickup)',bg:'var(--pickup-bg)',dur:60},
   dropoff:{label:'Office Drop-off',icon:'🏢',color:'var(--dropoff)',bg:'var(--dropoff-bg)',dur:15},
@@ -1636,36 +1644,57 @@ const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getPuFee()+getDelFe
 // ═══════════════════════════════════════
 // SIGNATURE
 // ═══════════════════════════════════════
+// ── SVG SIGNATURE — no canvas, no width measurement needed ──────────────────
+let sigPaths=[],sigCurrentPath=null;
 function setupSig(){
-  // Retry until we get a real width (handles mobile scroll containers)
-  let attempts=0;
-  function trySetup(){
-    const wrap=document.getElementById('sig-wrap');
-    if(!wrap)return;
-    const w=wrap.getBoundingClientRect().width;
-    if(w>10){_doSetupSig(Math.floor(w));}
-    else if(attempts++<20){setTimeout(trySetup,100);}
+  sigPaths=[];sigCurrentPath=null;sigDrawn=false;
+  const svg=document.getElementById('sig-svg');
+  const wrap=document.getElementById('sig-wrap');
+  if(!svg||!wrap)return;
+  svg.innerHTML='';
+  document.getElementById('sig-hint').style.display='flex';
+  function getXY(e){
+    const r=wrap.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    return{x:src.clientX-r.left,y:src.clientY-r.top};
   }
-  setTimeout(trySetup,200);
-}
-function _doSetupSig(fw){
-  const wrap=document.getElementById('sig-wrap'),oldC=document.getElementById('sig-canvas');
-  const c=document.createElement('canvas');c.id='sig-canvas';
-  c.style.cssText='display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent';
-  if(oldC)wrap.replaceChild(c,oldC);else wrap.appendChild(c);
-  c.width=fw;c.height=130;
-  sigCtx=c.getContext('2d');sigCtx.strokeStyle='#7a3344';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';
-  sigDrawn=false;document.getElementById('sig-hint').style.display='flex';
-  const pos=e=>{const r=c.getBoundingClientRect(),s=e.touches?e.touches[0]:e;return[s.clientX-r.left,s.clientY-r.top]};
-  c.addEventListener('mousedown',e=>{sigDrawing=true;[sigLX,sigLY]=pos(e)});
-  c.addEventListener('mousemove',e=>{if(!sigDrawing)return;const[x,y]=pos(e);sigCtx.beginPath();sigCtx.moveTo(sigLX,sigLY);sigCtx.lineTo(x,y);sigCtx.stroke();sigLX=x;sigLY=y;markSig()});
-  c.addEventListener('mouseup',()=>sigDrawing=false);c.addEventListener('mouseleave',()=>sigDrawing=false);
-  c.addEventListener('touchstart',e=>{e.preventDefault();sigDrawing=true;[sigLX,sigLY]=pos(e)},{passive:false});
-  c.addEventListener('touchmove',e=>{e.preventDefault();if(!sigDrawing)return;const[x,y]=pos(e);sigCtx.beginPath();sigCtx.moveTo(sigLX,sigLY);sigCtx.lineTo(x,y);sigCtx.stroke();sigLX=x;sigLY=y;markSig()},{passive:false});
-  c.addEventListener('touchend',()=>sigDrawing=false);
+  function startStroke(e){
+    e.preventDefault();
+    const{x,y}=getXY(e);
+    sigCurrentPath=document.createElementNS('http://www.w3.org/2000/svg','path');
+    sigCurrentPath.setAttribute('stroke','#7a3344');
+    sigCurrentPath.setAttribute('stroke-width','2.5');
+    sigCurrentPath.setAttribute('fill','none');
+    sigCurrentPath.setAttribute('stroke-linecap','round');
+    sigCurrentPath.setAttribute('stroke-linejoin','round');
+    sigCurrentPath.setAttribute('d',`M${x},${y}`);
+    svg.appendChild(sigCurrentPath);
+    sigDrawing=true;
+    markSig();
+  }
+  function moveStroke(e){
+    e.preventDefault();
+    if(!sigDrawing||!sigCurrentPath)return;
+    const{x,y}=getXY(e);
+    sigCurrentPath.setAttribute('d',sigCurrentPath.getAttribute('d')+` L${x},${y}`);
+  }
+  function endStroke(){sigDrawing=false;sigCurrentPath=null;}
+  wrap.addEventListener('mousedown',startStroke);
+  wrap.addEventListener('mousemove',moveStroke);
+  wrap.addEventListener('mouseup',endStroke);
+  wrap.addEventListener('mouseleave',endStroke);
+  wrap.addEventListener('touchstart',startStroke,{passive:false});
+  wrap.addEventListener('touchmove',moveStroke,{passive:false});
+  wrap.addEventListener('touchend',endStroke);
 }
 function markSig(){if(!sigDrawn){sigDrawn=true;document.getElementById('sig-hint').style.display='none';document.getElementById('e-sig').classList.remove('show');}}
-function clearSig(){const c=document.getElementById('sig-canvas');if(c&&sigCtx)sigCtx.clearRect(0,0,c.width,c.height);sigDrawn=false;document.getElementById('sig-hint').style.display='flex';}
+function clearSig(){const svg=document.getElementById('sig-svg');if(svg)svg.innerHTML='';sigDrawn=false;sigCurrentPath=null;document.getElementById('sig-hint').style.display='flex';}
+function getSigDataUrl(){
+  const svg=document.getElementById('sig-svg');
+  if(!svg||!sigDrawn)return'';
+  const s=new XMLSerializer().serializeToString(svg);
+  return'data:image/svg+xml;base64,'+btoa(s);
+}
 function setupCollSig(){
   let attempts=0;
   function trySetup(){
@@ -2187,18 +2216,7 @@ function renderPricing(){
   <div style="margin-bottom:24px">
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add-ons</div>
     ${[{n:'Wooden Paw / Nose Print — Small',p:'$70'},{n:'Wooden Paw / Nose Print — Large',p:'$80'},{n:'Fur Clipping (if not Private)',p:'$27'}].map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-radius:10px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;font-weight:500;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
-  <div style="margin-bottom:24px">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Home Pickup Fees</div>
-    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:400px">
-      <thead><tr style="background:#faf2e8"><th style="padding:8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Zone</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Under 50lb</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">50–80lb</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Over 80lb</th></tr></thead>
-      <tbody>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">Fremont (≤10mi)</td><td style="padding:8px;text-align:center">$85 <span style="color:var(--muted);font-size:11px">(drv $62)</span></td><td style="padding:8px;text-align:center">$108 <span style="color:var(--muted);font-size:11px">(drv $78)</span></td><td style="padding:8px;text-align:center">$148 <span style="color:var(--muted);font-size:11px">(drv $108)</span></td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">Milpitas (≤18mi)</td><td style="padding:8px;text-align:center">$98 <span style="color:var(--muted);font-size:11px">(drv $72)</span></td><td style="padding:8px;text-align:center">$128 <span style="color:var(--muted);font-size:11px">(drv $94)</span></td><td style="padding:8px;text-align:center">$150 <span style="color:var(--muted);font-size:11px">(drv $110)</span></td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">San Jose (≤30mi)</td><td style="padding:8px;text-align:center">$122 <span style="color:var(--muted);font-size:11px">(drv $90)</span></td><td style="padding:8px;text-align:center">$160 <span style="color:var(--muted);font-size:11px">(drv $118)</span></td><td style="padding:8px;text-align:center">$172 <span style="color:var(--muted);font-size:11px">(drv $126)</span></td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">Peninsula (≤40mi)</td><td style="padding:8px;text-align:center">$140 <span style="color:var(--muted);font-size:11px">(drv $103)</span></td><td style="padding:8px;text-align:center">$185 <span style="color:var(--muted);font-size:11px">(drv $136)</span></td><td style="padding:8px;text-align:center">$172 <span style="color:var(--muted);font-size:11px">(drv $126)</span></td></tr>
-        <tr><td style="padding:8px;font-weight:600">SF (≤55mi)</td><td style="padding:8px;text-align:center">$195 <span style="color:var(--muted);font-size:11px">(drv $144)</span></td><td style="padding:8px;text-align:center">$235 <span style="color:var(--muted);font-size:11px">(drv $172)</span></td><td style="padding:8px;text-align:center">$220 <span style="color:var(--muted);font-size:11px">(drv $162)</span></td></tr>
-      </tbody></table></div>
-  </div>
+
   </div>
   <div style="margin-bottom:24px">
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cremation Partners</div>
