@@ -826,7 +826,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     <div class="tab hidden" id="tab-calc" onclick="switchTab('calc')">🚗 Quote</div>
     <div class="tab" id="tab-guide" onclick="switchTab('guide')">📖 VA Guide</div>
     <div class="tab hidden" id="tab-export" onclick="openExportModal()">⬇ Export</div>
-    <div class="tab hidden" id="tab-payroll" onclick="switchTab('payroll')">💰 Payroll</div>
+
   </div>
   <div class="date-nav" id="dateNav">
     <button class="date-nav-btn" onclick="changeDay(-1)">‹</button>
@@ -845,14 +845,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="leg-item"><div class="leg-dot" style="background:var(--ceremony)"></div>Ceremony</div>
       <div class="leg-item"><div class="leg-dot" style="background:#2e7d32"></div>AMS</div>
     </div>
-    <div class="grid-scroll" id="gridScroll">
-      <div style="display:inline-flex;min-width:100%;position:relative">
-        <div class="time-col" id="timeCol" style="position:sticky;left:0;z-index:20;background:var(--bg);flex-shrink:0"></div>
-        <div style="flex:1;min-width:0">
-          <div class="sched-staff-hdr" id="schedStaffHdr" style="position:sticky;top:0;z-index:15;display:flex;background:var(--surface);border-bottom:1px solid var(--border)"></div>
-          <div style="display:flex;position:relative"><div class="staff-cols" id="staffCols" style="display:flex"></div></div>
-        </div>
-      </div>
+    <div id="gridScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative">
+      <table id="gridTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%">
+        <thead id="gridHead" style="position:sticky;top:0;z-index:20;background:var(--surface)"></thead>
+        <tbody id="gridBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -870,14 +867,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
     </div>
     <div class="day-pills" id="dayPills"></div>
-    <div class="avail-grid-scroll">
-      <div style="display:inline-flex;min-width:100%">
-        <div class="avail-tc" id="availTC" style="position:sticky;left:0;z-index:10;background:var(--bg);flex-shrink:0"></div>
-        <div style="flex:1;min-width:0">
-          <div class="avail-staff-hdr" id="availStaffHdr" style="position:sticky;top:0;z-index:8;display:flex;background:var(--surface);border-bottom:1px solid var(--border)"></div>
-          <div class="avail-scols" id="availScols" style="display:flex"></div>
-        </div>
-      </div>
+    <div id="availScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch">
+      <table id="availTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%">
+        <thead id="availHead" style="position:sticky;top:0;z-index:10;background:var(--surface)"></thead>
+        <tbody id="availBody"></tbody>
+      </table>
     </div>
   </div>
 
@@ -1331,12 +1325,14 @@ const SVC_PRICE={
   private:{under5:450,'5to20':495,'21to50':550,'51to100':580,over100:620}
 };
 const WT_LABEL={under5:'Under 5 lbs','5to20':'5–20 lbs','21to50':'21–50 lbs','51to100':'51–100 lbs',over100:'Over 100 lbs'};
+// Home pickup fees by zone and weight (two-way trip, more responsibility)
+// under50 = under 50lb, over50 = 50-80lb, over80 = over 80lb
 const PU_FEES={
-  fremont:{under50:{c:55,d:40},over50:{c:85,d:60},over80:{c:120,d:90}},
-  milpitas:{under50:{c:70,d:50},over50:{c:100,d:70},over80:{c:140,d:105}},
-  sanjose:{under50:{c:95,d:65},over50:{c:130,d:90},over80:{c:180,d:135}},
-  peninsula:{under50:{c:120,d:85},over50:{c:165,d:120},over80:{c:220,d:165}},
-  sf:{under50:{c:160,d:115},over50:{c:220,d:160},over80:{c:280,d:210}}
+  fremont:  {under50:{c:65, d:48},  over50:{c:90, d:66},  over80:{c:130,d:96}},
+  milpitas: {under50:{c:80, d:58},  over50:{c:110,d:80},  over80:{c:155,d:114}},
+  sanjose:  {under50:{c:105,d:76},  over50:{c:140,d:102}, over80:{c:195,d:142}},
+  peninsula:{under50:{c:135,d:98},  over50:{c:180,d:130}, over80:{c:240,d:175}},
+  sf:       {under50:{c:175,d:128}, over50:{c:235,d:172}, over80:{c:300,d:220}}
 };
 // Ashes delivery fees — miles based (driver gets stated amount, you keep the rest)
 const DEL_FEES_MILES=[
@@ -1642,19 +1638,20 @@ const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getPuFee()+getDelFe
 // SIGNATURE
 // ═══════════════════════════════════════
 function setupSig(){
-  setTimeout(()=>{
+  // Use requestAnimationFrame to ensure DOM is painted before measuring
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
     const wrap=document.getElementById('sig-wrap');
     if(!wrap)return;
-    // Force layout recalc
-    const w=wrap.getBoundingClientRect().width||wrap.offsetWidth||320;
+    const w=wrap.offsetWidth||wrap.getBoundingClientRect().width||320;
     _doSetupSig(w);
-  },150);
+  }));
 }
 function _doSetupSig(forcedWidth){
   const wrap=document.getElementById('sig-wrap'),old=document.getElementById('sig-canvas');
-  const c=document.createElement('canvas');c.id='sig-canvas';c.style.cssText='display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none';
+  const c=document.createElement('canvas');c.id='sig-canvas';
+  c.style.cssText='display:block;width:100%;height:130px;cursor:crosshair;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent';
   wrap.replaceChild(c,old);
-  c.width=forcedWidth||wrap.getBoundingClientRect().width||wrap.offsetWidth||320;
+  c.width=forcedWidth||320;
   c.height=130;
   sigCtx=c.getContext('2d');sigCtx.strokeStyle='#7a3344';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';
   sigDrawn=false;document.getElementById('sig-hint').style.display='flex';
@@ -1875,7 +1872,7 @@ async function showApp(){
   document.getElementById('tab-orders').classList.toggle('hidden',!isAdmin);
   document.getElementById('tab-calc').classList.toggle('hidden',!isAdmin);
   document.getElementById('tab-export').classList.toggle('hidden',!isAdmin);
-  document.getElementById('tab-payroll').classList.toggle('hidden',!isAdmin);
+  
   renderStaffPills('staffPills');renderStaffPills('editStaffPills');renderStaffPills('schedStaffPills');
   renderDateLabel();renderWeekLabel();
   await loadJobs();await loadAvailability();
@@ -1919,53 +1916,104 @@ function subscribeRealtime(){
 function renderGrid(){
   if(!currentUser)return;
   const H=H_END-H_START,ds=fmtDateKey(curDate);
-  const vis=currentUser.role==='admin'?staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name):staffList.filter(s=>s.name===currentUser.name).map(s=>s.name);
-  const hdr=document.getElementById('schedStaffHdr');hdr.innerHTML='';
-  vis.forEach(n=>{const c=document.createElement('div');c.className='staff-cell';c.innerHTML=`<div class="staff-av">${n[0]}</div><div class="staff-nm">${n}</div>`;hdr.appendChild(c);});
-  const tc=document.getElementById('timeCol');tc.innerHTML='';
-  for(let h=H_START;h<H_END;h++){const s=document.createElement('div');s.className='time-slot';s.innerHTML=`<span class="time-label">${fmtHour(h)}</span>`;tc.appendChild(s);}
-  const sc=document.getElementById('staffCols');sc.innerHTML='';
+  const vis=currentUser.role==='admin'
+    ?staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name)
+    :staffList.filter(s=>s.name===currentUser.name).map(s=>s.name);
+  const TW=52,SW=Math.max(120,Math.floor((window.innerWidth-TW)/(vis.length||1)));
+  const thead=document.getElementById('gridHead');
+  const tbody=document.getElementById('gridBody');
+  // Header row
+  let hHTML=`<tr><th style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;z-index:25;background:var(--surface);border-bottom:2px solid var(--border);border-right:1px solid var(--border)"></th>`;
+  vis.forEach(n=>{hHTML+=`<th style="width:${SW}px;min-width:${SW}px;padding:8px 4px;text-align:center;border-bottom:2px solid var(--border);border-right:1px solid var(--border);font-weight:400;background:var(--surface)"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 3px">${n[0]}</div><div style="font-size:12px;font-weight:600;color:#111">${n}</div></th>`;});
+  hHTML+='</tr>';
+  thead.innerHTML=hHTML;
+  // Pre-compute jobs per staff
+  const staffJobs={};
   vis.forEach(n=>{
-    const col=document.createElement('div');col.className='staff-col';col.style.height=`${H*H_PX}px`;
-    for(let h=0;h<H;h++){const r=document.createElement('div');r.style.cssText=`position:absolute;left:0;right:0;top:${h*H_PX}px;height:${H_PX}px;border-bottom:1px solid var(--border)`;const half=document.createElement('div');half.style.cssText='position:absolute;left:0;right:0;top:50%;border-bottom:1px dashed var(--border);opacity:.4';r.appendChild(half);col.appendChild(r);}
-    for(let h=H_START;h<H_END;h++){if(availability[`${n}_${ds}_${h}`]===false){const b=document.createElement('div');b.className='unavail-block';b.style.top=`${(h-H_START)*H_PX}px`;b.style.height=`${H_PX}px`;col.appendChild(b);}}
     const sjobs=jobs.filter(j=>j.staff_name===n).sort((a,b)=>a.job_time.localeCompare(b.job_time));
     const subs=[];
     sjobs.forEach(job=>{const st=t2m(job.job_time.slice(0,5)),en=st+job.duration_mins;let placed=false;for(let i=0;i<subs.length;i++){if(!subs[i].some(s=>st<s.e&&en>s.s)){subs[i].push({s:st,e:en,job});placed=true;break;}}if(!placed)subs.push([{s:st,e:en,job}]);});
-    const tot=subs.length||1;
-    subs.forEach((sub,si)=>sub.forEach(({job})=>{
-      const top=m2px(t2m(job.job_time.slice(0,5))-H_START*60),ht=Math.max(m2px(job.duration_mins),20);
-      const card=document.createElement('div');card.className=`job-card ${job.type}`;const pct=100/tot;
-      card.style.cssText=`top:${top}px;height:${ht}px;left:calc(${si*pct}% + 2px);width:calc(${pct}% - 4px);right:auto`;
-      card.onclick=()=>currentUser.role==='admin'?openEditModal(job):openViewModal(job);
-      const big=ht>=44,mid=ht>=24;
-      card.innerHTML=`${big?`<div class="job-type-label">${TYPE_CFG[job.type]?.label||job.type}</div>`:''}${mid?`<div class="job-owner">${job.owner_name.split(' ')[0]}</div>`:''}${big&&job.pet_name?`<div class="job-pet">${job.pet_name}${job.pet_breed?' · '+job.pet_breed:''}</div>`:''}${big?`<div class="job-time-s">${job.job_time.slice(0,5)} · ${job.duration_mins}m</div>`:''}<span class="job-paid ${job.paid?'paid':'unpaid'}">${job.paid?'Paid':'Unpaid'}</span>`;
-      col.appendChild(card);
-    }));
-    sc.appendChild(col);
+    staffJobs[n]=subs;
   });
-  const now=new Date();if(now.toDateString()===curDate.toDateString()){const nm=now.getHours()*60+now.getMinutes()-H_START*60;if(nm>=0&&nm<=H*60){const l=document.createElement('div');l.className='now-line';l.style.top=`${m2px(nm)}px`;sc.appendChild(l);}}
-  document.getElementById('gridScroll').scrollTop=m2px(60);
+  // Body rows — one per hour
+  let bHTML='';
+  const now=new Date();const isToday=now.toDateString()===curDate.toDateString();
+  const nowMins=now.getHours()*60+now.getMinutes();
+  for(let h=H_START;h<H_END;h++){
+    const rowTop=(h-H_START)*H_PX;
+    bHTML+=`<tr style="height:${H_PX}px">`;
+    // Time cell
+    const isNowRow=isToday&&nowMins>=h*60&&nowMins<(h+1)*60;
+    bHTML+=`<td style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:top;padding-top:4px"><span style="font-size:11px;font-weight:500;color:var(--muted);padding-left:6px">${fmtHour(h)}</span>${isNowRow?'<div style="position:absolute;left:0;right:0;height:2px;background:#f44336;z-index:5"></div>':''}</td>`;
+    vis.forEach(n=>{
+      const isUnavail=availability[`${n}_${ds}_${h}`]===false;
+      const bg=isUnavail?'background:rgba(180,170,170,0.4);':'';
+      bHTML+=`<td style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);position:relative;vertical-align:top;${bg}">`;
+      // Draw job cards that START in this hour
+      staffJobs[n].forEach((sub,si)=>sub.forEach(({s:st,e:en,job})=>{
+        if(Math.floor(st/60)===h){
+          const topOff=(st%60/60)*H_PX;
+          const ht=Math.max(m2px(job.duration_mins),20);
+          const tot=staffJobs[n].length||1;const pct=100/tot;
+          const cfg=TYPE_CFG[job.type]||{};
+          const big=ht>=44,mid=ht>=24;
+          bHTML+=`<div onclick="${currentUser.role==='admin'?`openEditModal(jobs.find(j=>j.id==='${job.id}'))`:`openViewModal(jobs.find(j=>j.id==='${job.id}'))`}" style="position:absolute;top:${topOff}px;left:2px;right:2px;height:${ht}px;border-radius:6px;padding:3px 5px;cursor:pointer;z-index:10;overflow:hidden;border-left:3px solid ${cfg.color||'#ccc'};background:${cfg.bg||'#f5f5f5'};box-shadow:0 1px 3px rgba(0,0,0,.1)">
+            ${big?`<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:${cfg.color||'#333'}">${cfg.label||job.type}</div>`:''}
+            ${mid?`<div style="font-size:11px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.owner_name.split(' ')[0]}</div>`:''}
+            ${big&&job.pet_name?`<div style="font-size:10px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.pet_name}</div>`:''}
+            <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:${job.paid?'#e8f5e9':'#fff3e0'};color:${job.paid?'#2e7d32':'#e65100'}">${job.paid?'Paid':'Unpaid'}</span>
+          </div>`;
+        }
+      }));
+      bHTML+='</td>';
+    });
+    bHTML+='</tr>';
+  }
+  tbody.innerHTML=bHTML;
+  // Scroll to 8am
+  document.getElementById('gridScroll').scrollTop=H_PX;
 }
 function renderAvailability(){
   if(!currentUser)return;renderWeekLabel();const wk=getWeekDates(curWeekStart);
-  document.getElementById('availHint').textContent=currentUser.role==='admin'?'Viewing team availability — staff update their own hours':'Tap any hour to toggle your availability';
+  document.getElementById('availHint').textContent=currentUser.role==='admin'?'Admin view — tap to toggle any hour':'Tap an hour to mark yourself unavailable (grey) or available (pink)';
   const pills=document.getElementById('dayPills');pills.innerHTML='';
   ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((d,i)=>{const p=document.createElement('button');p.className='day-pill'+(i===curAvailDay?' active':'');p.textContent=`${d} ${wk[i].getDate()}`;p.onclick=()=>{curAvailDay=i;renderAvailability();};pills.appendChild(p);});
   const sd=wk[curAvailDay],ds=fmtDateKey(sd);
-  const tc=document.getElementById('availTC');tc.innerHTML='';
-  for(let h=H_START;h<H_END;h++){const r=document.createElement('div');r.className='avail-tr';r.innerHTML=`<span class="avail-tt">${fmtHour(h)}</span>`;tc.appendChild(r);}
-  const vis=currentUser.role==='admin'?staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name):[currentUser.name];
-  const shdr=document.getElementById('availStaffHdr');shdr.innerHTML='';
-  vis.forEach(n=>{const c=document.createElement('div');c.className='avail-sname';c.innerHTML=`<div class="staff-av" style="margin:0 auto 3px">${n[0]}</div><div class="staff-nm">${n}</div>`;shdr.appendChild(c);});
-  const scols=document.getElementById('availScols');scols.innerHTML='';
-  vis.forEach(n=>{
-    const col=document.createElement('div');col.className='avail-scol';
-    for(let h=H_START;h<H_END;h++){const key=`${n}_${ds}_${h}`;const av=availability[key]!==false;const cell=document.createElement('div');cell.className=`avail-cell ${av?'available':'unavailable'}`;const canEdit=currentUser.role==='admin'||currentUser.name===n;if(canEdit)cell.onclick=()=>toggleAvail(n,ds,h,cell);col.appendChild(cell);}
-    scols.appendChild(col);
-  });
+  const vis=currentUser.role==='admin'
+    ?staffList.filter(s=>s.role==='staff').sort((a,b)=>{const oa=STAFF_ORDER.indexOf(a.name),ob=STAFF_ORDER.indexOf(b.name);return(oa<0?99:oa)-(ob<0?99:ob)}).map(s=>s.name)
+    :[currentUser.name];
+  const TW=60,SW=Math.max(80,Math.floor((window.innerWidth-TW)/(vis.length||1)));
+  const thead=document.getElementById('availHead');
+  const tbody=document.getElementById('availBody');
+  // Header
+  let hHTML=`<tr><th style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;background:var(--surface);border-bottom:2px solid var(--border);border-right:1px solid var(--border);z-index:15"></th>`;
+  vis.forEach(n=>{hHTML+=`<th style="width:${SW}px;min-width:${SW}px;padding:8px 4px;text-align:center;border-bottom:2px solid var(--border);border-right:1px solid var(--border);font-weight:400;background:var(--surface)"><div style="width:28px;height:28px;border-radius:50%;background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 3px">${n[0]}</div><div style="font-size:12px;font-weight:600;color:#111">${n}</div></th>`;});
+  hHTML+='</tr>';
+  thead.innerHTML=hHTML;
+  // Body rows
+  let bHTML='';
+  for(let h=H_START;h<H_END;h++){
+    bHTML+=`<tr style="height:44px">`;
+    bHTML+=`<td style="width:${TW}px;min-width:${TW}px;position:sticky;left:0;background:var(--bg);border-bottom:1px solid var(--border);border-right:1px solid var(--border);vertical-align:middle;padding-left:8px"><span style="font-size:11px;font-weight:500;color:var(--muted)">${fmtHour(h)}</span></td>`;
+    vis.forEach(n=>{
+      const key=`${n}_${ds}_${h}`;const av=availability[key]!==false;
+      const canEdit=currentUser.role==='admin'||currentUser.name===n;
+      const bg=av?'background:var(--pink-light);':'background:#c8c4c4;';
+      const click=canEdit?`onclick="toggleAvailCell('${n}','${ds}',${h},this)"`:''
+      bHTML+=`<td ${click} style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid var(--border);border-right:1px solid var(--border);${bg}cursor:${canEdit?'pointer':'default'}" data-av="${av}"></td>`;
+    });
+    bHTML+='</tr>';
+  }
+  tbody.innerHTML=bHTML;
 }
-async function toggleAvail(sn,ds,h,cell){const key=`${sn}_${ds}_${h}`;const cur=availability[key]!==false;const nv=!cur;availability[key]=nv;cell.className=`avail-cell ${nv?'available':'unavailable'}`;await sb.from('availability').upsert({staff_name:sn,avail_date:ds,hour_slot:h,is_available:nv},{onConflict:'staff_name,avail_date,hour_slot'});}
+async function toggleAvailCell(sn,ds,h,cell){
+  const cur=cell.dataset.av==='true';const nv=!cur;
+  availability[`${sn}_${ds}_${h}`]=nv;
+  cell.dataset.av=nv;
+  cell.style.background=nv?'var(--pink-light)':'#c8c4c4';
+  await sb.from('availability').upsert({staff_name:sn,avail_date:ds,hour_slot:h,is_available:nv},{onConflict:'staff_name,avail_date,hour_slot'});
+}
+
 
 // ═══════════════════════════════════════
 // ADD / EDIT JOB
