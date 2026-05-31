@@ -845,7 +845,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="leg-item"><div class="leg-dot" style="background:var(--ceremony)"></div>Ceremony</div>
       <div class="leg-item"><div class="leg-dot" style="background:#2e7d32"></div>AMS</div>
     </div>
-    <div id="gridScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative;width:100%">
+    <div id="gridScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;position:relative;width:100%;height:0">
       <table id="gridTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%">
         <thead id="gridHead" style="position:sticky;top:0;z-index:20;background:var(--surface)"></thead>
         <tbody id="gridBody"></tbody>
@@ -867,7 +867,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <button class="week-nav-btn" onclick="changeWeek(1)">›</button>
     </div>
     <div class="day-pills" id="dayPills"></div>
-    <div id="availScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch">
+    <div id="availScroll" style="flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;height:0">
       <table id="availTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%">
         <thead id="availHead" style="position:sticky;top:0;z-index:10;background:var(--surface)"></thead>
         <tbody id="availBody"></tbody>
@@ -893,17 +893,17 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="otab" onclick="oTab('Ready for Collection',this)">🟣 Ready</div>
       <div class="otab" onclick="oTab('Completed',this)">🟢 Done</div>
     </div>
-    <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block"></div>
+    <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:block;height:0"></div>
   </div>
 
   <!-- PRICING VIEW -->
   <div class="staff-view" id="view-pricing">
-    <div id="pricingContent" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block"></div>
+    <div id="pricingContent" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block;height:0"></div>
   </div>
 
   <!-- QUOTE CALC VIEW (admin only) -->
   <div class="staff-view" id="view-calc">
-    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block">
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block;height:0">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-size:17px;font-weight:700;color:#111;margin-bottom:4px">🚗 Quick Quote Calculator</div>
         <div style="font-size:14px;color:var(--muted);margin-bottom:16px">Use when clients call to ask about fees — before they fill out the form.</div>
@@ -943,7 +943,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 
   <!-- VA GUIDE VIEW -->
   <div class="staff-view" id="view-guide">
-    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block">
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block;height:0">
       <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px">
         <div style="font-family:'DM Serif Display',serif;font-size:20px;color:var(--pink-deep);margin-bottom:4px">VA Script &amp; Guide</div>
         <div style="background:#e8f5e9;border:2px solid #4caf50;border-radius:12px;padding:14px;margin-bottom:20px">
@@ -1081,7 +1081,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       </div>
       <button onclick="generatePayroll()" style="width:100%;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:var(--rs);font-size:16px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif">Generate Payroll →</button>
     </div>
-    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block" id="payroll-results">
+    <div style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;display:block;height:0" id="payroll-results">
       <div style="text-align:center;font-size:14px;color:var(--muted);padding:32px 0">Select a date range and tap Generate.</div>
     </div>
   </div>
@@ -1776,7 +1776,9 @@ async function doSubmit(){
   let ref='PT-PENDING';
   try{
     const{count}=await sb.from('orders').select('id',{count:'exact',head:true});
-    ref='PT-'+String((count||0)+1).padStart(4,'0');
+    // Start from a random base so refs don't reveal order volume
+    const base=1000+Math.floor(Math.random()*8999);
+    ref='PT-'+String(base+(count||0)).padStart(4,'0');
     const{error}=await sb.from('orders').insert({
       ref,form_type:formType,
       first_name:gv('fn'),last_name:gv('ln'),phone:gv('phone'),email:gv('email-intake'),city,
@@ -1797,7 +1799,7 @@ async function doSubmit(){
   // Auto-send if email provided
   const em=gv('email-intake');
   if(em&&em.includes('@')){
-    try{await emailjs.send(EMAILJS_SVC,EMAILJS_TPL,{to_email:em,to_name:window._lastSub.toName,pet_name:window._lastSub.petName,ref_number:ref,service:window._lastSub.service,urn:window._lastSub.urn,keepsake:window._lastSub.keepsake,fur_clipping:window._lastSub.furClipping,total:window._lastSub.total,return_method:window._lastSub.returnMethod,submitted_date:window._lastSub.submittedDate,office_phone:'(510) 505-8102',office_email:'hello@thepawstribute.com'});}
+    try{await emailjs.send(EMAILJS_SVC,EMAILJS_TPL,{to_email:em,to_name:subData.toName,pet_name:subData.petName,ref_number:ref,service:subData.service,urn:subData.urn,keepsake:subData.keepsake,fur_clipping:subData.furClipping,total:subData.total,return_method:subData.returnMethod,submitted_date:subData.submittedDate,office_phone:'(510) 505-8102',office_email:'hello@thepawstribute.com'});}
     catch(e){console.error('Email:',e);}
     document.getElementById('ty-email-sec').style.display='none';
   }
@@ -2275,7 +2277,7 @@ async function exportCSV(){
 // ═══════════════════════════════════════
 function getMonday(d){const dt=new Date(d),day=dt.getDay();dt.setDate(dt.getDate()-day+(day===0?-6:1));dt.setHours(0,0,0,0);return dt;}
 function fmtDateKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function fmtHour(h){if(h===0||h===24)return'12am';if(h<12)return`${h}am`;if(h===12)return'12pm';return`${h-12}pm`;}
+function fmtHour(h){if(h===0||h===24)return'12am';if(h===25)return'1am';if(h<12)return`${h}am`;if(h===12)return'12pm';return`${h-12}pm`;}
 function fmtDateFull(d){const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;}
 function getWeekDates(ws){return Array.from({length:7},(_,i)=>{const d=new Date(ws);d.setDate(d.getDate()+i);return d;});}
 function fmtWeekRange(s){const e=new Date(s);e.setDate(e.getDate()+6);const m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${s.getDate()} ${m[s.getMonth()]} – ${e.getDate()} ${m[e.getMonth()]}`;}
