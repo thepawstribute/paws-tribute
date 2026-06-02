@@ -293,10 +293,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .guide-bullets li{font-size:14px;color:#111;line-height:1.7;padding-left:16px;position:relative}
 .guide-bullets li::before{content:"–";position:absolute;left:0;color:var(--pink);font-weight:700}
 .guide-bullets li em{color:var(--text-muted);font-size:13px}
-.guide-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
-.guide-table th{padding:8px 10px;text-align:left;background:var(--pink-light);color:var(--pink-deep);font-size:12px;font-weight:700;letter-spacing:.04em}
-.guide-table td{padding:8px 10px;border-bottom:1px solid var(--pink-mid);color:#111}
-.guide-table td:not(:first-child){font-weight:700;text-align:right}
+.guide-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0;table-layout:fixed}
+.guide-table th{padding:8px 10px;text-align:center;background:var(--pink-light);color:var(--pink-deep);font-size:12px;font-weight:700;letter-spacing:.04em;border:1px solid var(--pink-border)}
+.guide-table th:first-child{text-align:left}
+.guide-table td{padding:8px 10px;border:1px solid var(--pink-mid);color:#111;text-align:center}
+.guide-table td:first-child{font-weight:600;text-align:left}
+.guide-table td:not(:first-child){font-weight:700}
 .guide-sms{background:var(--pink-light);border-left:3px solid var(--pink);border-radius:0 var(--rs) var(--rs) 0;padding:12px 14px;font-size:14px;color:#111;line-height:1.8;margin-bottom:10px}
 .guide-sms-label{font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:200;padding:0}
@@ -604,12 +606,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div class="ret-card" id="rc-pickup" onclick="selRet('pickup',this)">
             <div class="ret-icon">🏠</div>
             <div class="ret-name">Collect at our office</div>
-            <div class="ret-sub" style="color:#2e7d32;font-weight:600">Free · 200 Brown Rd, Fremont</div>
+            <div class="ret-sub" style="color:var(--muted)">200 Brown Rd #108, Fremont</div>
           </div>
-          <div class="ret-card" id="rc-delivery" onclick="selRet('delivery',this)">
+          <div class="ret-card" id="rc-delivery" onclick="selRet('delivery',this)" style="border-color:var(--pink-border);background:var(--pink-light)">
+            <div style="font-size:10px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">✨ Most families choose this</div>
             <div class="ret-icon">🚗</div>
             <div class="ret-name">We bring them home</div>
-            <div class="ret-sub" style="color:var(--pink);font-weight:600">From $30 · We come to you</div>
+            <div class="ret-sub" style="color:var(--pink);font-weight:600">We come to you</div>
           </div>
         </div>
         <div id="slot-sec" style="display:none">
@@ -1332,6 +1335,8 @@ const EMAILJS_PK='WqHdEuq5z_zyjKeVg';
 const EMAILJS_SVC='service_s0uk0tq';
 const EMAILJS_TPL='template_lly2vcw';
 const FREMONT_OFFICE='200 Brown Rd, Fremont, CA 94538';
+const BREVO_API_KEY='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';
+const BREVO_LIST_ID=6;
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const STAFF_ORDER=['Saskia','Jesse','Sophie','Claire','K','Jamie'];
@@ -1906,12 +1911,16 @@ async function selectCollOrder(id){
 async function collConfirm(){
   if(!collSigDrawn){document.getElementById('e-coll-sig').classList.add('show');return;}
   const btn=document.getElementById('coll-confirm-btn');btn.disabled=true;btn.textContent='Confirming…';
+  // Get pet name before updating
+  const{data:collOrder}=await sb.from('orders').select('pet_name,first_name,last_name').eq('id',collOrderId).single();
   await sb.from('orders').update({status:'Completed',collected_at:new Date().toISOString()}).eq('id',collOrderId);
   document.getElementById('coll-view').classList.remove('active');
   document.getElementById('ty-view').classList.add('active');
   document.getElementById('ty-paw').textContent='💛';
-  document.getElementById('ty-title').textContent='Collection confirmed. Thank you.';
-  document.getElementById('ty-body').innerHTML='We hope you find comfort in the days ahead. You are always welcome to reach out at (510) 505-8102.';
+  const petName=collOrder?.pet_name||'your pet';
+  document.getElementById('ty-pet').textContent=petName;
+  document.getElementById('ty-title').textContent='Thank you for trusting us with '+petName+'.';
+  document.getElementById('ty-body').innerHTML='We hope '+petName+'\'s ashes bring you comfort. We are always here if you need us.';
   document.getElementById('ty-ref').textContent='Collected '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   document.getElementById('ty-email-sec').style.display='none';
 }
@@ -2304,7 +2313,37 @@ async function saveDeliveryTime(){
   await sb.from('orders').update({delivery_datetime:dt.toISOString()}).eq('id',openOrderId);
   showToast('Delivery time saved ✓');
 }
-async function saveOrderStatus(){const v=document.getElementById('od-status').value;await sb.from('orders').update({status:v}).eq('id',openOrderId);const o=orders.find(x=>x.id==openOrderId);if(o)o.status=v;showToast('Status updated ✓');}
+async function addToBrevo(email, firstName, petName){
+  if(!email||!email.includes('@'))return;
+  try{
+    await fetch('https://api.brevo.com/v3/contacts',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','api-key':BREVO_API_KEY},
+      body:JSON.stringify({
+        email,
+        attributes:{FIRSTNAME:firstName,PET_NAME:petName},
+        listIds:[BREVO_LIST_ID],
+        updateEnabled:true
+      })
+    });
+    console.log('Added to Brevo:',email);
+  }catch(e){console.error('Brevo error:',e);}
+}
+async function saveOrderStatus(){
+  const v=document.getElementById('od-status').value;
+  await sb.from('orders').update({status:v}).eq('id',openOrderId);
+  const o=orders.find(x=>x.id==openOrderId);
+  if(o){
+    o.status=v;
+    // When marked Completed — add to Brevo for 7-day follow up email
+    if(v==='Completed'&&o.email){
+      addToBrevo(o.email, o.first_name||'', o.pet_name||'');
+      showToast('Status updated ✓ · Follow-up email scheduled');
+    } else {
+      showToast('Status updated ✓');
+    }
+  }
+}
 async function saveOrderBalance(){await sb.from('orders').update({remaining_balance:parseFloat(document.getElementById('od-balance').value)||0}).eq('id',openOrderId);}
 async function saveOrderNote(){await sb.from('orders').update({notes:document.getElementById('od-notes').value}).eq('id',openOrderId);}
 function chgOrdOt(d){const cur=parseInt(document.getElementById('od-ot-qty').textContent)||0;const nv=Math.max(0,cur+d);document.getElementById('od-ot-qty').textContent=nv;document.getElementById('od-ot-total').textContent='= $'+(nv*28);sb.from('orders').update({overtime_blocks:nv}).eq('id',openOrderId);}
@@ -2370,70 +2409,12 @@ function renderPricing(){
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add-ons</div>
     ${[{n:'Paw / Nose Print — Small',p:'$70'},{n:'Paw / Nose Print — Large',p:'$80'},{n:'Fur Clipping (not Private)',p:'$27'}].map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
   </div>
-  <div style="margin-bottom:20px">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🚗 Home Pickup Fees</div>
-    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
-      <thead><tr style="background:#faf2e8"><th style="padding:7px 8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Miles</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Under 30lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">30–60lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">60–80lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">80–100lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">100–150lb 👥</th></tr></thead>
-      <tbody>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 8px;font-weight:600">0–10 mi</td><td style="padding:7px 8px;text-align:center">$65 <span style="color:var(--muted);font-size:10px">(drv $40)</span></td><td style="padding:7px 8px;text-align:center">$95 <span style="color:var(--muted);font-size:10px">(drv $55)</span></td><td style="padding:7px 8px;text-align:center">$105 <span style="color:var(--muted);font-size:10px">(drv $65)</span></td><td style="padding:7px 8px;text-align:center">$130 <span style="color:var(--muted);font-size:10px">(drv $90)</span></td><td style="padding:7px 8px;text-align:center">$160 <span style="color:var(--muted);font-size:10px">($60 ea)</span></td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:7px 8px;font-weight:600">11–20 mi</td><td style="padding:7px 8px;text-align:center">$75 <span style="color:var(--muted);font-size:10px">(drv $45)</span></td><td style="padding:7px 8px;text-align:center">$98 <span style="color:var(--muted);font-size:10px">(drv $58)</span></td><td style="padding:7px 8px;text-align:center">$118 <span style="color:var(--muted);font-size:10px">(drv $78)</span></td><td style="padding:7px 8px;text-align:center">$140 <span style="color:var(--muted);font-size:10px">(drv $100)</span></td><td style="padding:7px 8px;text-align:center">$180 <span style="color:var(--muted);font-size:10px">($70 ea)</span></td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 8px;font-weight:600">21–35 mi</td><td style="padding:7px 8px;text-align:center">$105 <span style="color:var(--muted);font-size:10px">(drv $65)</span></td><td style="padding:7px 8px;text-align:center">$120 <span style="color:var(--muted);font-size:10px">(drv $80)</span></td><td style="padding:7px 8px;text-align:center">$140 <span style="color:var(--muted);font-size:10px">(drv $100)</span></td><td style="padding:7px 8px;text-align:center">$168 <span style="color:var(--muted);font-size:10px">(drv $128)</span></td><td style="padding:7px 8px;text-align:center">$215 <span style="color:var(--muted);font-size:10px">($87 ea)</span></td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:7px 8px;font-weight:600">36–50 mi</td><td style="padding:7px 8px;text-align:center">$125 <span style="color:var(--muted);font-size:10px">(drv $85)</span></td><td style="padding:7px 8px;text-align:center">$145 <span style="color:var(--muted);font-size:10px">(drv $105)</span></td><td style="padding:7px 8px;text-align:center">$168 <span style="color:var(--muted);font-size:10px">(drv $128)</span></td><td style="padding:7px 8px;text-align:center">$198 <span style="color:var(--muted);font-size:10px">(drv $158)</span></td><td style="padding:7px 8px;text-align:center">$255 <span style="color:var(--muted);font-size:10px">($107 ea)</span></td></tr>
-        <tr><td style="padding:7px 8px;font-weight:600">51–60 mi</td><td style="padding:7px 8px;text-align:center">$148 <span style="color:var(--muted);font-size:10px">(drv $108)</span></td><td style="padding:7px 8px;text-align:center">$172 <span style="color:var(--muted);font-size:10px">(drv $132)</span></td><td style="padding:7px 8px;text-align:center">$200 <span style="color:var(--muted);font-size:10px">(drv $160)</span></td><td style="padding:7px 8px;text-align:center">$235 <span style="color:var(--muted);font-size:10px">(drv $195)</span></td><td style="padding:7px 8px;text-align:center">$290 <span style="color:var(--muted);font-size:10px">($125 ea)</span></td></tr>
-      </tbody></table></div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px">👥 Over 100lb always requires 2 staff. Each driver paid separately. Custom quote for 60+ miles.</div>
-  </div>
-  <div style="margin-bottom:20px">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📦 Ashes Delivery Fees</div>
-    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="background:#fdf8e8"><th style="padding:8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Miles</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Client pays</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Driver gets</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">You keep</th></tr></thead>
-      <tbody>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">0–10 mi</td><td style="padding:8px;text-align:center;font-weight:700">$30</td><td style="padding:8px;text-align:center">$20</td><td style="padding:8px;text-align:center">$10</td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">11–20 mi</td><td style="padding:8px;text-align:center;font-weight:700">$35</td><td style="padding:8px;text-align:center">$25</td><td style="padding:8px;text-align:center">$10</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">21–35 mi</td><td style="padding:8px;text-align:center;font-weight:700">$48</td><td style="padding:8px;text-align:center">$36</td><td style="padding:8px;text-align:center">$12</td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">36–50 mi</td><td style="padding:8px;text-align:center;font-weight:700">$62</td><td style="padding:8px;text-align:center">$48</td><td style="padding:8px;text-align:center">$14</td></tr>
-        <tr><td style="padding:8px;font-weight:600">51–60 mi</td><td style="padding:8px;text-align:center;font-weight:700">$88</td><td style="padding:8px;text-align:center">$70</td><td style="padding:8px;text-align:center">$18</td></tr>
-      </tbody></table></div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px">One way only. Custom quote for 60+ miles.</div>
-  </div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin-bottom:24px">
     <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px">Questions? Call anytime</div>
     <div style="font-size:16px;font-weight:700;color:var(--accent)">(510) 505-8102</div>
   </div>`;
 }
 
-function renderPricing_OLD(){
-  document.getElementById('pricingContent').innerHTML=`
-  <div style="margin-bottom:24px">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cremation Services</div>
-    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:300px">
-      <thead><tr style="background:#faf2e8"><th style="padding:10px 8px;text-align:left;font-weight:700;color:#111;border-bottom:1px solid var(--border)">Size</th><th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--ashes);border-bottom:1px solid var(--border)">Shared</th><th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--dropoff);border-bottom:1px solid var(--border)">Individual</th><th style="padding:10px 8px;text-align:center;font-weight:700;color:var(--ceremony);border-bottom:1px solid var(--border)">Private</th></tr></thead>
-      <tbody>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 8px;font-weight:600">Under 5 lbs</td><td style="padding:10px 8px;text-align:center;font-weight:700">$125</td><td style="padding:10px 8px;text-align:center;font-weight:700">$250</td><td style="padding:10px 8px;text-align:center;font-weight:700">$450</td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:10px 8px;font-weight:600">5–20 lbs</td><td style="padding:10px 8px;text-align:center;font-weight:700">$150</td><td style="padding:10px 8px;text-align:center;font-weight:700">$350</td><td style="padding:10px 8px;text-align:center;font-weight:700">$495</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:10px 8px;font-weight:600">21–50 lbs</td><td style="padding:10px 8px;text-align:center;font-weight:700">$200</td><td style="padding:10px 8px;text-align:center;font-weight:700">$420</td><td style="padding:10px 8px;text-align:center;font-weight:700">$550</td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:10px 8px;font-weight:600">51–100 lbs</td><td style="padding:10px 8px;text-align:center;font-weight:700">$250</td><td style="padding:10px 8px;text-align:center;font-weight:700">$480</td><td style="padding:10px 8px;text-align:center;font-weight:700">$580</td></tr>
-        <tr><td style="padding:10px 8px;font-weight:600">Over 100 lbs</td><td style="padding:10px 8px;text-align:center;font-weight:700">$280</td><td style="padding:10px 8px;text-align:center;font-weight:700">$520</td><td style="padding:10px 8px;text-align:center;font-weight:700">$620</td></tr>
-      </tbody></table></div>
-    <div style="font-size:12px;color:var(--muted);margin-top:8px">✦ Individual Farewell includes a standard urn &nbsp;·&nbsp; Ceremony is 30 mins, +$28 per additional 30 mins &nbsp;·&nbsp; Fur clipping included in Private</div>
-  </div>
-  <div style="margin-bottom:24px">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add-ons</div>
-    ${[{n:'Wooden Paw / Nose Print — Small',p:'$70'},{n:'Wooden Paw / Nose Print — Large',p:'$80'},{n:'Fur Clipping (if not Private)',p:'$27'}].map(i=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--surface);border-radius:10px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;font-weight:500;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
-
-  </div>
-  <div style="margin-bottom:24px">
-    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cremation Partners</div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden">
-      <div style="padding:12px 14px;border-bottom:1px solid var(--border)"><div style="font-size:14px;font-weight:700;color:#111">AMS — Gilroy</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Communal cremation partner</div></div>
-      <div style="padding:12px 14px"><div style="font-size:14px;font-weight:700;color:#111">Oceans of Love</div><div style="font-size:12px;color:var(--muted);margin-top:2px">Shared Farewell — ashes scattered in the Pacific off Southern California</div></div>
-    </div>
-  </div>
-  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin-bottom:24px">
-    <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px">We're Here to Help — Call Anytime</div>
-    <div style="font-size:16px;font-weight:700;color:var(--accent)">(510) 505-8102</div>
-  </div>`;
-}
 
 // ═══════════════════════════════════════
 // QUOTE CALCULATOR
