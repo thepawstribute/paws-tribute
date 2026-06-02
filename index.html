@@ -438,12 +438,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <input class="fi" type="text" id="pet-breed" placeholder="e.g. Golden Retriever, Persian…"></div>
       <div class="fg"><label class="fl">Weight <span class="req">*</span></label>
         <div class="weight-opts">
-          <div class="wopt" id="wo1" onclick="selWeight('under5','wo1')"><div class="wopt-label">Under 30 lbs</div></div>
-          <div class="wopt" id="wo2" onclick="selWeight('5to20','wo2')"><div class="wopt-label">31 – 60 lbs</div></div>
-          <div class="wopt" id="wo3" onclick="selWeight('21to50','wo3')"><div class="wopt-label">61 – 80 lbs</div></div>
-          <div class="wopt" id="wo4" onclick="selWeight('51to80','wo4')"><div class="wopt-label">81 – 100 lbs</div></div>
-          <div class="wopt" id="wo5" onclick="selWeight('81to100','wo5')"><div class="wopt-label">101 – 150 lbs</div></div>
-          <div class="wopt" id="wo6" onclick="selWeight('over100','wo6')"><div class="wopt-label">Over 150 lbs</div></div>
+          <div class="wopt" id="wo1" onclick="selWeight('under5','wo1')"><div class="wopt-label">Under 5 lbs</div></div>
+          <div class="wopt" id="wo2" onclick="selWeight('5to20','wo2')"><div class="wopt-label">5 – 20 lbs</div></div>
+          <div class="wopt" id="wo3" onclick="selWeight('21to50','wo3')"><div class="wopt-label">21 – 50 lbs</div></div>
+          <div class="wopt" id="wo4" onclick="selWeight('51to100','wo4')"><div class="wopt-label">51 – 100 lbs</div></div>
+          <div class="wopt" id="wo5" onclick="selWeight('over100','wo5')"><div class="wopt-label">Over 100 lbs</div></div>
         </div>
         <div class="ferr" id="e-weight">Please select a weight range.</div></div>
       <div class="fg"><label class="fl">Color / markings <span class="hint">(optional)</span></label>
@@ -913,12 +912,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div><label class="fl" style="margin-bottom:6px">Pet weight</label>
             <select class="fi" id="calc-weight" onchange="runCalc()">
               <option value="">Select…</option>
-              <option value="under5">Under 30 lbs</option>
-              <option value="5to20">31–60 lbs</option>
-              <option value="21to50">61–80 lbs</option>
-              <option value="51to80">81–100 lbs</option>
-              <option value="81to100">101–150 lbs</option>
-              <option value="over100">Over 150 lbs</option>
+              <option value="under5">Under 5 lbs</option>
+              <option value="5to20">5–20 lbs</option>
+              <option value="21to50">21–50 lbs</option>
+              <option value="51to100">51–100 lbs</option>
+              <option value="over100">Over 100 lbs</option>
             </select></div>
         </div>
         <div id="calc-empty" style="font-size:14px;color:var(--text-hint);text-align:center;padding:16px 0">Enter zip and weight to see the quote.</div>
@@ -983,10 +981,11 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <table class="guide-table">
             <thead><tr><th>Weight</th><th>Shared</th><th>Individual</th><th>Private</th></tr></thead>
             <tbody>
-              <tr><td>Under 30 lbs</td><td>$125</td><td>$250</td><td>$450</td></tr>
-              <tr><td>31–60 lbs</td><td>$150</td><td>$350</td><td>$495</td></tr>
-              <tr><td>61–100 lbs</td><td>$250</td><td>$480</td><td>$580</td></tr>
-              <tr><td>101+ lbs</td><td>$280</td><td>$520</td><td>$620</td></tr>
+              <tr><td>Under 5 lbs</td><td>$125</td><td>$250</td><td>$450</td></tr>
+              <tr><td>5–20 lbs</td><td>$150</td><td>$350</td><td>$495</td></tr>
+              <tr><td>21–50 lbs</td><td>$200</td><td>$420</td><td>$550</td></tr>
+              <tr><td>51–100 lbs</td><td>$250</td><td>$480</td><td>$580</td></tr>
+              <tr><td>Over 100 lbs</td><td>$280</td><td>$520</td><td>$620</td></tr>
             </tbody>
           </table></div>
         <div class="guide-sec"><div class="guide-title">🌊 Shared Farewell</div>
@@ -1343,15 +1342,12 @@ const STAFF_ORDER=['Saskia','Jesse','Sophie','Claire','K','Jamie'];
 // ═══════════════════════════════════════
 // PRICING
 // ═══════════════════════════════════════
-// Cremation pricing mapped to new weight tiers
-// under5=Under 30lb, 5to20=31-60lb, 21to50=61-80lb, 51to80=81-100lb, 81to100=101-150lb, over100=Over 150lb
-// Price jumps at 50lb threshold matching website pricing
 const SVC_PRICE={
-  shared:{under5:125,'5to20':150,'21to50':250,'51to80':250,'81to100':280,over100:280},
-  individual:{under5:250,'5to20':350,'21to50':480,'51to80':480,'81to100':520,over100:520},
-  private:{under5:450,'5to20':495,'21to50':580,'51to80':580,'81to100':620,over100:620}
+  shared:{under5:125,'5to20':150,'21to50':200,'51to100':250,over100:280},
+  individual:{under5:250,'5to20':350,'21to50':420,'51to100':480,over100:520},
+  private:{under5:450,'5to20':495,'21to50':550,'51to100':580,over100:620}
 };
-const WT_LABEL={under5:'Under 30 lbs','5to20':'31–60 lbs','21to50':'61–80 lbs','51to80':'81–100 lbs','81to100':'101–150 lbs',over100:'Over 150 lbs'};
+const WT_LABEL={under5:'Under 5 lbs','5to20':'5–20 lbs','21to50':'21–50 lbs','51to100':'51–100 lbs',over100:'Over 100 lbs'};
 // Home pickup fees by zone and weight (two-way trip, more responsibility)
 // under50 = under 50lb, over50 = 50-80lb, over80 = over 80lb
 // Home pickup fees — miles-based, 5 weight tiers
@@ -1616,17 +1612,10 @@ async function getDrivingMiles(dest){
   });
 }
 function wtTierNew(w){
-  // weight keys map to tiers:
-  // under5 = Under 30lb → u30
-  // 5to20  = 31–60lb   → u60
-  // 21to50 = 61–80lb   → u80
-  // 51to80 = 81–100lb  → u100
-  // 81to100 = 101–150lb → over100
-  // over100 = Over 150lb → over100
   if(w==='under5')return'u30';
   if(w==='5to20')return'u60';
   if(w==='21to50')return'u80';
-  if(w==='51to80')return'u100';
+  if(w==='51to100')return'u100';
   return'over100';
 }
 function puFeeByMiles(miles,wKey){
@@ -2399,10 +2388,11 @@ function renderPricing(){
     <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:300px">
       <thead><tr style="background:#faf2e8"><th style="padding:8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Size</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border);color:var(--ashes)">Shared</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border);color:var(--dropoff)">Individual</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border);color:var(--ceremony)">Private</th></tr></thead>
       <tbody>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">Under 30 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$125</td><td style="padding:8px;text-align:center;font-weight:700">$250</td><td style="padding:8px;text-align:center;font-weight:700">$450</td></tr>
-        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">31–60 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$150</td><td style="padding:8px;text-align:center;font-weight:700">$350</td><td style="padding:8px;text-align:center;font-weight:700">$495</td></tr>
-        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">61–100 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$250</td><td style="padding:8px;text-align:center;font-weight:700">$480</td><td style="padding:8px;text-align:center;font-weight:700">$580</td></tr>
-        <tr><td style="padding:8px;font-weight:600">101+ lbs</td><td style="padding:8px;text-align:center;font-weight:700">$280</td><td style="padding:8px;text-align:center;font-weight:700">$520</td><td style="padding:8px;text-align:center;font-weight:700">$620</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">Under 5 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$125</td><td style="padding:8px;text-align:center;font-weight:700">$250</td><td style="padding:8px;text-align:center;font-weight:700">$450</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">5–20 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$150</td><td style="padding:8px;text-align:center;font-weight:700">$350</td><td style="padding:8px;text-align:center;font-weight:700">$495</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">21–50 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$200</td><td style="padding:8px;text-align:center;font-weight:700">$420</td><td style="padding:8px;text-align:center;font-weight:700">$550</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">51–100 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$250</td><td style="padding:8px;text-align:center;font-weight:700">$480</td><td style="padding:8px;text-align:center;font-weight:700">$580</td></tr>
+        <tr><td style="padding:8px;font-weight:600">Over 100 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$280</td><td style="padding:8px;text-align:center;font-weight:700">$520</td><td style="padding:8px;text-align:center;font-weight:700">$620</td></tr>
       </tbody></table></div>
     <div style="font-size:12px;color:var(--muted);margin-top:8px">✦ Fur clipping included in Private &nbsp;·&nbsp; Ceremony +$28 per extra 30 mins</div>
   </div>
