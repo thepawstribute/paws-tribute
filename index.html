@@ -436,11 +436,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <input class="fi" type="text" id="pet-breed" placeholder="e.g. Golden Retriever, Persian…"></div>
       <div class="fg"><label class="fl">Weight <span class="req">*</span></label>
         <div class="weight-opts">
-          <div class="wopt" id="wo1" onclick="selWeight('under5','wo1')"><div class="wopt-label">Under 5 lbs</div></div>
-          <div class="wopt" id="wo2" onclick="selWeight('5to20','wo2')"><div class="wopt-label">5 – 20 lbs</div></div>
-          <div class="wopt" id="wo3" onclick="selWeight('21to50','wo3')"><div class="wopt-label">21 – 50 lbs</div></div>
-          <div class="wopt" id="wo4" onclick="selWeight('51to100','wo4')"><div class="wopt-label">51 – 100 lbs</div></div>
-          <div class="wopt" id="wo5" onclick="selWeight('over100','wo5')"><div class="wopt-label">Over 100 lbs</div></div>
+          <div class="wopt" id="wo1" onclick="selWeight('under5','wo1')"><div class="wopt-label">Under 30 lbs</div></div>
+          <div class="wopt" id="wo2" onclick="selWeight('5to20','wo2')"><div class="wopt-label">30 – 60 lbs</div></div>
+          <div class="wopt" id="wo3" onclick="selWeight('21to50','wo3')"><div class="wopt-label">60 – 80 lbs</div></div>
+          <div class="wopt" id="wo4" onclick="selWeight('51to80','wo4')"><div class="wopt-label">80 – 100 lbs</div></div>
+          <div class="wopt" id="wo5" onclick="selWeight('81to100','wo5')"><div class="wopt-label">100 – 150 lbs</div></div>
+          <div class="wopt" id="wo6" onclick="selWeight('over100','wo6')"><div class="wopt-label">Over 150 lbs</div></div>
         </div>
         <div class="ferr" id="e-weight">Please select a weight range.</div></div>
       <div class="fg"><label class="fl">Color / markings <span class="hint">(optional)</span></label>
@@ -910,11 +911,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div><label class="fl" style="margin-bottom:6px">Pet weight</label>
             <select class="fi" id="calc-weight" onchange="runCalc()">
               <option value="">Select…</option>
-              <option value="under5">Under 5 lbs</option>
-              <option value="5to20">5–20 lbs</option>
-              <option value="21to50">21–50 lbs</option>
-              <option value="51to100">51–100 lbs</option>
-              <option value="over100">Over 100 lbs</option>
+              <option value="under5">Under 30 lbs</option>
+              <option value="5to20">30–60 lbs</option>
+              <option value="21to50">60–80 lbs</option>
+              <option value="51to80">80–100 lbs</option>
+              <option value="81to100">100–150 lbs</option>
+              <option value="over100">Over 150 lbs</option>
             </select></div>
         </div>
         <div id="calc-empty" style="font-size:14px;color:var(--text-hint);text-align:center;padding:16px 0">Enter zip and weight to see the quote.</div>
@@ -1329,23 +1331,25 @@ const SVC_PRICE={
   individual:{under5:250,'5to20':350,'21to50':420,'51to100':480,over100:520},
   private:{under5:450,'5to20':495,'21to50':550,'51to100':580,over100:620}
 };
-const WT_LABEL={under5:'Under 5 lbs','5to20':'5–20 lbs','21to50':'21–50 lbs','51to100':'51–100 lbs',over100:'Over 100 lbs'};
+const WT_LABEL={under5:'Under 30 lbs','5to20':'30–60 lbs','21to50':'60–80 lbs','51to80':'80–100 lbs','81to100':'100–150 lbs',over100:'Over 150 lbs'};
 // Home pickup fees by zone and weight (two-way trip, more responsibility)
 // under50 = under 50lb, over50 = 50-80lb, over80 = over 80lb
-const PU_FEES={
-  fremont:  {under50:{c:85, d:62},  over50:{c:108,d:78},  over80:{c:148,d:108}},
-  milpitas: {under50:{c:98, d:72},  over50:{c:128,d:94},  over80:{c:150,d:110}},
-  sanjose:  {under50:{c:122,d:90},  over50:{c:160,d:118}, over80:{c:172,d:126}},
-  peninsula:{under50:{c:140,d:103}, over50:{c:185,d:136}, over80:{c:172,d:126}},
-  sf:       {under50:{c:195,d:144}, over50:{c:235,d:172}, over80:{c:220,d:162}}
-};
-// Ashes delivery fees — miles based (driver gets stated amount, you keep the rest)
+// Home pickup fees — miles-based, 5 weight tiers
+// over100 = always 2 people, d = per driver, total driver pay = d*2
+const PU_FEES_MILES=[
+  {maxMiles:10,  u30:{c:65,d:40,you:25},  u60:{c:95,d:55,you:40},  u80:{c:105,d:65,you:40},  u100:{c:130,d:90,you:40},  over100:{c:160,d:60,you:40}},
+  {maxMiles:20,  u30:{c:75,d:45,you:30},  u60:{c:98,d:58,you:40},  u80:{c:118,d:78,you:40},  u100:{c:140,d:100,you:40}, over100:{c:180,d:70,you:40}},
+  {maxMiles:35,  u30:{c:105,d:65,you:40}, u60:{c:120,d:80,you:40}, u80:{c:140,d:100,you:40}, u100:{c:168,d:128,you:40},over100:{c:215,d:87,you:40}},
+  {maxMiles:50,  u30:{c:125,d:85,you:40}, u60:{c:145,d:105,you:40},u80:{c:168,d:128,you:40}, u100:{c:198,d:158,you:40},over100:{c:255,d:107,you:40}},
+  {maxMiles:60,  u30:{c:148,d:108,you:40},u60:{c:172,d:132,you:40},u80:{c:200,d:160,you:40}, u100:{c:235,d:195,you:40},over100:{c:290,d:125,you:40}},
+];
+// Ashes delivery fees — miles based, one way, one person
 const DEL_FEES_MILES=[
-  {maxMiles:10, client:25, driver:20},
-  {maxMiles:20, client:38, driver:30},
-  {maxMiles:30, client:48, driver:38},
-  {maxMiles:40, client:58, driver:46},
-  {maxMiles:55, client:72, driver:60},
+  {maxMiles:10, client:30, driver:20, you:10},
+  {maxMiles:20, client:35, driver:25, you:10},
+  {maxMiles:35, client:48, driver:36, you:12},
+  {maxMiles:50, client:62, driver:48, you:14},
+  {maxMiles:60, client:88, driver:70, you:18},
 ];
 
 // ═══════════════════════════════════════
@@ -1584,17 +1588,31 @@ async function getDrivingMiles(dest){
     });
   });
 }
-function feeZone(miles){if(miles<=10)return'fremont';if(miles<=18)return'milpitas';if(miles<=30)return'sanjose';if(miles<=40)return'peninsula';if(miles<=55)return'sf';return null;}
-function wtTier(w){if(w==='under5'||w==='5to20'||w==='21to50')return'under50';if(w==='51to100')return'over50';return'over80';}
-function puFeeByMiles(miles,wKey){const z=feeZone(miles);if(!z)return null;const t=wtTier(wKey);const f=PU_FEES[z][t];return{clientFee:f.c,driverPay:f.d,zone:z,miles};}
+function wtTierNew(w){
+  // w = form weight key
+  if(w==='under5'||w==='5to20')return'u30';
+  if(w==='21to50')return'u60';
+  if(w==='51to80')return'u80';
+  if(w==='81to100')return'u100';
+  return'over100';
+}
+function puFeeByMiles(miles,wKey){
+  if(miles===0)miles=1;
+  const bracket=PU_FEES_MILES.find(b=>miles<=b.maxMiles);
+  if(!bracket)return null;
+  const tier=wtTierNew(wKey);
+  const f=bracket[tier];
+  const isTwo=tier==='over100';
+  return{clientFee:f.c,driverPay:isTwo?f.d*2:f.d,driverPerPerson:f.d,you:f.you,twoPersonJob:isTwo,miles};
+}
 function delFeeByMiles(miles){
   if(miles===0)miles=1;
   const bracket=DEL_FEES_MILES.find(b=>miles<=b.maxMiles);
   if(!bracket)return null;
-  return{fee:bracket.client,driver:bracket.driver,you:bracket.client-bracket.driver,miles};
+  return{fee:bracket.client,driver:bracket.driver,you:bracket.you,miles};
 }
-function puFeeByZip(zip,wKey){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.09));return puFeeByMiles(m,wKey);}
-function delFeeByZip(zip){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.09));return delFeeByMiles(m);}
+function puFeeByZip(zip,wKey){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.12));return puFeeByMiles(m,wKey);}
+function delFeeByZip(zip){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.12));return delFeeByMiles(m);}
 async function calcPickupFee(){
   if(formType!=='pickup')return;
   const street=gv('pu-street').trim(),city=gv('pu-city').trim(),zip=gv('pu-zip').trim();
@@ -2292,6 +2310,57 @@ async function doScheduleJob(){
 // ═══════════════════════════════════════
 function renderPricing(){
   document.getElementById('pricingContent').innerHTML=`
+  <div style="margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cremation Services</div>
+    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:300px">
+      <thead><tr style="background:#faf2e8"><th style="padding:8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Size</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border);color:var(--ashes)">Shared</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border);color:var(--dropoff)">Individual</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border);color:var(--ceremony)">Private</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">Under 5 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$125</td><td style="padding:8px;text-align:center;font-weight:700">$250</td><td style="padding:8px;text-align:center;font-weight:700">$450</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">5–20 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$150</td><td style="padding:8px;text-align:center;font-weight:700">$350</td><td style="padding:8px;text-align:center;font-weight:700">$495</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">21–50 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$200</td><td style="padding:8px;text-align:center;font-weight:700">$420</td><td style="padding:8px;text-align:center;font-weight:700">$550</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">51–100 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$250</td><td style="padding:8px;text-align:center;font-weight:700">$480</td><td style="padding:8px;text-align:center;font-weight:700">$580</td></tr>
+        <tr><td style="padding:8px;font-weight:600">Over 100 lbs</td><td style="padding:8px;text-align:center;font-weight:700">$280</td><td style="padding:8px;text-align:center;font-weight:700">$520</td><td style="padding:8px;text-align:center;font-weight:700">$620</td></tr>
+      </tbody></table></div>
+    <div style="font-size:12px;color:var(--muted);margin-top:8px">✦ Fur clipping included in Private &nbsp;·&nbsp; Ceremony +$28 per extra 30 mins</div>
+  </div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add-ons</div>
+    ${[{n:'Paw / Nose Print — Small',p:'$70'},{n:'Paw / Nose Print — Large',p:'$80'},{n:'Fur Clipping (not Private)',p:'$27'}].map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
+  </div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🚗 Home Pickup Fees</div>
+    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
+      <thead><tr style="background:#faf2e8"><th style="padding:7px 8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Miles</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Under 30lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">30–60lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">60–80lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">80–100lb</th><th style="padding:7px 8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">100–150lb 👥</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 8px;font-weight:600">0–10 mi</td><td style="padding:7px 8px;text-align:center">$65 <span style="color:var(--muted);font-size:10px">(drv $40)</span></td><td style="padding:7px 8px;text-align:center">$95 <span style="color:var(--muted);font-size:10px">(drv $55)</span></td><td style="padding:7px 8px;text-align:center">$105 <span style="color:var(--muted);font-size:10px">(drv $65)</span></td><td style="padding:7px 8px;text-align:center">$130 <span style="color:var(--muted);font-size:10px">(drv $90)</span></td><td style="padding:7px 8px;text-align:center">$160 <span style="color:var(--muted);font-size:10px">($60 ea)</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:7px 8px;font-weight:600">11–20 mi</td><td style="padding:7px 8px;text-align:center">$75 <span style="color:var(--muted);font-size:10px">(drv $45)</span></td><td style="padding:7px 8px;text-align:center">$98 <span style="color:var(--muted);font-size:10px">(drv $58)</span></td><td style="padding:7px 8px;text-align:center">$118 <span style="color:var(--muted);font-size:10px">(drv $78)</span></td><td style="padding:7px 8px;text-align:center">$140 <span style="color:var(--muted);font-size:10px">(drv $100)</span></td><td style="padding:7px 8px;text-align:center">$180 <span style="color:var(--muted);font-size:10px">($70 ea)</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:7px 8px;font-weight:600">21–35 mi</td><td style="padding:7px 8px;text-align:center">$105 <span style="color:var(--muted);font-size:10px">(drv $65)</span></td><td style="padding:7px 8px;text-align:center">$120 <span style="color:var(--muted);font-size:10px">(drv $80)</span></td><td style="padding:7px 8px;text-align:center">$140 <span style="color:var(--muted);font-size:10px">(drv $100)</span></td><td style="padding:7px 8px;text-align:center">$168 <span style="color:var(--muted);font-size:10px">(drv $128)</span></td><td style="padding:7px 8px;text-align:center">$215 <span style="color:var(--muted);font-size:10px">($87 ea)</span></td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:7px 8px;font-weight:600">36–50 mi</td><td style="padding:7px 8px;text-align:center">$125 <span style="color:var(--muted);font-size:10px">(drv $85)</span></td><td style="padding:7px 8px;text-align:center">$145 <span style="color:var(--muted);font-size:10px">(drv $105)</span></td><td style="padding:7px 8px;text-align:center">$168 <span style="color:var(--muted);font-size:10px">(drv $128)</span></td><td style="padding:7px 8px;text-align:center">$198 <span style="color:var(--muted);font-size:10px">(drv $158)</span></td><td style="padding:7px 8px;text-align:center">$255 <span style="color:var(--muted);font-size:10px">($107 ea)</span></td></tr>
+        <tr><td style="padding:7px 8px;font-weight:600">51–60 mi</td><td style="padding:7px 8px;text-align:center">$148 <span style="color:var(--muted);font-size:10px">(drv $108)</span></td><td style="padding:7px 8px;text-align:center">$172 <span style="color:var(--muted);font-size:10px">(drv $132)</span></td><td style="padding:7px 8px;text-align:center">$200 <span style="color:var(--muted);font-size:10px">(drv $160)</span></td><td style="padding:7px 8px;text-align:center">$235 <span style="color:var(--muted);font-size:10px">(drv $195)</span></td><td style="padding:7px 8px;text-align:center">$290 <span style="color:var(--muted);font-size:10px">($125 ea)</span></td></tr>
+      </tbody></table></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">👥 Over 100lb always requires 2 staff. Each driver paid separately. Custom quote for 60+ miles.</div>
+  </div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">📦 Ashes Delivery Fees</div>
+    <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:#fdf8e8"><th style="padding:8px;text-align:left;font-weight:700;border-bottom:1px solid var(--border)">Miles</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Client pays</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">Driver gets</th><th style="padding:8px;text-align:center;font-weight:700;border-bottom:1px solid var(--border)">You keep</th></tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">0–10 mi</td><td style="padding:8px;text-align:center;font-weight:700">$30</td><td style="padding:8px;text-align:center">$20</td><td style="padding:8px;text-align:center">$10</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">11–20 mi</td><td style="padding:8px;text-align:center;font-weight:700">$35</td><td style="padding:8px;text-align:center">$25</td><td style="padding:8px;text-align:center">$10</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:8px;font-weight:600">21–35 mi</td><td style="padding:8px;text-align:center;font-weight:700">$48</td><td style="padding:8px;text-align:center">$36</td><td style="padding:8px;text-align:center">$12</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:#fafafa"><td style="padding:8px;font-weight:600">36–50 mi</td><td style="padding:8px;text-align:center;font-weight:700">$62</td><td style="padding:8px;text-align:center">$48</td><td style="padding:8px;text-align:center">$14</td></tr>
+        <tr><td style="padding:8px;font-weight:600">51–60 mi</td><td style="padding:8px;text-align:center;font-weight:700">$88</td><td style="padding:8px;text-align:center">$70</td><td style="padding:8px;text-align:center">$18</td></tr>
+      </tbody></table></div>
+    <div style="font-size:11px;color:var(--muted);margin-top:6px">One way only. Custom quote for 60+ miles.</div>
+  </div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin-bottom:24px">
+    <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px">Questions? Call anytime</div>
+    <div style="font-size:16px;font-weight:700;color:var(--accent)">(510) 505-8102</div>
+  </div>`;
+}
+
+function renderPricing_OLD(){
+  document.getElementById('pricingContent').innerHTML=`
   <div style="margin-bottom:24px">
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Cremation Services</div>
     <div style="overflow-x:auto;border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse;font-size:13px;min-width:300px">
@@ -2336,8 +2405,8 @@ async function runCalc(){
   const pu=puFeeByMiles(miles||50,wt),del=delFeeByMiles(miles||50);
   if(!pu||!del){res.style.display='none';qm.style.display='block';return;}
   document.getElementById('calc-pu-client').textContent='$'+pu.clientFee;
-  document.getElementById('calc-pu-driver').textContent='$'+pu.driverPay;
-  document.getElementById('calc-pu-cut').textContent='$'+(pu.clientFee-pu.driverPay);
+  document.getElementById('calc-pu-driver').textContent=pu.twoPersonJob?'$'+pu.driverPerPerson+' × 2 people = $'+pu.driverPay:'$'+pu.driverPay;
+  document.getElementById('calc-pu-cut').textContent='$'+pu.you+(pu.twoPersonJob?' (2-person job 👥)':'');
   document.getElementById('calc-del-client').textContent='$'+del.fee;
   document.getElementById('calc-del-driver').textContent='$'+del.driver;
   document.getElementById('calc-del-cut').textContent='$'+(del.fee-del.driver);
