@@ -1226,6 +1226,20 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="mrow" id="od-slot-row"><span>Pick-up window</span><span class="mval" id="od-slot">—</span></div>
         <div class="mrow" id="od-del-row" style="display:none"><span>Delivery address</span><span class="mval" id="od-addr">—</span></div>
         <div class="mrow" id="od-dcost-row" style="display:none"><span>Delivery fee</span><span class="mval" id="od-dcost">—</span></div>
+        <div id="od-delivery-time-row" style="display:none;margin-top:10px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:6px">📞 Confirmed delivery time</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+            <div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Date</div>
+              <input type="date" class="fi2" id="od-del-date" onchange="saveDeliveryTime()">
+            </div>
+            <div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Time</div>
+              <input type="time" class="fi2" id="od-del-time" onchange="saveDeliveryTime()">
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-hint)">Fill in after calling client to confirm delivery</div>
+        </div>
       </div>
       <div class="mrow"><span style="font-weight:700;color:#111">Payment</span><span class="mval" id="od-payment">—</span></div>
       <div class="mtotal"><span>Total</span><span id="od-total">—</span></div>
@@ -1595,11 +1609,17 @@ async function getDrivingMiles(dest){
   });
 }
 function wtTierNew(w){
-  // w = form weight key
-  if(w==='under5'||w==='5to20')return'u30';
-  if(w==='21to50')return'u60';
-  if(w==='51to80')return'u80';
-  if(w==='81to100')return'u100';
+  // weight keys map to tiers:
+  // under5 = Under 30lb → u30
+  // 5to20  = 31–60lb   → u60
+  // 21to50 = 61–80lb   → u80
+  // 51to80 = 81–100lb  → u100
+  // 81to100 = 101–150lb → over100
+  // over100 = Over 150lb → over100
+  if(w==='under5')return'u30';
+  if(w==='5to20')return'u60';
+  if(w==='21to50')return'u80';
+  if(w==='51to80')return'u100';
   return'over100';
 }
 function puFeeByMiles(miles,wKey){
@@ -2256,6 +2276,15 @@ function openOrderDetail(id,showSched){
   document.getElementById('od-addr').textContent=o.delivery_address||'—';
   document.getElementById('od-dcost-row').style.display=o.return_method==='We deliver to you'?'flex':'none';
   document.getElementById('od-dcost').textContent=o.delivery_fee||'—';
+  document.getElementById('od-delivery-time-row').style.display=o.return_method==='We deliver to you'?'block':'none';
+  if(o.delivery_datetime){
+    const dt=new Date(o.delivery_datetime);
+    document.getElementById('od-del-date').value=dt.toISOString().slice(0,10);
+    document.getElementById('od-del-time').value=dt.toTimeString().slice(0,5);
+  } else {
+    document.getElementById('od-del-date').value='';
+    document.getElementById('od-del-time').value='';
+  }
   document.getElementById('od-payment').textContent=o.payment_status||'Unpaid';
   document.getElementById('od-total').textContent=o.total_amount?'$'+o.total_amount:'—';
   document.getElementById('od-status').value=o.status||'New / Received';
@@ -2266,6 +2295,14 @@ function openOrderDetail(id,showSched){
   document.getElementById('od-ot-total').textContent='= $'+((o.overtime_blocks||0)*28);
   document.getElementById('od-sched-sec').style.display=showSched?'block':'none';
   document.getElementById('orderOverlay').classList.add('open');
+}
+async function saveDeliveryTime(){
+  const date=document.getElementById('od-del-date').value;
+  const time=document.getElementById('od-del-time').value;
+  if(!date||!time)return;
+  const dt=new Date(date+'T'+time+':00');
+  await sb.from('orders').update({delivery_datetime:dt.toISOString()}).eq('id',openOrderId);
+  showToast('Delivery time saved ✓');
 }
 async function saveOrderStatus(){const v=document.getElementById('od-status').value;await sb.from('orders').update({status:v}).eq('id',openOrderId);const o=orders.find(x=>x.id==openOrderId);if(o)o.status=v;showToast('Status updated ✓');}
 async function saveOrderBalance(){await sb.from('orders').update({remaining_balance:parseFloat(document.getElementById('od-balance').value)||0}).eq('id',openOrderId);}
