@@ -275,15 +275,15 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .order-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .order-row:active{background:var(--pink-light)}
 .obadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.b-new{background:#fff8e1;color:#856404}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#e8f5e9;color:#2e7d32}
+.b-new{background:#ffeaea;color:#c62828}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#e8f5e9;color:#2e7d32}
 .order-main{flex:1;min-width:0}
 .order-pet{font-size:15px;font-weight:700;color:#111}
 .order-owner{font-size:13px;color:var(--muted);margin-top:1px}
 .order-svc{font-size:12px;color:var(--muted);margin-top:1px}
 .order-total{font-size:15px;font-weight:700;color:var(--pink-deep);white-space:nowrap}
-.pending-banner{background:#fff8e1;border-bottom:1px solid #f0c040;padding:5px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0}
-.pending-text{font-size:12px;font-weight:600;color:#856404;flex:1}
-.pending-item{background:#fffbf0;border-bottom:1px solid #f0c040;padding:8px 12px;display:flex;align-items:center;gap:10px}
+.pending-banner{background:#ffeaea;border-bottom:1px solid #ef9a9a;padding:5px 12px;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.pending-text{font-size:12px;font-weight:600;color:#c62828;flex:1}
+.pending-item{background:#fff5f5;border-bottom:1px solid #ef9a9a;padding:8px 12px;display:flex;align-items:center;gap:10px}
 .pending-ttl{font-size:13px;font-weight:700;color:#111;flex:1}
 .pending-sub{display:none}
 .confirm-btn{background:var(--pink);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif;white-space:nowrap}
@@ -437,10 +437,10 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="fg"><label class="fl">Weight <span class="req">*</span></label>
         <div class="weight-opts">
           <div class="wopt" id="wo1" onclick="selWeight('under5','wo1')"><div class="wopt-label">Under 30 lbs</div></div>
-          <div class="wopt" id="wo2" onclick="selWeight('5to20','wo2')"><div class="wopt-label">30 – 60 lbs</div></div>
-          <div class="wopt" id="wo3" onclick="selWeight('21to50','wo3')"><div class="wopt-label">60 – 80 lbs</div></div>
-          <div class="wopt" id="wo4" onclick="selWeight('51to80','wo4')"><div class="wopt-label">80 – 100 lbs</div></div>
-          <div class="wopt" id="wo5" onclick="selWeight('81to100','wo5')"><div class="wopt-label">100 – 150 lbs</div></div>
+          <div class="wopt" id="wo2" onclick="selWeight('5to20','wo2')"><div class="wopt-label">31 – 60 lbs</div></div>
+          <div class="wopt" id="wo3" onclick="selWeight('21to50','wo3')"><div class="wopt-label">61 – 80 lbs</div></div>
+          <div class="wopt" id="wo4" onclick="selWeight('51to80','wo4')"><div class="wopt-label">81 – 100 lbs</div></div>
+          <div class="wopt" id="wo5" onclick="selWeight('81to100','wo5')"><div class="wopt-label">101 – 150 lbs</div></div>
           <div class="wopt" id="wo6" onclick="selWeight('over100','wo6')"><div class="wopt-label">Over 150 lbs</div></div>
         </div>
         <div class="ferr" id="e-weight">Please select a weight range.</div></div>
@@ -603,29 +603,28 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="ret-grid">
           <div class="ret-card" id="rc-pickup" onclick="selRet('pickup',this)">
             <div class="ret-icon">🏠</div>
-            <div class="ret-name">Pick up at office</div>
-            <div class="ret-sub">200 Brown Rd #108, Fremont</div>
+            <div class="ret-name">Collect at our office</div>
+            <div class="ret-sub" style="color:#2e7d32;font-weight:600">Free · 200 Brown Rd, Fremont</div>
           </div>
           <div class="ret-card" id="rc-delivery" onclick="selRet('delivery',this)">
             <div class="ret-icon">🚗</div>
-            <div class="ret-name">We deliver to you</div>
-            <div class="ret-sub" style="color:var(--gold);font-weight:600">Delivery fee applies</div>
+            <div class="ret-name">We bring them home</div>
+            <div class="ret-sub" style="color:var(--pink);font-weight:600">From $30 · We come to you</div>
           </div>
         </div>
         <div id="slot-sec" style="display:none">
-          <label class="fl" style="margin-bottom:4px">Preferred collection time — we'll call to confirm</label>
-          <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Select all that apply</div>
-          <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Day</div>
-          <div class="pill-row" style="margin-bottom:16px">
-            <button type="button" class="pill" id="day-weekday" onclick="togSlotPill(this,'day-weekday')">Weekday</button>
-            <button type="button" class="pill" id="day-weekend" onclick="togSlotPill(this,'day-weekend')">Weekend</button>
-          </div>
-          <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Time</div>
-          <div class="pill-row">
-            <button type="button" class="pill" id="time-morning" onclick="togSlotPill(this,'time-morning')">Morning (9am–12pm)</button>
-            <button type="button" class="pill" id="time-afternoon" onclick="togSlotPill(this,'time-afternoon')">Afternoon (12pm–5pm)</button>
-            <button type="button" class="pill" id="time-evening" onclick="togSlotPill(this,'time-evening')">Evening (5pm–7pm)</button>
-            <button type="button" class="pill" id="time-after7" onclick="togSlotPill(this,'time-after7')">After 7pm</button>
+          <label class="fl" style="margin-bottom:8px">Preferred collection window — we'll confirm by phone</label>
+          <div class="ret-grid">
+            <div class="ret-card" id="sl-eve" onclick="selSlotCard('Evening (5pm–7pm)','sl-eve')">
+              <div class="ret-icon">🌆</div>
+              <div class="ret-name">Evening</div>
+              <div class="ret-sub">5:00 – 7:00 pm</div>
+            </div>
+            <div class="ret-card" id="sl-late" onclick="selSlotCard('After 7pm','sl-late')">
+              <div class="ret-icon">🌙</div>
+              <div class="ret-name">After 7pm</div>
+              <div class="ret-sub">We'll coordinate</div>
+            </div>
           </div>
         </div>
         <div id="del-sec" style="display:none">
@@ -912,10 +911,10 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <select class="fi" id="calc-weight" onchange="runCalc()">
               <option value="">Select…</option>
               <option value="under5">Under 30 lbs</option>
-              <option value="5to20">30–60 lbs</option>
-              <option value="21to50">60–80 lbs</option>
-              <option value="51to80">80–100 lbs</option>
-              <option value="81to100">100–150 lbs</option>
+              <option value="5to20">31–60 lbs</option>
+              <option value="21to50">61–80 lbs</option>
+              <option value="51to80">81–100 lbs</option>
+              <option value="81to100">101–150 lbs</option>
               <option value="over100">Over 150 lbs</option>
             </select></div>
         </div>
@@ -1331,17 +1330,19 @@ const SVC_PRICE={
   individual:{under5:250,'5to20':350,'21to50':420,'51to100':480,over100:520},
   private:{under5:450,'5to20':495,'21to50':550,'51to100':580,over100:620}
 };
-const WT_LABEL={under5:'Under 30 lbs','5to20':'30–60 lbs','21to50':'60–80 lbs','51to80':'80–100 lbs','81to100':'100–150 lbs',over100:'Over 150 lbs'};
+const WT_LABEL={under5:'Under 30 lbs','5to20':'31–60 lbs','21to50':'61–80 lbs','51to80':'81–100 lbs','81to100':'101–150 lbs',over100:'Over 150 lbs'};
 // Home pickup fees by zone and weight (two-way trip, more responsibility)
 // under50 = under 50lb, over50 = 50-80lb, over80 = over 80lb
 // Home pickup fees — miles-based, 5 weight tiers
 // over100 = always 2 people, d = per driver, total driver pay = d*2
+// Home pickup fees — miles-based, 5 weight tiers
+// over100 = 2 people, d = per driver each
 const PU_FEES_MILES=[
   {maxMiles:10,  u30:{c:65,d:40,you:25},  u60:{c:95,d:55,you:40},  u80:{c:105,d:65,you:40},  u100:{c:130,d:90,you:40},  over100:{c:160,d:60,you:40}},
   {maxMiles:20,  u30:{c:75,d:45,you:30},  u60:{c:98,d:58,you:40},  u80:{c:118,d:78,you:40},  u100:{c:140,d:100,you:40}, over100:{c:180,d:70,you:40}},
-  {maxMiles:35,  u30:{c:105,d:65,you:40}, u60:{c:120,d:80,you:40}, u80:{c:140,d:100,you:40}, u100:{c:168,d:128,you:40},over100:{c:215,d:87,you:40}},
-  {maxMiles:50,  u30:{c:125,d:85,you:40}, u60:{c:145,d:105,you:40},u80:{c:168,d:128,you:40}, u100:{c:198,d:158,you:40},over100:{c:255,d:107,you:40}},
-  {maxMiles:60,  u30:{c:148,d:108,you:40},u60:{c:172,d:132,you:40},u80:{c:200,d:160,you:40}, u100:{c:235,d:195,you:40},over100:{c:290,d:125,you:40}},
+  {maxMiles:35,  u30:{c:105,d:65,you:40}, u60:{c:120,d:80,you:40}, u80:{c:140,d:100,you:40}, u100:{c:168,d:128,you:40}, over100:{c:215,d:87,you:40}},
+  {maxMiles:50,  u30:{c:125,d:85,you:40}, u60:{c:145,d:105,you:40},u80:{c:168,d:128,you:40}, u100:{c:198,d:158,you:40}, over100:{c:255,d:107,you:40}},
+  {maxMiles:60,  u30:{c:148,d:108,you:40},u60:{c:172,d:132,you:40},u80:{c:200,d:160,you:40}, u100:{c:235,d:195,you:40}, over100:{c:290,d:125,you:40}},
 ];
 // Ashes delivery fees — miles based, one way, one person
 const DEL_FEES_MILES=[
@@ -1458,7 +1459,7 @@ function startForm(type){
   document.getElementById('eng-box').style.display='none';
   document.getElementById('ks-details').style.display='none';
   document.getElementById('slot-sec').style.display='none';
-  ['day-weekday','day-weekend','time-morning','time-afternoon','time-evening','time-after7'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('sel');});
+  sSlot='';['sl-eve','sl-late'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('sel');});
   document.getElementById('del-sec').style.display='none';
   document.getElementById('ret-opts').style.display='none';
   document.getElementById('shared-msg').style.display='none';
@@ -1560,6 +1561,11 @@ function selUrn(u,id,et){
 }
 function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('ks-details').style.display=(k==='paw'||k==='nose')?'block':'none';}
 function selRet(r,card){sRet=r;document.querySelectorAll('.ret-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('e-ret').classList.remove('show');document.getElementById('slot-sec').style.display=r==='pickup'?'block':'none';document.getElementById('del-sec').style.display=r==='delivery'?'block':'none';}
+function selSlotCard(s,id){
+  sSlot=s;
+  document.querySelectorAll('#sl-eve,#sl-late').forEach(c=>c.classList.remove('sel'));
+  const el=document.getElementById(id);if(el)el.classList.add('sel');
+}
 function togSlotPill(btn,id){btn.classList.toggle('sel');buildSlotString();}
 function buildSlotString(){
   const days=[{id:'day-weekday',label:'Weekday'},{id:'day-weekend',label:'Weekend'}].filter(d=>document.getElementById(d.id)?.classList.contains('sel')).map(d=>d.label);
