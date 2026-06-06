@@ -1659,20 +1659,22 @@ function wtTierNew(w){
   if(w==='51to100')return'u100';
   return'over100';
 }
-function puFeeByMiles(miles,wKey){
+function puFeeByMiles(miles,wKey,zip){
   if(miles===0)miles=1;
   const bracket=PU_FEES_MILES.find(b=>miles<=b.maxMiles);
   if(!bracket)return null;
   const tier=wtTierNew(wKey);
   const f=bracket[tier];
   const isTwo=tier==='over100';
-  return{clientFee:f.c,driverPay:isTwo?f.d*2:f.d,driverPerPerson:f.d,you:f.you,twoPersonJob:isTwo,miles};
+  const toll=zip&&hasBridgeToll(zip)?9:0;
+  return{clientFee:f.c+toll,driverPay:isTwo?f.d*2:f.d,driverPerPerson:f.d,you:f.you,twoPersonJob:isTwo,miles,toll};
 }
-function delFeeByMiles(miles){
+function delFeeByMiles(miles,zip){
   if(miles===0)miles=1;
   const bracket=DEL_FEES_MILES.find(b=>miles<=b.maxMiles);
   if(!bracket)return null;
-  return{fee:bracket.client,driver:bracket.driver,you:bracket.you,miles};
+  const toll=zip&&hasBridgeToll(zip)?9:0;
+  return{fee:bracket.client+toll,driver:bracket.driver,you:bracket.you+toll,miles,toll};
 }
 function puFeeByZip(zip,wKey){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.12));return puFeeByMiles(m,wKey);}
 function delFeeByZip(zip){const m=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.12));return delFeeByMiles(m);}
@@ -2453,14 +2455,14 @@ async function runCalc(){
   em.style.display='none';document.getElementById('calc-pu-client').textContent='Calculating…';document.getElementById('calc-del-client').textContent='Calculating…';res.style.display='block';qm.style.display='none';
   let miles=null;
   try{const dest=zip+', CA';miles=await getDrivingMiles(dest);}catch(e){miles=Math.max(1,Math.round(Math.abs(parseInt(zip)-94538)*0.09));}
-  const pu=puFeeByMiles(miles||50,wt),del=delFeeByMiles(miles||50);
+  const pu=puFeeByMiles(miles||50,wt,zip),del=delFeeByMiles(miles||50,zip);
   if(!pu||!del){res.style.display='none';qm.style.display='block';return;}
-  document.getElementById('calc-pu-client').textContent='$'+pu.clientFee;
+  document.getElementById('calc-pu-client').textContent='$'+pu.clientFee+(pu.toll?' (incl. $9 bridge toll)':'');
   document.getElementById('calc-pu-driver').textContent=pu.twoPersonJob?'$'+pu.driverPerPerson+' × 2 people = $'+pu.driverPay:'$'+pu.driverPay;
   document.getElementById('calc-pu-cut').textContent='$'+pu.you+(pu.twoPersonJob?' (2-person job 👥)':'');
-  document.getElementById('calc-del-client').textContent='$'+del.fee;
+  document.getElementById('calc-del-client').textContent='$'+del.fee+(del.toll?' (incl. $9 bridge toll)':'');
   document.getElementById('calc-del-driver').textContent='$'+del.driver;
-  document.getElementById('calc-del-cut').textContent='$'+(del.fee-del.driver);
+  document.getElementById('calc-del-cut').textContent='$'+del.you;
 }
 
 // ═══════════════════════════════════════
