@@ -1645,8 +1645,12 @@ let _distSvc=null;
 function getDistSvc(){if(_distSvc)return _distSvc;if(window.google&&google.maps){_distSvc=new google.maps.DistanceMatrixService();return _distSvc;}return null;}
 async function getDrivingMiles(dest){
   return new Promise((res,rej)=>{
-    const svc=getDistSvc();if(!svc){rej(new Error('Maps not loaded'));return;}
+    // Timeout after 4 seconds — fall back to zip estimate
+    const timer=setTimeout(()=>rej(new Error('timeout')),4000);
+    const svc=getDistSvc();
+    if(!svc){clearTimeout(timer);rej(new Error('Maps not loaded'));return;}
     svc.getDistanceMatrix({origins:[FREMONT_OFFICE],destinations:[dest],travelMode:'DRIVING',unitSystem:google.maps.UnitSystem.IMPERIAL},(r,status)=>{
+      clearTimeout(timer);
       if(status==='OK'&&r.rows[0].elements[0].status==='OK')res(Math.round(r.rows[0].elements[0].distance.value/1609.34));
       else rej(new Error(status));
     });
@@ -1658,6 +1662,10 @@ function wtTierNew(w){
   if(w==='21to50')return'u80';
   if(w==='51to100')return'u100';
   return'over100';
+}
+function hasBridgeToll(zip){
+  const prefix=String(zip).trim().slice(0,3);
+  return['940','941','942','943','948','949'].includes(prefix);
 }
 function puFeeByMiles(miles,wKey,zip){
   if(miles===0)miles=1;
