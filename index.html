@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASvmLKSMItn_UWEmkgNph84N6BODCbNk8&libraries=geometry,places"></script>
+<!-- Google Maps loaded via serverless function -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;-webkit-text-size-adjust:100%}
@@ -1644,17 +1644,24 @@ function updatePrice(){}
 let _distSvc=null;
 function getDistSvc(){if(_distSvc)return _distSvc;if(window.google&&google.maps){_distSvc=new google.maps.DistanceMatrixService();return _distSvc;}return null;}
 async function getDrivingMiles(dest){
-  return new Promise((res,rej)=>{
-    // Timeout after 4 seconds — fall back to zip estimate
-    const timer=setTimeout(()=>rej(new Error('timeout')),4000);
-    const svc=getDistSvc();
-    if(!svc){clearTimeout(timer);rej(new Error('Maps not loaded'));return;}
-    svc.getDistanceMatrix({origins:[FREMONT_OFFICE],destinations:[dest],travelMode:'DRIVING',unitSystem:google.maps.UnitSystem.IMPERIAL},(r,status)=>{
-      clearTimeout(timer);
-      if(status==='OK'&&r.rows[0].elements[0].status==='OK')res(Math.round(r.rows[0].elements[0].distance.value/1609.34));
-      else rej(new Error(status));
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),5000);
+  try{
+    const r=await fetch('/api/distance',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({destination:dest}),
+      signal:controller.signal
     });
-  });
+    clearTimeout(timer);
+    if(!r.ok)throw new Error('API error');
+    const data=await r.json();
+    if(data.miles)return data.miles;
+    throw new Error('No miles');
+  }catch(e){
+    clearTimeout(timer);
+    throw e;
+  }
 }
 function wtTierNew(w){
   if(w==='under5')return'u30';
