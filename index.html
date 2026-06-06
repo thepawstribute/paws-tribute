@@ -1641,8 +1641,8 @@ function updatePrice(){}
 // ═══════════════════════════════════════
 // DISTANCE & FEES
 // ═══════════════════════════════════════
-let _distSvc=null;
-function getDistSvc(){if(_distSvc)return _distSvc;if(window.google&&google.maps){_distSvc=new google.maps.DistanceMatrixService();return _distSvc;}return null;}
+// let _distSvc=null; // removed with Maps SDK
+function getDistSvc(){return null;} // Maps SDK removed — using /api/distance instead
 async function getDrivingMiles(dest){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),5000);
@@ -2108,7 +2108,7 @@ function renderGrid(){
           const tot=staffJobs[n].length||1;const pct=100/tot;
           const cfg=TYPE_CFG[job.type]||{};
           const big=ht>=44,mid=ht>=24;
-          bHTML+=`<div onclick="${currentUser.role==='admin'?`openEditModal(jobs.find(j=>j.id==='${job.id}'))`:`openViewModal(jobs.find(j=>j.id==='${job.id}'))`}" style="position:absolute;top:${topOff}px;left:2px;right:2px;height:${ht}px;border-radius:6px;padding:3px 5px;cursor:pointer;z-index:10;overflow:hidden;border-left:3px solid ${cfg.color||'#ccc'};background:${cfg.bg||'#f5f5f5'};box-shadow:0 1px 3px rgba(0,0,0,.1)">
+          bHTML+=`<div onclick="jobClick('${job.id}')" style="position:absolute;top:${topOff}px;left:2px;right:2px;height:${ht}px;border-radius:6px;padding:3px 5px;cursor:pointer;z-index:10;overflow:hidden;border-left:3px solid ${cfg.color||'#ccc'};background:${cfg.bg||'#f5f5f5'};box-shadow:0 1px 3px rgba(0,0,0,.1)">
             ${big?`<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:${cfg.color||'#333'}">${cfg.label||job.type}</div>`:''}
             ${mid?`<div style="font-size:11px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.owner_name.split(' ')[0]}</div>`:''}
             ${big&&job.pet_name?`<div style="font-size:10px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.pet_name}</div>`:''}
@@ -2195,6 +2195,12 @@ async function addJob(){
   const{error}=await sb.from('jobs').insert({type:jobType,cremation_type:jobCrem,staff_name:jobStaff,job_date:fmtDateKey(curDate),job_time:document.getElementById('jobTime').value+':00',duration_mins:parseInt(document.getElementById('jobDuration').value)||30,owner_name:document.getElementById('ownerName').value.trim(),owner_phone:document.getElementById('ownerPhone').value,pet_name:document.getElementById('petName').value,pet_breed:document.getElementById('petBreed').value,pet_weight:parseFloat(document.getElementById('petWeight').value)||null,address:document.getElementById('ownerAddress').value,paid:isPaid===true,remarks:document.getElementById('remarks').value});
   if(error){showToast('Error saving. Try again.');return;}
   document.getElementById('addOverlay').classList.remove('open');showToast('Job added ✓');await loadJobs();renderGrid();
+}
+function jobClick(id){
+  const job=jobs.find(j=>j.id===id);
+  if(!job)return;
+  if(currentUser.role==='admin')openEditModal(job);
+  else openViewModal(job);
 }
 function openEditModal(job){
   editJobId=job.id;editType=job.type;editCrem=job.cremation_type;editStaff=job.staff_name;editPaid=job.paid;
