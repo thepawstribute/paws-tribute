@@ -2099,7 +2099,7 @@ function renderGrid(){
     vis.forEach(n=>{
       const isUnavail=availability[`${n}_${ds}_${h}`]===false;
       const bg=isUnavail?'background:rgba(180,170,170,0.4);':'';
-      bHTML+=`<td style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid #d0ccc8;border-right:1px solid #d0ccc8;vertical-align:top;${bg}"><div style="position:relative;width:100%;height:${H_PX}px">`;
+      bHTML+=`<td style="width:${SW}px;min-width:${SW}px;border-bottom:1px solid #d0ccc8;border-right:1px solid #d0ccc8;vertical-align:top;${bg}"><div style="position:relative;width:100%;height:${H_PX}px;overflow:visible">`;
       // Draw job cards that START in this hour
       staffJobs[n].forEach((sub,si)=>sub.forEach(({s:st,e:en,job})=>{
         if(Math.floor(st/60)===h){
