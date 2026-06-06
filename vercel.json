@@ -3,5 +3,7 @@
     "api/*.js": {
       "runtime": "nodejs20.x"
     }
-  }
+  },
+  "buildCommand": null,
+  "outputDirectory": "."
 }
