@@ -185,7 +185,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .back-to-client{font-size:13px;color:var(--text-hint);background:none;border:none;cursor:pointer;margin-top:20px;font-family:"DM Sans",sans-serif}
 
 /* ── STAFF APP ── */
-#screen-staff-app{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:var(--bg)}
+#screen-staff-app{display:none;flex-direction:column;height:100dvh;overflow:hidden;background:var(--bg);position:relative}
 #screen-staff-app.active{display:flex}
 .app-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:52px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
 .app-logo{font-family:"DM Serif Display",serif;font-size:17px;color:var(--pink-deep)}
@@ -2014,7 +2014,7 @@ async function showApp(){
   renderStaffPills('staffPills');renderStaffPills('editStaffPills');renderStaffPills('schedStaffPills');
   renderDateLabel();renderWeekLabel();
   await loadJobs();await loadAvailability();
-  renderGrid();renderAvailability();subscribeRealtime();setTimeout(positionActiveView,50);
+  moveModalsToBody();renderGrid();renderAvailability();subscribeRealtime();setTimeout(positionActiveView,50);
   document.getElementById('orders-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
 function renderStaffPills(cid){
@@ -2034,6 +2034,11 @@ function getStaffViewTop(){
   let top=(hdr?hdr.offsetHeight:52)+(tabs?tabs.offsetHeight:44);
   if(dateNav&&dateNav.style.display!=='none') top+=dateNav.offsetHeight;
   return top;
+}
+function moveModalsToBody(){
+  document.querySelectorAll('.modal-overlay').forEach(m=>{
+    if(m.parentElement!==document.body)document.body.appendChild(m);
+  });
 }
 function positionActiveView(){
   const top=getStaffViewTop();
