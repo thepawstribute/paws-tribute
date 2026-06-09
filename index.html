@@ -1164,7 +1164,14 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="fg2"><div class="fl2">Breed</div><input type="text" class="fi2" id="petBreed"></div>
         <div class="fg2"><div class="fl2">Weight (lb)</div><input type="number" class="fi2" id="petWeight"></div>
       </div>
-      <div class="fg2" id="addrGrp" style="display:none"><div class="fl2">Address</div><input type="text" class="fi2" id="ownerAddress" placeholder="Full address"></div>
+      <div class="fg2" id="ashesTypeGrp" style="display:none">
+        <div class="fl2">Ashes — how are they collecting?</div>
+        <div class="toggle-btns" style="margin-top:6px">
+          <button class="toggle-btn" id="ashesOfficeBtn" onclick="setAshesType('office')">🏢 Coming to office</button>
+          <button class="toggle-btn" id="ashesDeliveryBtn" onclick="setAshesType('delivery')">🚗 We deliver</button>
+        </div>
+      </div>
+      <div class="fg2" id="addrGrp" style="display:none"><div class="fl2">Delivery address</div><input type="text" class="fi2" id="ownerAddress" placeholder="Full address"></div>
       <div class="fg2"><div class="fl2">Payment</div>
         <div class="toggle-btns">
           <button class="toggle-btn" id="paidBtn" onclick="setPaid(true)">✓ Paid</button>
@@ -2175,6 +2182,10 @@ async function toggleAvailCell(sn,ds,h,cell){
 // ADD / EDIT JOB
 // ═══════════════════════════════════════
 function openAddModal(){
+  ashesDelivery=false;
+  document.getElementById('ashesTypeGrp').style.display='none';
+  document.getElementById('ashesOfficeBtn').classList.remove('sel');
+  document.getElementById('ashesDeliveryBtn').classList.remove('sel');
   document.getElementById('addOverlay').classList.add('open');
   jobType=null;jobStaff=null;isPaid=null;jobCrem=null;
   ['pickup','dropoff','ashes','ceremony','ams'].forEach(t=>document.getElementById(`type-${t}`).className='type-btn');
@@ -2183,6 +2194,13 @@ function openAddModal(){
   document.getElementById('paidBtn').className='toggle-btn';document.getElementById('unpaidBtn').className='toggle-btn';
   document.getElementById('overlapWarn').style.display='none';document.getElementById('cremGrp').style.display='block';document.getElementById('addrGrp').style.display='none';
   ['jobTime','jobDuration','ownerName','ownerPhone','petName','petBreed','petWeight','ownerAddress','remarks'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='jobTime'?'09:00':'';});
+}
+let ashesDelivery=false;
+function setAshesType(t){
+  ashesDelivery=t==='delivery';
+  document.getElementById('ashesOfficeBtn').classList.toggle('sel',t==='office');
+  document.getElementById('ashesDeliveryBtn').classList.toggle('sel',t==='delivery');
+  document.getElementById('addrGrp').style.display=ashesDelivery?'block':'none';
 }
 function selectType(t){jobType=t;['pickup','dropoff','ashes','ceremony','ams'].forEach(x=>document.getElementById(`type-${x}`).className='type-btn'+(x===t?` sel-${t}`:''));document.getElementById('jobDuration').value=TYPE_CFG[t].dur;document.getElementById('addrGrp').style.display=t==='pickup'?'flex':'none';const hide=t==='ashes'||t==='ams';document.getElementById('cremGrp').style.display=hide?'none':'block';if(hide){jobCrem=null;document.querySelectorAll('#cremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));}checkOverlap();}
 function selectCrem(t){jobCrem=t;const m={individual:'crem-individual',communal:'crem-communal',ceremony_crem:'crem-ceremony'};Object.entries(m).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===t));}
