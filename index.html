@@ -1310,6 +1310,41 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <option value="Private Farewell Ceremony">Private Farewell Ceremony</option>
           </select>
         </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Urn</div>
+          <select class="fi2" id="edit-urn">
+            <option value="—">— No urn (Shared)</option>
+            <option value="Biodegradable">Biodegradable</option>
+            <option value="Metal (Tan)">Metal (Tan)</option>
+            <option value="Metal (Black)">Metal (Black)</option>
+            <option value="Wooden">Wooden</option>
+            <option value="Ceramic">Ceramic</option>
+            <option value="Scattering Tube">Scattering Tube</option>
+            <option value="Custom / Other">Custom / Other</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Paw / Nose print</div>
+          <select class="fi2" id="edit-keepsake">
+            <option value="None">None</option>
+            <option value="Paw Print · Small">Paw Print · Small</option>
+            <option value="Paw Print · Large">Paw Print · Large</option>
+            <option value="Nose Print · Small">Nose Print · Small</option>
+            <option value="Nose Print · Large">Nose Print · Large</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Fur clipping</div>
+          <select class="fi2" id="edit-fur">
+            <option value="No">No</option>
+            <option value="Yes — $27">Yes — $27</option>
+            <option value="Included (Private)">Included (Private)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Return method</div>
+          <select class="fi2" id="edit-return">
+            <option value="Pick up at office">Pick up at office</option>
+            <option value="We deliver to you">We deliver to you</option>
+            <option value="N/A">N/A (Shared)</option>
+          </select>
+        </div>
         <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Total ($)</div><input type="number" class="fi2" id="edit-total" placeholder="0"></div>
         <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Payment</div>
           <select class="fi2" id="edit-payment">
@@ -2479,6 +2514,10 @@ function toggleOrderEdit(){
     document.getElementById('edit-pet-type').value=o.pet_type||'';
     document.getElementById('edit-weight').value=o.pet_weight||'';
     document.getElementById('edit-service').value=o.service||'Individual Farewell';
+    document.getElementById('edit-urn').value=o.urn||'—';
+    document.getElementById('edit-keepsake').value=o.keepsake||'None';
+    document.getElementById('edit-fur').value=o.fur_clipping||'No';
+    document.getElementById('edit-return').value=o.return_method||'Pick up at office';
     document.getElementById('edit-total').value=o.total_amount||'';
     document.getElementById('edit-payment').value=o.payment_status||'Unpaid';
     sec.style.display='block';
@@ -2499,6 +2538,10 @@ async function saveOrderEdits(){
     pet_type:document.getElementById('edit-pet-type').value.trim(),
     pet_weight:document.getElementById('edit-weight').value.trim(),
     service:document.getElementById('edit-service').value,
+    urn:document.getElementById('edit-urn').value,
+    keepsake:document.getElementById('edit-keepsake').value,
+    fur_clipping:document.getElementById('edit-fur').value,
+    return_method:document.getElementById('edit-return').value,
     total_amount:parseFloat(document.getElementById('edit-total').value)||0,
     payment_status:document.getElementById('edit-payment').value,
   };
