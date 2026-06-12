@@ -884,10 +884,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       </div>
       <div class="stats-row" id="stats-row" style="border:none;padding:0;margin:0;flex-shrink:0;background:transparent"></div>
     </div>
-    <div id="pending-section" style="display:none;flex-shrink:0;max-height:120px;overflow-y:auto">
-      <div class="pending-banner"><span style="font-size:16px">🔔</span><div class="pending-text">New client intakes — tap to review &amp; schedule</div></div>
-      <div id="pending-list"></div>
-    </div>
+<div id="pending-section" style="display:none"></div><div id="pending-list" style="display:none"></div>
 
     <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
   </div>
@@ -1290,6 +1287,39 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       </div>
       <div class="mrow"><span style="font-weight:700;color:#111">Payment</span><span class="mval" id="od-payment">—</span></div>
       <div class="mtotal"><span>Total</span><span id="od-total">—</span></div>
+
+      <!-- EDIT FIELDS — shown when Edit is clicked -->
+      <div id="od-edit-sec" style="display:none;margin-top:16px;border-top:2px solid var(--pink-border);padding-top:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px">✏️ Edit Order Details</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div><div class="fl2" style="margin-bottom:4px">First name</div><input type="text" class="fi2" id="edit-fn" placeholder="First name"></div>
+          <div><div class="fl2" style="margin-bottom:4px">Last name</div><input type="text" class="fi2" id="edit-ln" placeholder="Last name"></div>
+        </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Phone</div><input type="tel" class="fi2" id="edit-phone" placeholder="Phone"></div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Email</div><input type="email" class="fi2" id="edit-email" placeholder="Email"></div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Pet name</div><input type="text" class="fi2" id="edit-pet-name" placeholder="Pet name"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div><div class="fl2" style="margin-bottom:4px">Pet type</div><input type="text" class="fi2" id="edit-pet-type" placeholder="Dog / Cat"></div>
+          <div><div class="fl2" style="margin-bottom:4px">Weight</div><input type="text" class="fi2" id="edit-weight" placeholder="e.g. 5–20 lbs"></div>
+        </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Service</div>
+          <select class="fi2" id="edit-service">
+            <option value="Shared Farewell">Shared Farewell</option>
+            <option value="Individual Farewell">Individual Farewell</option>
+            <option value="Private Farewell Ceremony">Private Farewell Ceremony</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Total ($)</div><input type="number" class="fi2" id="edit-total" placeholder="0"></div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Payment</div>
+          <select class="fi2" id="edit-payment">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="Unpaid">Unpaid</option>
+          </select>
+        </div>
+        <button onclick="saveOrderEdits()" style="width:100%;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px">Save changes</button>
+      </div>
       <div class="msec" style="margin-top:14px"><div class="msec-lbl">Status</div>
         <select class="ssel" id="od-status" onchange="saveOrderStatus()">
           <option value="New / Received">🟡 New / Received</option>
@@ -1321,6 +1351,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     </div>
     <div class="modal-ftr">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('orderOverlay').classList.remove('open')">Close</button>
+      <button class="mbtn" id="od-edit-btn" onclick="toggleOrderEdit()" style="background:var(--pink-light);color:var(--pink-deep);border:1px solid var(--pink-border)">✏️ Edit</button>
       <button class="mbtn mbtn-pri" onclick="logOrderCall()">📞 Log call</button>
     </div>
   </div>
@@ -2431,6 +2462,56 @@ async function addToBrevo(email, firstName, petName){
     });
     console.log('Brevo response:',r.status);
   }catch(e){console.error('Brevo error:',e);}
+}
+function toggleOrderEdit(){
+  const sec=document.getElementById('od-edit-sec');
+  const btn=document.getElementById('od-edit-btn');
+  const o=orders.find(x=>x.id==openOrderId);
+  if(!o)return;
+  const isOpen=sec.style.display!=='none';
+  if(!isOpen){
+    // Populate edit fields with current values
+    document.getElementById('edit-fn').value=o.first_name||'';
+    document.getElementById('edit-ln').value=o.last_name||'';
+    document.getElementById('edit-phone').value=o.phone||'';
+    document.getElementById('edit-email').value=o.email||'';
+    document.getElementById('edit-pet-name').value=o.pet_name||'';
+    document.getElementById('edit-pet-type').value=o.pet_type||'';
+    document.getElementById('edit-weight').value=o.pet_weight||'';
+    document.getElementById('edit-service').value=o.service||'Individual Farewell';
+    document.getElementById('edit-total').value=o.total_amount||'';
+    document.getElementById('edit-payment').value=o.payment_status||'Unpaid';
+    sec.style.display='block';
+    btn.textContent='✕ Cancel';
+  } else {
+    sec.style.display='none';
+    btn.textContent='✏️ Edit';
+    btn.style.background='var(--pink-light)';
+  }
+}
+async function saveOrderEdits(){
+  const updates={
+    first_name:document.getElementById('edit-fn').value.trim(),
+    last_name:document.getElementById('edit-ln').value.trim(),
+    phone:document.getElementById('edit-phone').value.trim(),
+    email:document.getElementById('edit-email').value.trim(),
+    pet_name:document.getElementById('edit-pet-name').value.trim(),
+    pet_type:document.getElementById('edit-pet-type').value.trim(),
+    pet_weight:document.getElementById('edit-weight').value.trim(),
+    service:document.getElementById('edit-service').value,
+    total_amount:parseFloat(document.getElementById('edit-total').value)||0,
+    payment_status:document.getElementById('edit-payment').value,
+  };
+  await sb.from('orders').update(updates).eq('id',openOrderId);
+  // Update local orders array
+  const o=orders.find(x=>x.id==openOrderId);
+  if(o)Object.assign(o,updates);
+  // Refresh display
+  openOrderDetail(openOrderId,false);
+  document.getElementById('od-edit-sec').style.display='none';
+  document.getElementById('od-edit-btn').textContent='✏️ Edit';
+  showToast('Order updated ✓');
+  renderOrders();
 }
 async function saveOrderStatus(){
   const v=document.getElementById('od-status').value;
