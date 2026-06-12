@@ -1381,7 +1381,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <button class="mbtn mbtn-pri" style="width:100%;padding:14px;font-size:15px" onclick="confirmAndSchedule()">📅 Confirm &amp; Add to Schedule →</button>
       </div>
       <div id="od-ashes-sec" style="margin-top:8px">
-        <button class="mbtn" style="width:100%;padding:14px;font-size:15px;background:#fff3e0;color:#e65100;border:2px solid #ffb74d" onclick="scheduleAshesPickup()">🫙 Schedule Ashes Pickup →</button>
+        <button class="mbtn" id="od-ashes-btn" style="width:100%;padding:14px;font-size:15px;background:#fff3e0;color:#e65100;border:2px solid #ffb74d" onclick="scheduleAshesPickup()">🫙 Schedule Ashes Pickup →</button>
       </div>
     </div>
     <div class="modal-ftr">
@@ -2460,6 +2460,8 @@ function openOrderDetail(id,showSched){
   document.getElementById('od-dcost-row').style.display=o.return_method==='We deliver to you'?'flex':'none';
   document.getElementById('od-dcost').textContent=o.delivery_fee||'—';
   document.getElementById('od-delivery-time-row').style.display=o.return_method==='We deliver to you'?'block':'none';
+  const ashesBtn=document.getElementById('od-ashes-btn');
+  if(ashesBtn)ashesBtn.textContent=o.return_method==='We deliver to you'?'🚗 Schedule Ashes Delivery →':'🫙 Schedule Ashes Pickup →';
   if(o.delivery_datetime){
     const dt=new Date(o.delivery_datetime);
     document.getElementById('od-del-date').value=dt.toISOString().slice(0,10);
@@ -2585,14 +2587,18 @@ function confirmAndSchedule(){
   document.getElementById('schedOverlay').classList.add('open');
 }
 function scheduleAshesPickup(){
+  const o=orders.find(x=>x.id==openOrderId);
+  const isDelivery=o&&o.return_method==='We deliver to you';
   document.getElementById('orderOverlay').classList.remove('open');
   schedOrderId=openOrderId;schedStaff=null;
   document.getElementById('sched-date').value=fmtDateKey(new Date());
   document.getElementById('sched-time').value='10:00';
-  document.getElementById('sched-remarks').value='Ashes pickup — client collecting';
+  // Set note based on delivery method
+  document.getElementById('sched-remarks').value=isDelivery
+    ?'Ashes delivery — deliver to: '+(o.delivery_address||'[address]')
+    :'Ashes pickup — client collecting';
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
-  // Set modal title to Ashes Pickup
-  document.querySelector('#schedOverlay .modal-title').textContent='🫙 Schedule Ashes Pickup';
+  document.querySelector('#schedOverlay .modal-title').textContent=isDelivery?'🚗 Schedule Ashes Delivery':'🫙 Schedule Ashes Pickup';
   schedIsAshes=true;
   document.getElementById('schedOverlay').classList.add('open');
 }
