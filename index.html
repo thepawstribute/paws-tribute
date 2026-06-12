@@ -607,8 +607,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <div class="ret-name">Collect at our office</div>
             <div class="ret-sub" style="color:var(--muted)">200 Brown Rd #108, Fremont</div>
           </div>
-          <div class="ret-card" id="rc-delivery" onclick="selRet('delivery',this)" style="border-color:var(--pink-border);background:var(--pink-light)">
-            <div style="font-size:10px;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">✨ Most families choose this</div>
+          <div class="ret-card" id="rc-delivery" onclick="selRet('delivery',this)">
             <div class="ret-icon">🚗</div>
             <div class="ret-name">We bring them home</div>
             <div class="ret-sub" style="color:var(--pink);font-weight:600">We come to you</div>
@@ -701,10 +700,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <div style="font-size:20px;margin-bottom:4px">💳</div>
             <div class="wopt-label">Card</div>
           </div>
-          <div class="wopt" id="pay-pending" onclick="selPayment('Pending',this)" style="padding:14px 8px">
-            <div style="font-size:20px;margin-bottom:4px">⏳</div>
-            <div class="wopt-label">Pending</div>
-          </div>
+
         </div>
         <div style="font-size:13px;color:var(--text-hint);margin-top:10px;text-align:center">Card payment taken on Square reader separately</div>
       </div>
@@ -1441,7 +1437,7 @@ let pinEntry='',pinTarget=null;
 let schedOrderId=null,schedStaff=null,schedIsAshes=false;
 let orders=[],openOrderId=null,curOFilter='all';
 // Form
-let formType='dropoff',fPage=1,formStaff=null,paymentMethod='Pending';
+let formType='dropoff',fPage=1,formStaff=null,paymentMethod='';
 let sSvc='',sUrn='',sUrnEng='',sKs='none',sRet='',sSlot='',sPetType='',sWeight='';
 let ksQty=1,overtimeAuth=0;
 let puFeeData=null,delFeeData=null;
@@ -1533,8 +1529,8 @@ function startForm(type){
   document.getElementById('fur-sec').style.display='block';
   document.getElementById('private-fur-note').style.display='none';
   // payment handled by Cash/Card/Pending toggle
-  formStaff=null;paymentMethod='Pending';
-  document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(el=>el.classList.remove('sel'));
+  formStaff=null;paymentMethod='';
+  document.querySelectorAll('#pay-cash,#pay-card').forEach(el=>el.classList.remove('sel'));
   // Reset staff pill selection (pills already rendered on init)
   document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   setTimeout(()=>setupSig(),100);
@@ -1625,7 +1621,15 @@ function selUrn(u,id,et){
   document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
 }
 function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('ks-details').style.display=(k==='paw'||k==='nose')?'block':'none';}
-function selRet(r,card){sRet=r;document.querySelectorAll('.ret-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('e-ret').classList.remove('show');document.getElementById('slot-sec').style.display=r==='pickup'?'block':'none';document.getElementById('del-sec').style.display=r==='delivery'?'block':'none';}
+function selRet(r,card){
+  sRet=r;
+  document.querySelectorAll('.ret-card').forEach(c=>c.classList.remove('sel'));
+  card.classList.add('sel');
+  document.getElementById('e-ret').classList.remove('show');
+  document.getElementById('slot-sec').style.display=r==='pickup'?'block':'none';
+  const delSec=document.getElementById('del-sec');
+  if(delSec){delSec.style.display=r==='delivery'?'block':'none';}
+}
 function selSlotCard(s,id){
   sSlot=s;
   document.querySelectorAll('#sl-eve,#sl-late').forEach(c=>c.classList.remove('sel'));
@@ -1641,7 +1645,7 @@ function buildSlotString(){
   sSlot=parts.join(' · ')||'';
 }
 function selOvertime(n,el){overtimeAuth=n;document.querySelectorAll('[id^="ot-"]').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');}
-function selPayment(method,el){paymentMethod=method;document.querySelectorAll('#pay-cash,#pay-card,#pay-pending').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+function selPayment(method,el){paymentMethod=method;document.querySelectorAll('#pay-cash,#pay-card').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
 function chgQty(d){ksQty=Math.max(1,ksQty+d);document.getElementById('ks-qty').textContent=ksQty;}
 function updatePrice(){}
 
