@@ -2509,7 +2509,10 @@ function openOrderDetail(id,showSched){
     odPay.textContent=ps;
   }
   document.getElementById('od-total').textContent=o.total_amount?'$'+o.total_amount:'—';
-  document.getElementById('od-status').value=o.status||'New / Received';
+  // Map old status values to new ones
+  const statusMap={'In Progress':'New / Received','Ready for Collection':'Ashes Ready'};
+  const mappedStatus=statusMap[o.status]||o.status||'New / Received';
+  document.getElementById('od-status').value=mappedStatus;
   document.getElementById('od-balance').value=o.remaining_balance||'';
   document.getElementById('od-notes').value=o.notes||'';
   document.getElementById('od-ot-sec').style.display=o.service==='Private Farewell Ceremony'?'block':'none';
