@@ -840,7 +840,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   <div class="tab-bar">
     <div class="tab active" id="tab-schedule" onclick="switchTab('schedule')">📅 Schedule</div>
     <div class="tab" id="tab-availability" onclick="switchTab('availability')">🗓 Availability</div>
-    <div class="tab hidden" id="tab-orders" onclick="switchTab('orders')">📋 Orders</div>
+    <div class="tab" id="tab-orders" onclick="switchTab('orders')">📋 Orders</div>
     <div class="tab" id="tab-pricing" onclick="switchTab('pricing')">💲 Pricing</div>
     <div class="tab hidden" id="tab-calc" onclick="switchTab('calc')">🚗 Quote</div>
     <div class="tab" id="tab-guide" onclick="switchTab('guide')">📖 VA Guide</div>
@@ -2118,7 +2118,7 @@ async function showApp(){
   document.getElementById('logoutBtn').textContent=currentUser.name+' ↩';
   const isAdmin=currentUser.role==='admin';
   document.getElementById('addJobBtn').classList.toggle('hidden',!isAdmin);
-  document.getElementById('tab-orders').classList.toggle('hidden',!isAdmin);
+  document.getElementById('tab-orders').classList.remove('hidden'); // visible to all staff
   document.getElementById('tab-calc').classList.toggle('hidden',!isAdmin);
   document.getElementById('tab-export').classList.toggle('hidden',!isAdmin);
   
