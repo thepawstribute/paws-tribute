@@ -552,11 +552,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div class="eng-box">
             <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Personalization</div>
             <div class="fg"><label class="fl">Line 1 <span class="hint">(max 15 chars)</span></label>
-              <input class="fi" type="text" id="eng1" maxlength="15" placeholder="e.g. Buddy" oninput="document.getElementById('eng1c').textContent=this.value.length+'/15'">
+              <input class="fi" type="text" id="eng1" maxlength="15" placeholder="e.g. Buddy" oninput="document.getElementById('eng1c').textContent=this.value.length+'/15';updateEngNote()">
               <div class="char-count" id="eng1c">0/15</div></div>
             <div id="eng-l2" class="fg" style="display:none"><label class="fl">Line 2 <span class="hint">(optional)</span></label>
-              <input class="fi" type="text" id="eng2" maxlength="15" placeholder="e.g. Forever loved" oninput="document.getElementById('eng2c').textContent=this.value.length+'/15'">
+              <input class="fi" type="text" id="eng2" maxlength="15" placeholder="e.g. Forever loved" oninput="document.getElementById('eng2c').textContent=this.value.length+'/15';updateEngNote()">
               <div class="char-count" id="eng2c">0/15</div></div>
+            <div id="eng-fee-note" style="display:none;margin-top:10px;background:var(--pink-light);border:1px solid var(--pink-border);border-radius:8px;padding:10px 14px;font-size:14px;color:var(--pink-deep);font-weight:600">Additional $20 for engraving on metal urn</div>
           </div>
         </div>
       </div>
@@ -1715,8 +1716,15 @@ function selSvc(s,card){
   document.getElementById('private-fur-note').style.display=s==='private'?'block':'none';
   if(s==='shared')sUrn='N/A';
 }
+function updateEngNote(){
+  const note=document.getElementById('eng-fee-note');
+  if(!note)return;
+  const isMetalUrn=sUrn&&sUrn.toLowerCase().includes('metal');
+  const hasText=gv('eng1')||gv('eng2');
+  note.style.display=(isMetalUrn&&hasText)?'block':'none';
+}
 function selUrn(u,id,et){
-  sUrn=u;sUrnEng=et;document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));document.getElementById(id).classList.add('sel');document.getElementById('e-urn').classList.remove('show');
+  sUrn=u;sUrnEng=et;document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));document.getElementById(id).classList.add('sel');document.getElementById('e-urn').classList.remove('show');updateEngNote();
   document.getElementById('eng-box').style.display=et==='none'?'none':'block';
   document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
 }
