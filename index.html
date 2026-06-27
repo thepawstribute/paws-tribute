@@ -1724,7 +1724,24 @@ function updateEngNote(){
   note.style.display=(isMetalUrn&&hasText)?'block':'none';
 }
 function selUrn(u,id,et){
-  sUrn=u;sUrnEng=et;document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));document.getElementById(id).classList.add('sel');document.getElementById('e-urn').classList.remove('show');updateEngNote();
+  sUrn=u;
+  // Only allow engraving on metal urns
+  const isMetalUrn=u.toLowerCase().includes('metal');
+  sUrnEng=isMetalUrn?et:'none';
+  document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById(id).classList.add('sel');
+  document.getElementById('e-urn').classList.remove('show');
+  // Show engraving section only for metal urns
+  const engBox=document.getElementById('eng-box');
+  if(engBox)engBox.style.display=isMetalUrn?'block':'none';
+  // Clear engraving fields if non-metal
+  if(!isMetalUrn){
+    const e1=document.getElementById('eng1'),e2=document.getElementById('eng2');
+    if(e1)e1.value='';if(e2)e2.value='';
+    document.getElementById('eng1c').textContent='0/15';
+    document.getElementById('eng2c').textContent='0/15';
+  }
+  updateEngNote();
   document.getElementById('eng-box').style.display=et==='none'?'none':'block';
   document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
 }
