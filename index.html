@@ -676,13 +676,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           </div>
         </div>
       </div>
-      <label class="fl">Sign below <span class="req">*</span></label>
-      <div id="sig-wrap" style="border:2px solid var(--border);border-radius:var(--rs);background:#fff;height:140px;position:relative;cursor:crosshair;touch-action:none;-webkit-user-select:none;user-select:none;margin-bottom:8px">
-        <svg id="sig-svg" style="position:absolute;inset:0;width:100%;height:100%;display:block" xmlns="http://www.w3.org/2000/svg"></svg>
-        <div id="sig-hint" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#bbb;pointer-events:none">Sign here with your finger or mouse</div>
+      <div style="background:var(--surface);border:2px solid var(--border);border-radius:var(--rs);padding:16px;margin-bottom:8px">
+        <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
+          <input type="checkbox" id="sig-checkbox" onchange="onSigCheck(this)" style="width:22px;height:22px;margin-top:2px;accent-color:var(--pink);flex-shrink:0">
+          <span style="font-size:15px;color:#111;line-height:1.6">I confirm that I have read and agree to the terms above, and authorise The Paws Tribute to proceed with the selected services.</span>
+        </label>
       </div>
-      <button class="sig-clear" onclick="clearSig()">Clear signature</button>
-      <div class="ferr" id="e-sig" style="margin-bottom:14px">Please sign to continue.</div>
+      <div class="ferr" id="e-sig" style="margin-bottom:14px">Please confirm to continue.</div>
       <div class="divider"></div>
       <!-- Order Summary -->
       <div class="sum-lbl">Order summary</div>
@@ -1463,7 +1463,8 @@ const EMAILJS_PK='WqHdEuq5z_zyjKeVg';
 const EMAILJS_SVC='service_s0uk0tq';
 const EMAILJS_TPL='template_lly2vcw';
 const FREMONT_OFFICE='200 Brown Rd, Fremont, CA 94538';
-// Brevo handled via /api/brevo serverless function — key stored in Vercel env vars
+const BREVO_API_KEY='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';
+const BREVO_LIST_ID=6;
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const STAFF_ORDER=['Saskia','Jesse','Sophie','Claire','K','Jamie'];
@@ -1854,57 +1855,21 @@ const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getPuFee()+getDelFe
 // ═══════════════════════════════════════
 // SIGNATURE
 // ═══════════════════════════════════════
-// ── SVG SIGNATURE — no canvas, no width measurement needed ──────────────────
-let sigPaths=[],sigCurrentPath=null;
 function setupSig(){
-  sigPaths=[];sigCurrentPath=null;sigDrawn=false;
-  const svg=document.getElementById('sig-svg');
-  const wrap=document.getElementById('sig-wrap');
-  if(!svg||!wrap)return;
-  svg.innerHTML='';
-  document.getElementById('sig-hint').style.display='flex';
-  function getXY(e){
-    const r=wrap.getBoundingClientRect();
-    const src=e.touches?e.touches[0]:e;
-    return{x:src.clientX-r.left,y:src.clientY-r.top};
-  }
-  function startStroke(e){
-    e.preventDefault();
-    const{x,y}=getXY(e);
-    sigCurrentPath=document.createElementNS('http://www.w3.org/2000/svg','path');
-    sigCurrentPath.setAttribute('stroke','#7a3344');
-    sigCurrentPath.setAttribute('stroke-width','2.5');
-    sigCurrentPath.setAttribute('fill','none');
-    sigCurrentPath.setAttribute('stroke-linecap','round');
-    sigCurrentPath.setAttribute('stroke-linejoin','round');
-    sigCurrentPath.setAttribute('d',`M${x},${y}`);
-    svg.appendChild(sigCurrentPath);
-    sigDrawing=true;
-    markSig();
-  }
-  function moveStroke(e){
-    e.preventDefault();
-    if(!sigDrawing||!sigCurrentPath)return;
-    const{x,y}=getXY(e);
-    sigCurrentPath.setAttribute('d',sigCurrentPath.getAttribute('d')+` L${x},${y}`);
-  }
-  function endStroke(){sigDrawing=false;sigCurrentPath=null;}
-  wrap.addEventListener('mousedown',startStroke);
-  wrap.addEventListener('mousemove',moveStroke);
-  wrap.addEventListener('mouseup',endStroke);
-  wrap.addEventListener('mouseleave',endStroke);
-  wrap.addEventListener('touchstart',startStroke,{passive:false});
-  wrap.addEventListener('touchmove',moveStroke,{passive:false});
-  wrap.addEventListener('touchend',endStroke);
+  sigDrawn=false;
+  const cb=document.getElementById('sig-checkbox');
+  if(cb)cb.checked=false;
 }
-function markSig(){if(!sigDrawn){sigDrawn=true;document.getElementById('sig-hint').style.display='none';document.getElementById('e-sig').classList.remove('show');}}
-function clearSig(){const svg=document.getElementById('sig-svg');if(svg)svg.innerHTML='';sigDrawn=false;sigCurrentPath=null;document.getElementById('sig-hint').style.display='flex';}
-function getSigDataUrl(){
-  const svg=document.getElementById('sig-svg');
-  if(!svg||!sigDrawn)return'';
-  const s=new XMLSerializer().serializeToString(svg);
-  return'data:image/svg+xml;base64,'+btoa(s);
+function onSigCheck(cb){
+  sigDrawn=cb.checked;
+  if(sigDrawn)document.getElementById('e-sig').classList.remove('show');
 }
+function clearSig(){
+  sigDrawn=false;
+  const cb=document.getElementById('sig-checkbox');
+  if(cb)cb.checked=false;
+}
+function getSigDataUrl(){return sigDrawn?'confirmed':'';}
 function setupCollSig(){
   let attempts=0;
   function trySetup(){
@@ -2507,7 +2472,14 @@ function openOrderDetail(id,showSched){
     document.getElementById('od-del-date').value='';
     document.getElementById('od-del-time').value='';
   }
-  document.getElementById('od-payment').textContent=o.payment_status||'Unpaid';
+  const ps=o.payment_status||'Unpaid';
+  const odPay=document.getElementById('od-payment');
+  if(ps.startsWith('Split')){
+    odPay.innerHTML=ps.replace('Split','<span style="font-weight:700;color:var(--pink-deep)">Split Payment</span><br><span style="font-size:13px;color:#555">');
+    odPay.innerHTML+=`</span>`;
+  } else {
+    odPay.textContent=ps;
+  }
   document.getElementById('od-total').textContent=o.total_amount?'$'+o.total_amount:'—';
   document.getElementById('od-status').value=o.status||'New / Received';
   document.getElementById('od-balance').value=o.remaining_balance||'';
@@ -2529,12 +2501,17 @@ async function saveDeliveryTime(){
 async function addToBrevo(email, firstName, petName){
   if(!email||!email.includes('@'))return;
   try{
-    const r=await fetch('/api/brevo',{
+    await fetch('https://api.brevo.com/v3/contacts',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,firstName,petName})
+      headers:{'Content-Type':'application/json','api-key':BREVO_API_KEY},
+      body:JSON.stringify({
+        email,
+        attributes:{FIRSTNAME:firstName,PET_NAME:petName},
+        listIds:[BREVO_LIST_ID],
+        updateEnabled:true
+      })
     });
-    console.log('Brevo response:',r.status);
+    console.log('Added to Brevo:',email);
   }catch(e){console.error('Brevo error:',e);}
 }
 function toggleOrderEdit(){
