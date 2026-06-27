@@ -1611,7 +1611,7 @@ function startForm(type){
   document.getElementById('ks-qty').textContent='1';
   document.getElementById('urn-sec').style.display='none';
   document.getElementById('overtime-sec').style.display='none';
-  document.getElementById('eng-box').style.display='none';
+  const engBoxEl=document.getElementById('eng-box');if(engBoxEl)engBoxEl.style.display='none';
   document.getElementById('ks-details').style.display='none';
   document.getElementById('slot-sec').style.display='none';
   sSlot='';['sl-eve','sl-late'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('sel');});
@@ -1742,8 +1742,8 @@ function selUrn(u,id,et){
     document.getElementById('eng2c').textContent='0/15';
   }
   updateEngNote();
-  document.getElementById('eng-box').style.display=et==='none'?'none':'block';
-  document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
+  // Only show engraving for metal urns
+  document.getElementById('eng-l2').style.display=et==='2line'&&isMetalUrn?'block':'none';
 }
 function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('ks-details').style.display=(k==='paw'||k==='nose')?'block':'none';}
 function selRet(r,card){
