@@ -1383,9 +1383,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       </div>
       <div class="msec" style="margin-top:14px"><div class="msec-lbl">Status</div>
         <select class="ssel" id="od-status" onchange="saveOrderStatus()">
-          <option value="New / Received">🟡 New / Received</option>
-          <option value="In Progress">🔵 In Progress</option>
-          <option value="Ready for Collection">🟣 Ready for Collection</option>
+          <option value="New / Received">🔴 New</option>
+          <option value="Ashes Ready">🟣 Ashes Ready</option>
           <option value="Completed">🟢 Completed</option>
         </select></div>
       <div class="msec"><div class="msec-lbl">Remaining balance</div>
@@ -2416,20 +2415,18 @@ async function loadOrders(){
   const rev=orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+(o.total_amount||0),0);
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-box" onclick="oTabDirect('all')" style="cursor:pointer"><div class="stat-n">${all}</div><div class="stat-l">All</div></div>
-    <div class="stat-box" onclick="oTabDirect('New / Received')" style="cursor:pointer"><div class="stat-n" style="color:#856404">${nw}</div><div class="stat-l">🟡 New</div></div>
-    <div class="stat-box" onclick="oTabDirect('In Progress')" style="cursor:pointer"><div class="stat-n" style="color:#1565c0">${pr}</div><div class="stat-l">🔵 Progress</div></div>
-    <div class="stat-box" onclick="oTabDirect('Ready for Collection')" style="cursor:pointer"><div class="stat-n" style="color:#6b3a8c">${rd}</div><div class="stat-l">🟣 Ready</div></div>
-    <div class="stat-box" onclick="oTabDirect('Completed')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${dn}</div><div class="stat-l">🟢 Done</div></div>
-    <div class="stat-box"><div class="stat-n" style="color:var(--pink-deep);font-size:14px">$${rev.toLocaleString()}</div><div class="stat-l">💰 Revenue</div></div>`;
+    <div class="stat-box" onclick="oTabDirect('New / Received')" style="cursor:pointer"><div class="stat-n" style="color:#c62828">${nw}</div><div class="stat-l">🔴 New</div></div>
+    <div class="stat-box" onclick="oTabDirect('Ashes Ready')" style="cursor:pointer"><div class="stat-n" style="color:#6b3a8c">${rd}</div><div class="stat-l">🟣 Ashes Ready</div></div>
+    <div class="stat-box" onclick="oTabDirect('Completed')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${dn}</div><div class="stat-l">🟢 Done</div></div>`;
 }
 function renderOrders(){
   const pending=orders.filter(o=>o.status==='New / Received');
   document.getElementById('pending-section').style.display=pending.length?'block':'none';
   document.getElementById('pending-list').innerHTML=pending.slice(0,5).map(o=>`<div class="pending-item"><div class="pending-ttl">${o.pet_name} — ${o.first_name} ${o.last_name}</div><div class="pending-sub">${o.ref} · ${o.service} · ${o.form_type==='pickup'?'🏠 Home Pickup':'🏢 Drop-Off'} · ${o.submitted_at?new Date(o.submitted_at).toLocaleDateString():'—'}</div><button class="confirm-btn" onclick="openOrderDetail('${o.id}',true)">View &amp; Schedule →</button></div>`).join('');
   let list=curOFilter==='all'?orders:orders.filter(o=>o.status===curOFilter);
-  const bc={'New / Received':'b-new','In Progress':'b-prog','Ready for Collection':'b-ready','Completed':'b-done'};
+  const bc={'New / Received':'b-new','Ashes Ready':'b-ready','Completed':'b-done'};
   document.getElementById('orders-scroll').innerHTML=list.length===0?'<div style="padding:32px;text-align:center;font-size:14px;color:var(--muted)">No orders found</div>':list.map(o=>{
-    const statusLabel=o.status==='New / Received'?'🟡 New':o.status==='In Progress'?'🔵 Progress':o.status==='Ready for Collection'?'🟣 Ready':'🟢 Done';
+    const statusLabel=o.status==='New / Received'?'🔴 New':o.status==='Ashes Ready'?'🟣 Ashes Ready':'🟢 Done';
     const date=o.submitted_at?new Date(o.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     return `<div class="order-row" onclick="openOrderDetail('${o.id}',false)" style="padding:16px;flex-direction:column;align-items:stretch;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -2460,9 +2457,8 @@ function renderOrders(){
 function oTab(f,el){curOFilter=f;document.querySelectorAll('.otab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');renderOrders();setTimeout(fixOrdersScroll,50);}
 function oTabDirect(f){
   curOFilter=f;
-  // Highlight the active stat box
   document.querySelectorAll('#stats-row .stat-box').forEach(b=>b.style.outline='');
-  const idx={all:0,'New / Received':1,'In Progress':2,'Ready for Collection':3,'Completed':4}[f];
+  const idx={all:0,'New / Received':1,'Ashes Ready':2,'Completed':3}[f];
   const boxes=document.querySelectorAll('#stats-row .stat-box');
   if(boxes[idx])boxes[idx].style.outline='2px solid var(--accent)';
   renderOrders();setTimeout(fixOrdersScroll,50);
@@ -2531,9 +2527,10 @@ async function saveDeliveryTime(){
   showToast('Delivery time saved ✓');
 }
 async function addToBrevo(email, firstName, petName){
-  if(!email||!email.includes('@'))return;
+  if(!email||!email.includes('@')){console.log('Brevo skipped — invalid email:',email);return;}
   try{
-    await fetch('https://api.brevo.com/v3/contacts',{
+    console.log('Calling Brevo API for:',email);
+    const resp=await fetch('https://api.brevo.com/v3/contacts',{
       method:'POST',
       headers:{'Content-Type':'application/json','api-key':BREVO_API_KEY},
       body:JSON.stringify({
@@ -2543,7 +2540,8 @@ async function addToBrevo(email, firstName, petName){
         updateEnabled:true
       })
     });
-    console.log('Added to Brevo:',email);
+    const data=await resp.json();
+    console.log('Brevo response:',resp.status,data);
   }catch(e){console.error('Brevo error:',e);}
 }
 function toggleOrderEdit(){
@@ -2613,9 +2611,14 @@ async function saveOrderStatus(){
   if(o){
     o.status=v;
     // When marked Completed — add to Brevo for 7-day follow up email
-    if(v==='Completed'&&o.email){
-      addToBrevo(o.email, o.first_name||'', o.pet_name||'');
-      showToast('Status updated ✓ · Follow-up email scheduled');
+    if(v==='Completed'){
+      console.log('Order email:', o.email);
+      if(o.email){
+        addToBrevo(o.email, o.first_name||'', o.pet_name||'');
+        showToast('Status updated ✓ · Follow-up email scheduled');
+      } else {
+        showToast('Status updated ✓ · No email on file — Brevo skipped');
+      }
     } else {
       showToast('Status updated ✓');
     }
