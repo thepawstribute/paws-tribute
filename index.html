@@ -437,6 +437,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="ferr" id="e-type">Please select a type.</div></div>
       <div class="fg"><label class="fl">Breed <span class="hint">(optional)</span></label>
         <input class="fi" type="text" id="pet-breed" placeholder="e.g. Golden Retriever, Persian…"></div>
+      <div class="fg"><label class="fl">Gender</label>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <button type="button" class="pill" id="g-male" onclick="selGender('Male','g-male')">Male</button>
+          <button type="button" class="pill" id="g-female" onclick="selGender('Female','g-female')">Female</button>
+          <button type="button" class="pill" id="g-unknown" onclick="selGender('Unknown','g-unknown')">Unknown</button>
+        </div>
+      </div>
       <div class="fg"><label class="fl">Weight <span class="req">*</span></label>
         <div class="weight-opts">
           <div class="wopt" id="wo1" onclick="selWeight('under5','wo1')"><div class="wopt-label">Under 5 lbs</div></div>
@@ -1985,7 +1992,7 @@ async function doSubmit(){
     const{error}=await sb.from('orders').insert({
       ref,form_type:formType,
       first_name:gv('fn'),last_name:gv('ln'),phone:gv('phone'),email:gv('email-intake'),city,
-      pet_name:gv('pet-name'),pet_type:sPetType,pet_breed:gv('pet-breed')||'—',pet_weight:WT_LABEL[sWeight]||'—',pet_color:gv('pet-color')||'—',
+      pet_name:gv('pet-name'),pet_type:sPetType,pet_breed:gv('pet-breed')||'—',pet_gender:petGender,pet_weight:WT_LABEL[sWeight]||'—',pet_color:gv('pet-color')||'—',
       service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',
       engraving:sUrnEng==='none'?'—':[gv('eng1'),gv('eng2')].filter(x=>x).join(' / ')||'—',
       keepsake:ksStr,fur_clipping:fur?'Yes — $27':'No',
