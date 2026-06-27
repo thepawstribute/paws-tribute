@@ -548,7 +548,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 
         </div>
         <div id="eng-box" style="display:none">
-          <div class="eng-banner"><span style="font-size:18px">✏️</span><span style="font-size:14px;font-weight:700;color:#fff">Optional Engraving (+$20)</span></div>
+          <div class="eng-banner"><span style="font-size:18px">✏️</span><span id="eng-banner-text" style="font-size:14px;font-weight:700;color:#fff">Optional Engraving</span></div>
           <div class="eng-box">
             <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Personalization</div>
             <div class="fg"><label class="fl">Line 1 <span class="hint">(max 15 chars)</span></label>
@@ -1732,6 +1732,8 @@ function selUrn(u,id,et){
   // Show engraving for all urns except scattering tube
   const engBox=document.getElementById('eng-box');
   if(engBox)engBox.style.display=et==='none'?'none':'block';
+  const engBanner=document.getElementById('eng-banner-text');
+  if(engBanner)engBanner.textContent=isMetalUrn?'Optional Engraving (+$20)':'Optional Engraving';
   // Show second line for 2-line urns
   document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
   // Show $20 fee note only for metal urns
