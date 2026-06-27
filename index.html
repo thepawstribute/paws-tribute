@@ -701,6 +701,10 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <div style="font-size:20px;margin-bottom:4px">💳</div>
             <div class="wopt-label">Card</div>
           </div>
+          <div class="wopt" id="pay-split" onclick="selPayment('Split',this)" style="padding:14px 8px">
+            <div style="font-size:20px;margin-bottom:4px">🔀</div>
+            <div class="wopt-label">Split</div>
+          </div>
 
         </div>
         <div style="font-size:13px;color:var(--text-hint);margin-top:10px;text-align:center">Card payment taken on Square reader separately</div>
@@ -1303,6 +1307,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div><div class="fl2" style="margin-bottom:4px">Pet type</div><input type="text" class="fi2" id="edit-pet-type" placeholder="Dog / Cat"></div>
           <div><div class="fl2" style="margin-bottom:4px">Weight</div><input type="text" class="fi2" id="edit-weight" placeholder="e.g. 5–20 lbs"></div>
         </div>
+        <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Gender</div>
+          <select class="fi2" id="edit-gender">
+            <option value="Unknown">Unknown</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
         <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Service</div>
           <select class="fi2" id="edit-service">
             <option value="Shared Farewell">Shared Farewell</option>
@@ -1597,7 +1608,9 @@ function startForm(type){
   document.getElementById('private-fur-note').style.display='none';
   // payment handled by Cash/Card/Pending toggle
   formStaff=null;paymentMethod='';
-  document.querySelectorAll('#pay-cash,#pay-card').forEach(el=>el.classList.remove('sel'));
+  document.querySelectorAll('#pay-cash,#pay-card,#pay-split').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('split-pay-sec').style.display='none';
+  const ca=document.getElementById('cash-amount');if(ca)ca.value='';
   // Reset staff pill selection (pills already rendered on init)
   document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   setTimeout(()=>setupSig(),100);
@@ -1672,6 +1685,11 @@ function validatePage(n){
 // ═══════════════════════════════════════
 const gv=id=>{const el=document.getElementById(id);return el?el.value:''};
 function onSelType(t,btn){sPetType=t;document.querySelectorAll('.pill').forEach(p=>p.classList.remove('sel'));btn.classList.add('sel');document.getElementById('e-type').classList.remove('show');}
+function selGender(g,id){
+  petGender=g;
+  ['g-male','g-female','g-unknown'].forEach(x=>{const el=document.getElementById(x);if(el)el.classList.remove('sel');});
+  const el=document.getElementById(id);if(el)el.classList.add('sel');
+}
 function selWeight(w,id){sWeight=w;document.querySelectorAll('.wopt').forEach(o=>o.classList.remove('sel'));document.getElementById(id).classList.add('sel');document.getElementById('e-weight').classList.remove('show');updateSvcPrices();}
 function updateSvcPrices(){['shared','individual','private'].forEach(s=>{const el=document.getElementById('svc-p-'+s);if(el&&sWeight&&SVC_PRICE[s]?.[sWeight])el.textContent='$'+SVC_PRICE[s][sWeight];});}
 function selSvc(s,card){
@@ -1712,7 +1730,19 @@ function buildSlotString(){
   sSlot=parts.join(' · ')||'';
 }
 function selOvertime(n,el){overtimeAuth=n;document.querySelectorAll('[id^="ot-"]').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');}
-function selPayment(method,el){paymentMethod=method;document.querySelectorAll('#pay-cash,#pay-card').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');}
+function selPayment(method,el){
+  paymentMethod=method;
+  document.querySelectorAll('#pay-cash,#pay-card,#pay-split').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('split-pay-sec').style.display=method==='Split'?'block':'none';
+  if(method==='Split')updateCardBalance();
+}
+function updateCardBalance(){
+  const total=calcTotal();
+  const cash=parseFloat(document.getElementById('cash-amount').value)||0;
+  const card=Math.max(0,total-cash);
+  document.getElementById('card-balance').textContent='$'+card;
+}
 function chgQty(d){ksQty=Math.max(1,ksQty+d);document.getElementById('ks-qty').textContent=ksQty;}
 function updatePrice(){}
 
@@ -1963,7 +1993,7 @@ async function doSubmit(){
       return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
-      payment_status:paymentMethod==='Pending'?'Unpaid':paymentMethod,staff_name:formStaff,status:'New / Received',notes:'',submitted_at:new Date().toISOString()
+      payment_status:paymentMethod==='Split'?'Split (Cash $'+(document.getElementById('cash-amount').value||0)+' + Card $'+Math.max(0,calcTotal()-(parseFloat(document.getElementById('cash-amount').value)||0))+')':paymentMethod,staff_name:formStaff,status:'New / Received',notes:'',submitted_at:new Date().toISOString()
     });
     if(error){
       console.error('Supabase insert error:',JSON.stringify(error));
@@ -2187,7 +2217,7 @@ function renderGrid(){
       staffJobs[n].forEach((sub,si)=>sub.forEach(({s:st,e:en,job})=>{
         if(Math.floor(st/60)===h){
           const topOff=(st%60/60)*H_PX;
-          const ht=Math.max(m2px(job.duration_mins),20);
+          const ht=Math.max(m2px(job.duration_mins),52); // min 52px so cards are always clickable
           const tot=staffJobs[n].length||1;const pct=100/tot;
           const cfg=TYPE_CFG[job.type]||{};
           const big=ht>=44,mid=ht>=24;
@@ -2514,6 +2544,7 @@ function toggleOrderEdit(){
     document.getElementById('edit-email').value=o.email||'';
     document.getElementById('edit-pet-name').value=o.pet_name||'';
     document.getElementById('edit-pet-type').value=o.pet_type||'';
+    document.getElementById('edit-gender').value=o.pet_gender||'Unknown';
     document.getElementById('edit-weight').value=o.pet_weight||'';
     document.getElementById('edit-service').value=o.service||'Individual Farewell';
     document.getElementById('edit-urn').value=o.urn||'—';
@@ -2538,6 +2569,7 @@ async function saveOrderEdits(){
     email:document.getElementById('edit-email').value.trim(),
     pet_name:document.getElementById('edit-pet-name').value.trim(),
     pet_type:document.getElementById('edit-pet-type').value.trim(),
+    pet_gender:document.getElementById('edit-gender').value,
     pet_weight:document.getElementById('edit-weight').value.trim(),
     service:document.getElementById('edit-service').value,
     urn:document.getElementById('edit-urn').value,
