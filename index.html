@@ -655,11 +655,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 
     <!-- PAGE 5: Auth + Signature + Payment -->
     <div class="fstep" id="fp5">
-      <label class="chk-row" style="margin-bottom:10px">
-        <input type="checkbox" id="legal-chk" onchange="document.getElementById('e-legal').classList.remove('show')">
-        <div><div class="chk-label">I confirm I am the legal owner of this pet, or have authorization from the legal owner.</div></div>
-      </label>
-      <div class="ferr" id="e-legal" style="margin-bottom:10px">Please confirm to continue.</div>
+      <div id="e-legal" style="display:none"></div>
       <div style="margin-bottom:16px">
         <button onclick="var b=document.getElementById('legal-full'),t=document.getElementById('ltbtn');if(b.style.display==='none'){b.style.display='block';t.textContent='Hide terms ↑'}else{b.style.display='none';t.textContent='Read full terms ↓'}" id="ltbtn" style="background:none;border:none;font-size:14px;color:var(--pink);cursor:pointer;font-family:'DM Sans',sans-serif;padding:0;text-decoration:underline;font-weight:600">Read full terms ↓</button>
         <div id="legal-full" style="display:none;margin-top:10px">
@@ -679,7 +675,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div style="background:var(--surface);border:2px solid var(--border);border-radius:var(--rs);padding:16px;margin-bottom:8px">
         <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer">
           <input type="checkbox" id="sig-checkbox" onchange="onSigCheck(this)" style="width:22px;height:22px;margin-top:2px;accent-color:var(--pink);flex-shrink:0">
-          <span style="font-size:15px;color:#111;line-height:1.6">I confirm that I have read and agree to the terms above, and authorise The Paws Tribute to proceed with the selected services.</span>
+          <span style="font-size:15px;color:#111;line-height:1.6">I confirm I am the legal owner of this pet (or have authorization), and I agree to the terms above. I authorise The Paws Tribute to proceed with the selected services.</span>
         </label>
       </div>
       <div class="ferr" id="e-sig" style="margin-bottom:14px">Please confirm to continue.</div>
@@ -1682,7 +1678,7 @@ function validatePage(n){
   if(n===4&&sSvc!=='shared'){clr('e-ret');if(!sRet)err('e-ret');if(sRet==='delivery'&&!gv('d-street').trim())err('e-addr');}
   if(n===5){
     if(!formStaff){document.getElementById('e-form-staff').classList.add('show');ok=false;}
-    if(!document.getElementById('legal-chk').checked){document.getElementById('e-legal').classList.add('show');ok=false;}
+    // legal-chk merged into sig-checkbox
     if(!sigDrawn){document.getElementById('e-sig').classList.add('show');ok=false;}
   }
   return ok;
