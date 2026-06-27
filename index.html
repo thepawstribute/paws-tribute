@@ -1724,26 +1724,18 @@ function updateEngNote(){
   note.style.display=(isMetalUrn&&hasText)?'block':'none';
 }
 function selUrn(u,id,et){
-  sUrn=u;
-  // Only allow engraving on metal urns
+  sUrn=u;sUrnEng=et;
   const isMetalUrn=u.toLowerCase().includes('metal');
-  sUrnEng=isMetalUrn?et:'none';
   document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));
   document.getElementById(id).classList.add('sel');
   document.getElementById('e-urn').classList.remove('show');
-  // Show engraving section only for metal urns
+  // Show engraving for all urns except scattering tube
   const engBox=document.getElementById('eng-box');
-  if(engBox)engBox.style.display=isMetalUrn?'block':'none';
-  // Clear engraving fields if non-metal
-  if(!isMetalUrn){
-    const e1=document.getElementById('eng1'),e2=document.getElementById('eng2');
-    if(e1)e1.value='';if(e2)e2.value='';
-    document.getElementById('eng1c').textContent='0/15';
-    document.getElementById('eng2c').textContent='0/15';
-  }
+  if(engBox)engBox.style.display=et==='none'?'none':'block';
+  // Show second line for 2-line urns
+  document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
+  // Show $20 fee note only for metal urns
   updateEngNote();
-  // Only show engraving for metal urns
-  document.getElementById('eng-l2').style.display=et==='2line'&&isMetalUrn?'block':'none';
 }
 function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('ks-details').style.display=(k==='paw'||k==='nose')?'block':'none';}
 function selRet(r,card){
@@ -1883,7 +1875,6 @@ const getFurPrice=()=>{if(sSvc==='private')return 0;const c=document.getElementB
 const getPuFee=()=>puFeeData?puFeeData.clientFee:0;
 const getDelFee=()=>delFeeData&&sRet==='delivery'?delFeeData.fee:0;
 const getEngravingFee=()=>{
-  // $20 engraving fee for metal urns only, when engraving text is entered
   if(sUrnEng==='none')return 0;
   const isMetalUrn=sUrn&&sUrn.toLowerCase().includes('metal');
   const hasText=gv('eng1')||gv('eng2');
