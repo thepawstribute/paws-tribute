@@ -2180,6 +2180,31 @@ function subscribeRealtime(){
   sb.channel('a').on('postgres_changes',{event:'*',schema:'public',table:'availability'},async()=>{await loadAvailability();renderGrid();if(document.getElementById('view-availability').classList.contains('active'))renderAvailability();}).subscribe();
   if(currentUser.role==='admin')sb.channel('o').on('postgres_changes',{event:'*',schema:'public',table:'orders'},async()=>{if(document.getElementById('view-orders').classList.contains('active')){await loadOrders();renderOrders();}}).subscribe();
 }
+function renderAshesQueue(){
+  const ds=fmtDateKey(curDate);
+  const ashesJobs=jobs.filter(j=>j.type==='ashes'&&j.job_date===ds).sort((a,b)=>a.job_time.localeCompare(b.job_time));
+  const el=document.getElementById('ashes-queue-list');
+  const queue=document.getElementById('ashes-queue');
+  if(!el||!queue)return;
+  if(ashesJobs.length===0){queue.style.display='none';return;}
+  queue.style.display='block';
+  el.innerHTML=ashesJobs.map(j=>{
+    const time=j.job_time?j.job_time.slice(0,5):'';
+    const hr=parseInt(time.split(':')[0]);
+    const min=time.split(':')[1];
+    const ampm=hr>=12?'pm':'am';
+    const h=hr>12?hr-12:hr;
+    const timeStr=`${h}:${min}${ampm}`;
+    return `<div onclick="jobClick('${j.id}')" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:4px;border-radius:8px;background:var(--ashes-bg);border-left:3px solid var(--ashes);cursor:pointer">
+      <div style="font-size:13px;font-weight:700;color:var(--ashes);min-width:50px">${timeStr}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:700;color:#111">${j.owner_name||'—'}</div>
+        ${j.pet_name?`<div style="font-size:12px;color:#555">${j.pet_name}</div>`:''}
+      </div>
+      <div style="font-size:11px;color:var(--muted)">${j.staff_name||''}</div>
+    </div>`;
+  }).join('');
+}
 function renderGrid(){
   if(!currentUser)return;
   const H=H_END-H_START,ds=fmtDateKey(curDate);
