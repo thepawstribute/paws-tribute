@@ -2058,7 +2058,7 @@ function buildSummary(){
   const svcL={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Farewell Ceremony'};
   const retL={pickup:'Pick up at office',delivery:'We deliver to you'};
   const ksStr=buildKsStr();
-  const fur=document.getElementById('fur-clipping').checked&&sSvc!=='private';
+  const furChk=document.getElementById('fur-clipping');const fur=furChk&&furChk.checked&&sSvc!=='private';
   const row=(k,v)=>`<div class="sum-row"><span class="sum-key">${k}</span><span class="sum-val">${v}</span></div>`;
   let html=`<div class="sum-sec"><div class="sum-lbl">Owner</div>${row('Name',gv('fn')+' '+gv('ln'))}${row('Phone',gv('phone'))}${gv('email-intake')?row('Email',gv('email-intake')):''}` + '</div>';
   html+=`<div class="sum-sec"><div class="sum-lbl">Pet</div>${row('Name',gv('pet-name'))}${row('Type / Breed',sPetType+(gv('pet-breed')?' — '+gv('pet-breed'):''))}${row('Weight',WT_LABEL[sWeight]||'—')}` + '</div>';
@@ -2094,7 +2094,7 @@ async function doSubmit(){
   const svcL={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Farewell Ceremony'};
   const retL={na:'N/A',pickup:'Pick up at office',delivery:'We deliver to you'};
   const ksStr=buildKsStr();
-  const fur=document.getElementById('fur-clipping').checked&&sSvc!=='private';
+  const furChk=document.getElementById('fur-clipping');const fur=furChk&&furChk.checked&&sSvc!=='private';
   const total=calcTotal();
   const driverPay=(formType==='pickup'&&puFeeData?puFeeData.driverPay:0)+(sRet==='delivery'&&delFeeData?delFeeData.driver:0);
   const puAddr=[gv('pu-street'),gv('pu-apt'),gv('pu-city'),gv('pu-zip')].filter(x=>x).join(', ');
@@ -2159,16 +2159,15 @@ async function doSubmit(){
         office_email:'hello@thepawstribute.com'
       });
     }catch(e){console.error('Email error:',e);}
-    document.getElementById('ty-email-sec').style.display='none';
+    var tyEs=document.getElementById('ty-email-sec');if(tyEs)tyEs.style.display='none';
   }
   var tyPet=document.getElementById('ty-pet');if(tyPet)tyPet.textContent=gv('pet-name')||'your pet';
-  document.getElementById('ty-body').innerHTML=sSvc==='shared'?'Your pet will be respectfully cared for and their ashes scattered peacefully in the Pacific Ocean.':'We will contact you when the ashes and any keepsakes are ready.<br><br><strong>Estimated timeline: 7–10 business days.</strong>';
-  const tyRefEl=document.getElementById('ty-ref');
-  tyRefEl.textContent='Reference: '+ref+' · '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  tyRefEl.style.display='inline-block';
-  document.getElementById('ty-email-sec').style.display='none';
-  document.getElementById('form-view').classList.remove('active');
-  document.getElementById('ty-view').classList.add('active');
+  var tyBody=document.getElementById('ty-body');if(tyBody)tyBody.innerHTML=sSvc==='shared'?'Your pet will be respectfully cared for and their ashes scattered peacefully in the Pacific Ocean.':'We will contact you when the ashes and any keepsakes are ready.<br><br><strong>Estimated timeline: 7–10 business days.</strong>';
+  var tyRefEl=document.getElementById('ty-ref');
+  if(tyRefEl){tyRefEl.textContent='Reference: '+ref+' · '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});tyRefEl.style.display='inline-block';}
+  var tyEs2=document.getElementById('ty-email-sec');if(tyEs2)tyEs2.style.display='none';
+  var fv=document.getElementById('form-view');if(fv)fv.classList.remove('active');
+  var tv=document.getElementById('ty-view');if(tv)tv.classList.add('active');
 }
 function sendConfirmation(){
   const em=document.getElementById('ty-email').value.trim(),btn=document.getElementById('ty-email-btn'),sent=document.getElementById('ty-email-sent'),err=document.getElementById('ty-email-err');
