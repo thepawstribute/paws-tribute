@@ -2187,7 +2187,7 @@ async function searchCollOrder(){
   const q=document.getElementById('coll-search').value.trim().toLowerCase();
   if(!q){showToast('Please enter a reference or name');return;}
   document.getElementById('coll-results').innerHTML='<div style="font-size:14px;color:var(--text-muted);padding:8px 0">Searching…</div>';
-  const{data}=await sb.from('orders').select('*').eq('status','Ready for Collection').ilike('pet_name',`%${q}%`);
+  const{data}=await sb.from('orders').select('*').eq('status','Ashes Ready').ilike('pet_name',`%${q}%`);
   if(!data||!data.length){document.getElementById('coll-results').innerHTML='<div style="font-size:14px;color:var(--text-muted);padding:8px 0">No ready orders found. Check your reference or ask a staff member.</div>';return;}
   document.getElementById('coll-results').innerHTML=data.map(o=>`<div onclick="selectCollOrder('${o.id}')" style="border:2px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;background:#fff"><div style="font-size:16px;font-weight:700;color:#111">${o.pet_name} — ${o.first_name} ${o.last_name}</div><div style="font-size:13px;color:var(--muted);margin-top:3px">${o.ref} · ${o.service}</div></div>`).join('');
 }
@@ -2567,7 +2567,7 @@ function fixOrdersScroll(){
 async function loadOrders(){
   const{data}=await sb.from('orders').select('*').order('submitted_at',{ascending:false}).limit(300);
   orders=data||[];
-  const all=orders.length,nw=orders.filter(o=>o.status==='New / Received').length,pr=orders.filter(o=>o.status==='In Progress').length,rd=orders.filter(o=>o.status==='Ready for Collection').length,dn=orders.filter(o=>o.status==='Completed').length;
+  const all=orders.length,nw=orders.filter(o=>o.status==='New / Received').length,pr=orders.filter(o=>o.status==='In Progress').length,rd=orders.filter(o=>o.status==='Ashes Ready').length,dn=orders.filter(o=>o.status==='Completed').length;
   const rev=orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+(o.total_amount||0),0);
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-box" onclick="oTabDirect('all')" style="cursor:pointer"><div class="stat-n">${all}</div><div class="stat-l">All</div></div>
