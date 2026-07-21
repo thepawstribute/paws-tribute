@@ -399,7 +399,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   <div class="form-hdr">
     <button class="back-btn" onclick="showLanding()">← Back to start</button>
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:20%"></div></div>
-    <div class="form-badge" id="form-badge">🏢 Office Drop-Off</div>
+    <div class="form-badge" id="form-badge" style="display:none">🏢 Office Drop-Off</div>
     <div class="step-ind" id="step-ind">Step 1 of 5</div>
     <div class="step-title" id="step-title">Your information &amp; pet details</div>
     <div class="step-sub" id="step-sub">We're here for you. Let's start with a few details.</div>
@@ -827,7 +827,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     <div class="form-card">
       <div class="form-hdr">
         <button class="back-btn" onclick="showLanding()">← Back to start</button>
-        <div class="form-badge">📦 Collect Ashes / Keepsake</div>
+        
         <div class="step-title">Confirm your collection</div>
         <div class="step-sub">Find your order to sign and collect.</div>
       </div>
@@ -2196,7 +2196,7 @@ async function searchCollOrder(){
 async function selectCollOrder(id){
   const{data}=await sb.from('orders').select('*').eq('id',id).single();if(!data)return;
   collOrderId=id;
-  document.getElementById('coll-order-info').innerHTML=`<div style="background:var(--pink-light);border:1px solid var(--pink-border);border-radius:12px;padding:16px"><div style="font-size:18px;font-weight:700;color:var(--pink-deep);margin-bottom:8px">${data.pet_name}</div><div style="font-size:14px;color:var(--text-muted);line-height:1.8"><div><strong>Owner:</strong> ${data.first_name} ${data.last_name}</div><div><strong>Service:</strong> ${data.service}</div><div><strong>Urn:</strong> ${data.urn||'—'}</div><div><strong>Keepsake:</strong> ${data.keepsake||'—'}</div><div><strong>Ref:</strong> ${data.ref}</div></div></div>`;
+  document.getElementById('coll-order-info').innerHTML=`<div style="background:var(--pink-light);border:1px solid var(--pink-border);border-radius:12px;padding:16px"><div style="font-size:18px;font-weight:700;color:var(--pink-deep);margin-bottom:8px" id="coll-pet-name-display">${data.pet_name}</div><div style="font-size:14px;color:var(--text-muted);line-height:1.8"><div><strong>Owner:</strong> ${data.first_name} ${data.last_name}</div><div><strong>Service:</strong> ${data.service}</div><div><strong>Urn:</strong> ${data.urn||'—'}</div><div><strong>Keepsake:</strong> ${data.keepsake||'—'}</div><div><strong>Ref:</strong> ${data.ref}</div></div></div>`;
   document.getElementById('coll-step-find').style.display='none';
   document.getElementById('coll-step-sign').style.display='block';
   setTimeout(()=>setupCollSig(),50);
@@ -2204,13 +2204,13 @@ async function selectCollOrder(id){
 async function collConfirm(){
   if(!collSigDrawn){document.getElementById('e-coll-sig').classList.add('show');return;}
   const btn=document.getElementById('coll-confirm-btn');btn.disabled=true;btn.textContent='Confirming…';
-  // Get pet name before updating
-  const{data:collOrder}=await sb.from('orders').select('pet_name,first_name,last_name').eq('id',collOrderId).single();
+  // Get pet name from already loaded order data
+  const collOrder=orders.find(x=>x.id==collOrderId)||{};
+  const petName=collOrder.pet_name||document.getElementById('coll-pet-name-display')?.textContent||'your pet';
   await sb.from('orders').update({status:'Completed',collected_at:new Date().toISOString()}).eq('id',collOrderId);
   document.getElementById('coll-view').classList.remove('active');
   document.getElementById('ty-view').classList.add('active');
   document.getElementById('ty-paw').textContent='💛';
-  const petName=collOrder?.pet_name||'your pet';
   document.getElementById('ty-pet').textContent=petName;
   document.getElementById('ty-body').innerHTML='We hope '+petName+'\'s ashes bring you comfort. We are always here if you need us.';
   const tyRef=document.getElementById('ty-ref');
