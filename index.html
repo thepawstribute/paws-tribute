@@ -517,6 +517,16 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           </div>
         </div>
       </div>
+      <!-- After-hours fee -->
+      <div style="margin-top:12px;">
+        <label class="chk-row" style="border-color:#e8d4a0;background:#fffbf0;">
+          <input type="checkbox" id="afterhours-fee" onchange="updatePrice()">
+          <div>
+            <div class="chk-label" style="color:#b07d00;">After-hours service — $30</div>
+            <div class="chk-sub">Service requested after 8:00 PM</div>
+          </div>
+        </label>
+      </div>
       <!-- Urn (individual/private only) -->
       <div id="urn-sec" style="display:none;margin-top:20px">
         <div class="divider"></div>
@@ -549,7 +559,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div class="eng-banner"><span style="font-size:18px">✏️</span><span id="eng-banner-text" style="font-size:14px;font-weight:700;color:#fff">Optional Engraving</span></div>
           <div class="eng-box">
             <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Personalization</div>
-            <div class="fg"><label class="fl">Line 1 <span class="hint">(max 15 chars)</span></label>
+            <div class="fg"><label class="fl">Line 1 <span class="hint" id="eng1-hint">(max 15 chars)</span></label>
               <input class="fi" type="text" id="eng1" maxlength="15" placeholder="e.g. Buddy" oninput="document.getElementById('eng1c').textContent=this.value.length+'/15';updateEngNote()">
               <div class="char-count" id="eng1c">0/15</div></div>
             <div id="eng-l2" class="fg" style="display:none"><label class="fl">Line 2 <span class="hint">(optional)</span></label>
@@ -920,7 +930,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="leg-item"><div class="leg-dot" style="background:var(--dropoff)"></div>Drop-off</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--ashes)"></div>Ashes Pickup</div>
       <div class="leg-item"><div class="leg-dot" style="background:var(--ceremony)"></div>Ceremony</div>
-      <div class="leg-item"><div class="leg-dot" style="background:#2e7d32"></div>AMS</div>
+
     </div>
     <div id="gridScroll" style="flex:1;overflow:auto;-webkit-overflow-scrolling:touch;min-height:0">
       <table id="gridTable" style="border-collapse:collapse;table-layout:fixed;min-width:100%;margin-bottom:20px">
@@ -1220,7 +1230,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <button class="type-btn" id="type-dropoff" onclick="selectType('dropoff')">🏢 Drop-off</button>
           <button class="type-btn" id="type-ashes" onclick="selectType('ashes')">🫙 Ashes</button>
           <button class="type-btn" id="type-ceremony" onclick="selectType('ceremony')">🌸 Ceremony</button>
-          <button class="type-btn" id="type-ams" onclick="selectType('ams')">🚐 AMS</button>
+
         </div></div>
       <div class="fg2" id="cremGrp"><div class="fl2">Cremation Type <span style="color:var(--pink)">*</span></div>
         <div class="crem-btns">
@@ -1274,7 +1284,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <button class="type-btn" id="edit-type-dropoff" onclick="editSelType('dropoff')">🏢 Drop-off</button>
           <button class="type-btn" id="edit-type-ashes" onclick="editSelType('ashes')">🫙 Ashes</button>
           <button class="type-btn" id="edit-type-ceremony" onclick="editSelType('ceremony')">🌸 Ceremony</button>
-          <button class="type-btn" id="edit-type-ams" onclick="editSelType('ams')">🚐 AMS</button>
+
         </div></div>
       <div class="fg2" id="editCremGrp"><div class="fl2">Cremation Type</div>
         <div class="crem-btns">
@@ -1475,6 +1485,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     </div>
     <div class="modal-ftr">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('orderOverlay').classList.remove('open')">Close</button>
+      <button class="mbtn" id="od-edit-btn" onclick="toggleOrderEdit()" style="background:var(--pink-light);color:var(--pink-deep);border:1px solid var(--pink-border)">✏️ Edit</button>
       <button class="mbtn mbtn-pri" onclick="saveOrderAll()" style="background:#2e7d32">💾 Save</button>
     </div>
   </div>
@@ -1579,7 +1590,7 @@ const TYPE_CFG={
   dropoff:{label:'Office Drop-off',icon:'🏢',color:'var(--dropoff)',bg:'var(--dropoff-bg)',dur:15},
   ashes:{label:'Ashes Pickup',icon:'🫙',color:'var(--ashes)',bg:'var(--ashes-bg)',dur:10},
   ceremony:{label:'Ceremony',icon:'🌸',color:'var(--ceremony)',bg:'var(--ceremony-bg)',dur:30},
-  ams:{label:'AMS Pickup',icon:'🚐',color:'#2e7d32',bg:'#e8f5e9',dur:15}
+  // ams removed
 };
 
 // ═══════════════════════════════════════
@@ -1661,38 +1672,43 @@ function startForm(type){
   var fb=document.getElementById('form-badge');if(fb)fb.textContent=type==='pickup'?'🏠 Home Pick-Up':'🏢 Office Drop-Off';
   document.getElementById('pickup-addr-sec').style.display=type==='pickup'?'block':'none';
   ['fn','ln','phone','email-intake','pet-name','pet-breed','pet-color','pu-street','pu-apt','pu-city','pu-zip','eng1','eng2','ks-name','d-street','d-apt','d-city','d-zip'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  document.getElementById('legal-chk').checked=false;
-  document.getElementById('fur-clipping').checked=false;
+  var lchk=document.getElementById('legal-chk');if(lchk)lchk.checked=false;
+  var fchk=document.getElementById('fur-clipping');if(fchk)fchk.checked=false;
+  var ahchk=document.getElementById('afterhours-fee');if(ahchk)ahchk.checked=false;
   document.querySelectorAll('.pill').forEach(p=>p.classList.remove('sel'));
   document.querySelectorAll('.wopt').forEach(w=>w.classList.remove('sel'));
   document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('sel'));
   document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));
   document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));
-  document.getElementById('ks-none').classList.add('sel');
+  var ksnone=document.getElementById('ks-none');if(ksnone)ksnone.classList.add('sel');
   document.querySelectorAll('.ret-card,.slot').forEach(c=>c.classList.remove('sel'));
-  document.querySelectorAll('[name="ks-size"]').forEach(r=>r.checked=false);
-  document.getElementById('ks-qty').textContent='1';
-  document.getElementById('urn-sec').style.display='none';
-  document.getElementById('overtime-sec').style.display='none';
-  const engBoxEl=document.getElementById('eng-box');if(engBoxEl)engBoxEl.style.display='none';
-  document.getElementById('ks-details').style.display='none';
-  document.getElementById('slot-sec').style.display='none';
+  document.querySelectorAll('[name="ks-size"],[name="paw-size"],[name="nose-size"]').forEach(r=>r.checked=false);
+  var ksqty=document.getElementById('ks-qty');if(ksqty)ksqty.textContent='1';
+  var urnsec=document.getElementById('urn-sec');if(urnsec)urnsec.style.display='none';
+  var otsec=document.getElementById('overtime-sec');if(otsec)otsec.style.display='none';
+  var engBoxEl=document.getElementById('eng-box');if(engBoxEl)engBoxEl.style.display='none';
+  var ksdet=document.getElementById('ks-details');if(ksdet)ksdet.style.display='none';
+  var slotsec=document.getElementById('slot-sec');if(slotsec)slotsec.style.display='none';
   sSlot='';['sl-eve','sl-late'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('sel');});
-  document.getElementById('del-sec').style.display='none';
-  document.getElementById('ret-opts').style.display='none';
-  document.getElementById('shared-msg').style.display='none';
-  document.getElementById('pu-fee-box').style.display='none';
-  document.getElementById('pu-quote-box').style.display='none';
+  var delsec=document.getElementById('del-sec');if(delsec)delsec.style.display='none';
+  var retopts=document.getElementById('ret-opts');if(retopts)retopts.style.display='none';
+  var sharedmsg=document.getElementById('shared-msg');if(sharedmsg)sharedmsg.style.display='none';
+  var pufee=document.getElementById('pu-fee-box');if(pufee)pufee.style.display='none';
+  var puquote=document.getElementById('pu-quote-box');if(puquote)puquote.style.display='none';
   var furSecEl=document.getElementById('ks-fur-section');if(furSecEl)furSecEl.style.display='block';
-  document.getElementById('private-fur-note').style.display='none';
-  // payment handled by Cash/Card/Pending toggle
+  var pfn=document.getElementById('private-fur-note');if(pfn)pfn.style.display='none';
   formStaff=null;paymentMethod='';
   document.querySelectorAll('#pay-cash,#pay-card,#pay-split').forEach(el=>el.classList.remove('sel'));
-  document.getElementById('split-pay-sec').style.display='none';
+  var spSec=document.getElementById('split-pay-sec');if(spSec)spSec.style.display='none';
   const ca=document.getElementById('cash-amount');if(ca)ca.value='';
-  // Reset staff pill selection (pills already rendered on init)
-  document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected')); // formStaffPills removed
-  setTimeout(()=>setupSig(),100);
+  // Reset new keepsake sections
+  ['paw','nose'].forEach(function(w){
+    var body=document.getElementById('ks-'+w+'-body');if(body)body.style.display='none';
+    var tog=document.getElementById('ks-'+w+'-toggle');if(tog)tog.textContent='+ Add';
+    var sec=document.getElementById('ks-'+w+'-section');if(sec)sec.classList.remove('active');
+    var wopt=document.getElementById('ks-'+w+'-wooden-opts');if(wopt)wopt.style.display='none';
+  });
+  var furtog=document.getElementById('ks-fur-toggle');if(furtog)furtog.textContent='+ Add';
   showPage(1);
 }
 function startCollection(){
@@ -1774,6 +1790,7 @@ function updateSvcPrices(){['shared','individual','private'].forEach(s=>{const e
 function selSvc(s,card){
   sSvc=s;document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('e-svc').classList.remove('show');
   document.getElementById('overtime-sec').style.display=s==='private'?'block':'none';
+  checkAfterHours();
   document.getElementById('urn-sec').style.display=s==='shared'?'none':'block';
   var furSecEl2=document.getElementById('ks-fur-section');if(furSecEl2)furSecEl2.style.display=s==='private'?'none':'block';
   document.getElementById('private-fur-note').style.display=s==='private'?'block':'none';
@@ -1805,6 +1822,7 @@ function selUrn(u,id,et){
   if(e1c)e1c.textContent=(e1?e1.value.length:0)+'/'+limit;
   if(e2){e2.maxLength=limit;e2.oninput=function(){if(e2c)e2c.textContent=this.value.length+'/'+limit;updateEngNote();};}
   if(e2c)e2c.textContent=(e2?e2.value.length:0)+'/'+limit;
+  const h1=document.getElementById('eng1-hint');if(h1)h1.textContent='(max '+limit+' chars)';
   updateEngNote();
 }
 // ===== NEW KEEPSAKE SYSTEM =====
@@ -1984,6 +2002,8 @@ async function calcDelFee(){
 const getSvcPrice=()=>(!sSvc||!sWeight)?0:SVC_PRICE[sSvc]?.[sWeight]||0;
 // getKsPrice defined in new keepsake system
 const getFurPrice=()=>{if(sSvc==='private')return 0;const c=document.getElementById('fur-clipping');return(c&&c.checked)?30:0;};
+const getAfterHoursPrice=()=>{const c=document.getElementById('afterhours-fee');return(c&&c.checked)?30:0;};
+function checkAfterHours(){const c=document.getElementById('afterhours-fee');if(c&&new Date().getHours()>=20)c.checked=true;}
 const getPuFee=()=>puFeeData?puFeeData.clientFee:0;
 const getDelFee=()=>delFeeData&&sRet==='delivery'?delFeeData.fee:0;
 const getEngravingFee=()=>{
@@ -1992,7 +2012,7 @@ const getEngravingFee=()=>{
   const hasText=gv('eng1')||gv('eng2');
   return(isMetalUrn&&hasText)?20:0;
 };
-const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getPuFee()+getDelFee()+getEngravingFee();
+const calcTotal=()=>getSvcPrice()+getKsPrice()+getFurPrice()+getAfterHoursPrice()+getPuFee()+getDelFee()+getEngravingFee();
 
 // ═══════════════════════════════════════
 // SIGNATURE
@@ -2057,6 +2077,8 @@ function buildSummary(){
   if(sSvc==='private'&&overtimeAuth>0)html+=row('Overtime','Up to '+overtimeAuth+' block'+(overtimeAuth>1?'s':'')+' ($'+overtimeAuth*28+' if used)');
   if(ksStr!=='None')html+=row('Keepsake',ksStr);
   if(fur)html+=row('Fur clipping','$30');
+  const ah=getAfterHoursPrice()>0;
+  if(ah)html+=row('After-hours service','$30');
   if(sSvc!=='shared')html+=row('Return',retL[sRet]||'—');
   if(sRet==='pickup'&&sSlot)html+=row('Pick-up window',sSlot);
   if(sRet==='delivery'&&delFeeData)html+=row('Delivery fee','$'+delFeeData.fee);
@@ -2088,27 +2110,36 @@ async function doSubmit(){
   const nb=document.getElementById('btn-next');nb.disabled=true;nb.textContent='Submitting…';
   let ref='PT-PENDING';
   try{
-    const{count}=await sb.from('orders').select('id',{count:'exact',head:true});
-    // Start from a random base so refs don't reveal order volume
     const base=1000+Math.floor(Math.random()*8999);
-    ref='PT-'+String(base+(count||0)).padStart(4,'0');
-    const{error}=await sb.from('orders').insert({
+    ref='PT-'+String(base).padStart(4,'0');
+    const row={
       ref,form_type:formType,
       first_name:gv('fn'),last_name:gv('ln'),phone:gv('phone'),email:gv('email-intake'),city,
       pet_name:gv('pet-name'),pet_type:sPetType,pet_breed:gv('pet-breed')||'—',pet_gender:petGender||'Unknown',pet_weight:WT_LABEL[sWeight]||'—',pet_color:gv('pet-color')||'—',
       service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',
       engraving:sUrnEng==='none'?'—':[gv('eng1'),gv('eng2')].filter(x=>x).join(' / ')||'—',
-      keepsake:ksStr,fur_clipping:fur?'Yes — $30':'No',
+      keepsake:ksStr,fur_clipping:fur?'Yes — $30':'No',after_hours_fee:getAfterHoursPrice()>0?30:0,
       pickup_address:formType==='pickup'?puAddr:'',pickup_fee:formType==='pickup'&&puFeeData?'$'+puFeeData.clientFee:'',
       return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
-      payment_status:paymentMethod==='Split'?'Split (Cash $'+(document.getElementById('cash-amount').value||0)+' + Card $'+Math.max(0,calcTotal()-(parseFloat(document.getElementById('cash-amount').value)||0))+')':paymentMethod,staff_name:formStaff,status:'New / Received',notes:'',submitted_at:new Date().toISOString()
+      payment_status:paymentMethod||'Unpaid',staff_name:'',
+      status:'New / Received',notes:'',submitted_at:new Date().toISOString()
+    };
+    const res=await fetch(SUPABASE_URL+'/rest/v1/orders',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_KEY,
+        'Authorization':'Bearer '+SUPABASE_KEY,
+        'Prefer':'return=minimal'
+      },
+      body:JSON.stringify(row)
     });
-    if(error){
-      console.error('Supabase insert error:',JSON.stringify(error));
-      alert('Save error: '+error.message+' (code: '+error.code+')');
-      throw error;
+    if(!res.ok){
+      const errText=await res.text();
+      console.error('Supabase insert error:',errText);
+      throw new Error(errText);
     }
 
   }catch(err){
@@ -2424,7 +2455,7 @@ function openAddModal(){
   document.getElementById('ashesDeliveryBtn').classList.remove('sel');
   document.getElementById('addOverlay').classList.add('open');
   jobType=null;jobStaff=null;isPaid=null;jobCrem=null;
-  ['pickup','dropoff','ashes','ceremony','ams'].forEach(t=>document.getElementById(`type-${t}`).className='type-btn');
+  ['pickup','dropoff','ashes','ceremony'].forEach(t=>document.getElementById(`type-${t}`).className='type-btn');
   document.querySelectorAll('#staffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   document.querySelectorAll('#cremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('paidBtn').className='toggle-btn';document.getElementById('unpaidBtn').className='toggle-btn';
@@ -2440,14 +2471,14 @@ function setAshesType(t){
 }
 function selectType(t){
   jobType=t;
-  ['pickup','dropoff','ashes','ceremony','ams'].forEach(x=>document.getElementById(`type-${x}`).className='type-btn'+(x===t?` sel-${t}`:''));
+  ['pickup','dropoff','ashes','ceremony'].forEach(x=>document.getElementById(`type-${x}`).className='type-btn'+(x===t?` sel-${t}`:''));
   document.getElementById('jobDuration').value=TYPE_CFG[t].dur;
   // Show address for pickup only (not ashes — handled by ashesTypeGrp)
   document.getElementById('addrGrp').style.display=t==='pickup'?'flex':'none';
   // Show ashes office/delivery toggle only for ashes type
   document.getElementById('ashesTypeGrp').style.display=t==='ashes'?'block':'none';
   if(t!=='ashes'){ashesDelivery=false;}
-  const hide=t==='ashes'||t==='ams';
+  const hide=t==='ashes';
   document.getElementById('cremGrp').style.display=hide?'none':'block';
   if(hide){jobCrem=null;document.querySelectorAll('#cremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));}
   checkOverlap();
@@ -2460,7 +2491,7 @@ async function addJob(){
   document.querySelectorAll('.field-error').forEach(e=>e.remove());let valid=true;
   const err=(id,msg)=>{const el=document.getElementById(id);if(!el)return;const e=document.createElement('div');e.className='field-error';e.textContent='⚠ '+msg;el.parentNode.appendChild(e);valid=false;};
   if(!jobType)err('type-pickup','Please select a job type');
-  if(!jobCrem&&jobType!=='ashes'&&jobType!=='ams')err('crem-individual','Please select cremation type');
+  if(!jobCrem&&jobType!=='ashes')err('crem-individual','Please select cremation type');
   if(!jobStaff)err('staffPills','Please assign a staff member');
   if(!document.getElementById('ownerName').value.trim())err('ownerName','Please enter owner name');
   if(!valid)return;
@@ -2488,15 +2519,15 @@ function openEditModal(job){
     document.getElementById('ashesTypeGrp').style.display='none';
   }
   editJobId=job.id;editType=job.type;editCrem=job.cremation_type;editStaff=job.staff_name;editPaid=job.paid;
-  ['pickup','dropoff','ashes','ceremony','ams'].forEach(t=>document.getElementById(`edit-type-${t}`).className='type-btn'+(t===job.type?` sel-${t}`:''));
-  document.getElementById('editCremGrp').style.display=job.type==='ashes'||job.type==='ams'?'none':'block';document.getElementById('editAddrGrp').style.display=job.type==='pickup'?'flex':'none';
+  ['pickup','dropoff','ashes','ceremony'].forEach(t=>document.getElementById(`edit-type-${t}`).className='type-btn'+(t===job.type?` sel-${t}`:''));
+  document.getElementById('editCremGrp').style.display=job.type==='ashes'?'none':'block';document.getElementById('editAddrGrp').style.display=job.type==='pickup'?'flex':'none';
   const m={individual:'edit-crem-individual',communal:'edit-crem-communal',ceremony_crem:'edit-crem-ceremony'};Object.entries(m).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===job.cremation_type));
   document.querySelectorAll('#editStaffPills .staff-pill').forEach(p=>p.classList.toggle('selected',p.textContent===job.staff_name));
   document.getElementById('editPaidBtn').className='toggle-btn'+(job.paid?' active-paid':'');document.getElementById('editUnpaidBtn').className='toggle-btn'+(!job.paid?' active-unpaid':'');
   document.getElementById('editJobTime').value=job.job_time.slice(0,5);document.getElementById('editJobDuration').value=job.duration_mins;document.getElementById('editOwnerName').value=job.owner_name||'';document.getElementById('editOwnerPhone').value=job.owner_phone||'';document.getElementById('editPetName').value=job.pet_name||'';document.getElementById('editPetBreed').value=job.pet_breed||'';document.getElementById('editPetWeight').value=job.pet_weight||'';document.getElementById('editOwnerAddress').value=job.address||'';document.getElementById('editRemarks').value=job.remarks||'';
   document.getElementById('editOverlay').classList.add('open');
 }
-function editSelType(t){editType=t;['pickup','dropoff','ashes','ceremony','ams'].forEach(x=>document.getElementById(`edit-type-${x}`).className='type-btn'+(x===t?` sel-${t}`:''));document.getElementById('editAddrGrp').style.display=t==='pickup'?'flex':'none';const hide=t==='ashes'||t==='ams';document.getElementById('editCremGrp').style.display=hide?'none':'block';if(hide){editCrem=null;document.querySelectorAll('#editCremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));}}
+function editSelType(t){editType=t;['pickup','dropoff','ashes','ceremony'].forEach(x=>document.getElementById(`edit-type-${x}`).className='type-btn'+(x===t?` sel-${t}`:''));document.getElementById('editAddrGrp').style.display=t==='pickup'?'flex':'none';const hide=t==='ashes';document.getElementById('editCremGrp').style.display=hide?'none':'block';if(hide){editCrem=null;document.querySelectorAll('#editCremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));}}
 function editSelCrem(t){editCrem=t;const m={individual:'edit-crem-individual',communal:'edit-crem-communal',ceremony_crem:'edit-crem-ceremony'};Object.entries(m).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===t));}
 function editToggleStaffPill(btn,n){document.querySelectorAll('#editStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));btn.classList.add('selected');editStaff=n;}
 function editSetPaid(v){editPaid=v;document.getElementById('editPaidBtn').className='toggle-btn'+(v?' active-paid':'');document.getElementById('editUnpaidBtn').className='toggle-btn'+(!v?' active-unpaid':'');}
@@ -2652,7 +2683,13 @@ function openOrderDetail(id,showSched){
   const mappedStatus=statusMap[o.status]||o.status||'New / Received';
   document.getElementById('od-status').value=mappedStatus;
   document.getElementById('od-balance').value=o.remaining_balance||'';
-  document.getElementById('od-notes').value=o.notes||'';
+  // If order has client-submitted notes and staff notes don't already include them, prepend with !
+  let staffNotes=o.notes||'';
+  if(o.client_notes&&o.client_notes.trim()&&!staffNotes.includes(o.client_notes.trim())){
+    const clientNoteEntry='⚠️ Client note: '+o.client_notes.trim();
+    staffNotes=clientNoteEntry+(staffNotes?'\n'+staffNotes:'');
+  }
+  document.getElementById('od-notes').value=staffNotes;
   document.getElementById('od-ot-sec').style.display=o.service==='Private Farewell Ceremony'?'block':'none';
   document.getElementById('od-ot-qty').textContent=o.overtime_blocks||0;
   document.getElementById('od-ot-total').textContent='= $'+((o.overtime_blocks||0)*28);
