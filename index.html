@@ -2124,14 +2124,16 @@ async function doSubmit(){
     if(error){
       console.error('Supabase insert error:',JSON.stringify(error));
       nb.disabled=false;nb.textContent='Submit';
-      alert('Save error: '+error.message);
+      nb.style.background='#d32f2f';
+      nb.textContent='Error: '+error.message+' — tap to retry';
       return;
     }
 
   }catch(err){
     console.error('Submit error full:',err);
-    nb.disabled=false;nb.textContent='Submit';
-    alert('Could not save your order. Please try again or ask a staff member.');
+    nb.disabled=false;
+    nb.style.background='#d32f2f';
+    nb.textContent='Error: '+(err.message||String(err))+' — tap to retry';
     return;
   }
   nb.disabled=false;
@@ -2159,7 +2161,7 @@ async function doSubmit(){
     }catch(e){console.error('Email error:',e);}
     document.getElementById('ty-email-sec').style.display='none';
   }
-  document.getElementById('ty-pet').textContent=gv('pet-name')||'your pet';
+  var tyPet=document.getElementById('ty-pet');if(tyPet)tyPet.textContent=gv('pet-name')||'your pet';
   document.getElementById('ty-body').innerHTML=sSvc==='shared'?'Your pet will be respectfully cared for and their ashes scattered peacefully in the Pacific Ocean.':'We will contact you when the ashes and any keepsakes are ready.<br><br><strong>Estimated timeline: 7–10 business days.</strong>';
   const tyRefEl=document.getElementById('ty-ref');
   tyRefEl.textContent='Reference: '+ref+' · '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
@@ -2206,7 +2208,7 @@ async function collConfirm(){
   document.getElementById('coll-view').classList.remove('active');
   document.getElementById('ty-view').classList.add('active');
   document.getElementById('ty-paw').textContent='💛';
-  document.getElementById('ty-pet').textContent=petName;
+  var tyPet2=document.getElementById('ty-pet');if(tyPet2)tyPet2.textContent=petName;
   document.getElementById('ty-body').innerHTML='We hope '+petName+'\'s ashes bring you comfort. We are always here if you need us.';
   const tyRef=document.getElementById('ty-ref');
   tyRef.textContent='Collected '+new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
