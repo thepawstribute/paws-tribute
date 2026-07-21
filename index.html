@@ -2662,11 +2662,13 @@ function openOrderDetail(id,showSched){
   }
   const ps=o.payment_status||'Unpaid';
   const odPay=document.getElementById('od-payment');
-  if(ps.startsWith('Split')){
-    odPay.innerHTML=ps.replace('Split','<span style="font-weight:700;color:var(--pink-deep)">Split Payment</span><br><span style="font-size:13px;color:#555">');
-    odPay.innerHTML+=`</span>`;
-  } else {
-    odPay.textContent=ps;
+  if(odPay){
+    if(ps.startsWith('Split')){
+      odPay.innerHTML=ps.replace('Split','<span style="font-weight:700;color:var(--pink-deep)">Split Payment</span><br><span style="font-size:13px;color:#555">');
+      odPay.innerHTML+=`</span>`;
+    } else {
+      odPay.textContent=ps;
+    }
   }
   document.getElementById('od-total').textContent=o.total_amount?'$'+o.total_amount:'—';
   // Map old status values to new ones
