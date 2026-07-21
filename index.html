@@ -275,7 +275,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .order-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .order-row:active{background:var(--pink-light)}
 .obadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.b-new{background:#e8f5e9;color:#2e7d32}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#f0f0f0;color:#111}
+.b-new{background:#e8f5e9;color:#2e7d32}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#e8e8e8;color:#111}
 .order-main{flex:1;min-width:0}
 .order-pet{font-size:15px;font-weight:700;color:#111}
 .order-owner{font-size:13px;color:var(--muted);margin-top:1px}
@@ -1414,16 +1414,20 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Paw / Nose print</div>
           <select class="fi2" id="edit-keepsake">
             <option value="None">None</option>
-            <option value="Paw Print · Small">Paw Print · Small</option>
-            <option value="Paw Print · Large">Paw Print · Large</option>
-            <option value="Nose Print · Small">Nose Print · Small</option>
-            <option value="Nose Print · Large">Nose Print · Large</option>
+            <option value="Paw Print · Wooden · Small ($70)">Paw Print · Wooden · Small ($70)</option>
+            <option value="Paw Print · Wooden · Large ($80)">Paw Print · Wooden · Large ($80)</option>
+            <option value="Paw Print · Digital — $25">Paw Print · Digital — $25</option>
+            <option value="Nose Print · Wooden · Small ($70)">Nose Print · Wooden · Small ($70)</option>
+            <option value="Nose Print · Wooden · Large ($80)">Nose Print · Wooden · Large ($80)</option>
+            <option value="Nose Print · Digital — $25">Nose Print · Digital — $25</option>
+            <option value="Paw Print · Wooden · Small ($70) + Nose Print · Wooden · Small ($70)">Paw + Nose · Wooden Small</option>
+            <option value="Paw Print · Digital — $25 + Nose Print · Digital — $25">Paw + Nose · Digital</option>
           </select>
         </div>
         <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Fur clipping</div>
           <select class="fi2" id="edit-fur">
             <option value="No">No</option>
-            <option value="Yes — $30">Yes — $27</option>
+            <option value="Yes — $30">Yes — $30</option>
             <option value="Included (Private)">Included (Private)</option>
           </select>
         </div>
@@ -1489,7 +1493,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="fg2"><div class="fl2">Date <span style="color:var(--pink)">*</span></div><input type="date" class="fi2" id="sched-date"></div>
       <div class="fg2"><div class="fl2">Time <span style="color:var(--pink)">*</span></div><input type="time" class="fi2" id="sched-time" value="10:00"></div>
       <div class="fg2"><div class="fl2">Assign Staff <span style="color:var(--pink)">*</span></div><div class="staff-pills" id="schedStaffPills"></div></div>
-      <div class="fg2"><div class="fl2">Notes for staff</div><input type="text" class="fi2" id="sched-remarks" placeholder="e.g. Cedar urn, paw print keepsake"></div>
+      <div class="fg2"><div class="fl2">Notes for staff</div><textarea class="fi2" id="sched-remarks" placeholder="e.g. Cedar urn, paw print keepsake" rows="3" style="resize:vertical;min-height:70px;font-family:inherit;"></textarea></div>
     </div>
     <div class="modal-ftr">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('schedOverlay').classList.remove('open')">Cancel</button>
@@ -2729,7 +2733,12 @@ function toggleOrderEdit(){
     document.getElementById('edit-weight').value=o.pet_weight||'';
     document.getElementById('edit-service').value=o.service||'Individual Farewell';
     document.getElementById('edit-urn').value=o.urn||'—';
-    document.getElementById('edit-keepsake').value=o.keepsake||'None';
+    // Set keepsake - try exact match first, then partial
+    const ksVal=o.keepsake||'None';
+    const ksSelect=document.getElementById('edit-keepsake');
+    let ksMatched=false;
+    for(let i=0;i<ksSelect.options.length;i++){if(ksSelect.options[i].value===ksVal){ksSelect.value=ksVal;ksMatched=true;break;}}
+    if(!ksMatched)ksSelect.value='None';
     document.getElementById('edit-fur').value=o.fur_clipping||'No';
     document.getElementById('edit-return').value=o.return_method||'Pick up at office';
     document.getElementById('edit-total').value=o.total_amount||'';
