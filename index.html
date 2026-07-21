@@ -2106,33 +2106,25 @@ async function doSubmit(){
     const base=1000+Math.floor(Math.random()*8999);
     ref='PT-'+String(base).padStart(4,'0');
     const row={
-      ref,
-      first_name:gv('fn'),last_name:gv('ln'),phone:gv('phone'),email:gv('email-intake'),
-      pet_name:gv('pet-name'),pet_type:sPetType,pet_breed:gv('pet-breed')||'—',
-      pet_gender:petGender||'Unknown',pet_weight:WT_LABEL[sWeight]||'—',pet_color:gv('pet-color')||'—',
+      ref,form_type:formType,
+      first_name:gv('fn'),last_name:gv('ln'),phone:gv('phone'),email:gv('email-intake'),city,
+      pet_name:gv('pet-name'),pet_type:sPetType,pet_breed:gv('pet-breed')||'—',pet_gender:petGender||'Unknown',pet_weight:WT_LABEL[sWeight]||'—',pet_color:gv('pet-color')||'—',
       service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',
+      engraving:sUrnEng==='none'?'—':[gv('eng1'),gv('eng2')].filter(x=>x).join(' / ')||'—',
       keepsake:ksStr,fur_clipping:fur?'Yes — $30':'No',
-      return_method:retL[sRet]||'—',
-      total_amount:total,
-      status:'New / Received',
-      notes:getAfterHoursPrice()>0?'⚠️ After-hours service ($30)':'',
+      pickup_address:formType==='pickup'?puAddr:'',pickup_fee:formType==='pickup'&&puFeeData?'$'+puFeeData.clientFee:'',
+      return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
+      delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
+      total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
+      payment_status:paymentMethod||'Unpaid',staff_name:'',
+      status:'New / Received',notes:getAfterHoursPrice()>0?'⚠️ After-hours service ($30)':'',
       submitted_at:new Date().toISOString()
     };
-    const res=await fetch(SUPABASE_URL+'/rest/v1/orders',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'apikey':SUPABASE_KEY,
-        'Authorization':'Bearer '+SUPABASE_KEY,
-        'Prefer':'return=minimal'
-      },
-      body:JSON.stringify(row)
-    });
-    if(!res.ok){
-      const errText=await res.text();
-      console.error('Supabase insert error:',errText);
+    const{error}=await sb.from('orders').insert(row);
+    if(error){
+      console.error('Supabase insert error:',JSON.stringify(error));
       nb.disabled=false;nb.textContent='Submit';
-      alert('Error: '+errText);
+      alert('Save error: '+error.message);
       return;
     }
 
