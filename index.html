@@ -1367,7 +1367,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div style="font-size:12px;color:var(--text-hint)">Fill in after calling client to confirm delivery</div>
         </div>
       </div>
-      <div class="mrow"><span style="font-weight:700;color:#111">Payment</span><span class="mval" id="od-payment">—</span></div>
+
       <div class="mtotal"><span>Total</span><span id="od-total">—</span></div>
 
       <!-- EDIT FIELDS — shown when Edit is clicked -->
@@ -2543,7 +2543,7 @@ function openViewModal(job){
   if(job.cremation_type)b+=row('🕯️','Cremation',CL[job.cremation_type]||job.cremation_type);
   if(job.owner_phone)b+=row('📞','Phone',job.owner_phone);
   if(job.address)b+=row('📍','Address',job.address);
-  b+=row(job.paid?'✅':'⏳','Payment',job.paid?'Paid':'Unpaid');
+
   if(job.remarks)b+=row('📝','Remarks',job.remarks.replace(/\n/g,'<br>'));
   document.getElementById('viewBody').innerHTML=b;
   document.getElementById('viewOverlay').classList.add('open');
@@ -2603,7 +2603,7 @@ function renderOrders(){
         </div>
         <div style="text-align:right">
           <div style="font-size:15px;font-weight:700;color:var(--pink-deep)">${o.total_amount?'$'+o.total_amount:'—'}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${o.payment_status||'Unpaid'}${o.remaining_balance>0?' · <span style=\"color:#e65100;font-weight:700\">Bal $'+o.remaining_balance+'</span>':''}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${o.remaining_balance>0?'<span style=\"color:#e65100;font-weight:700\">Bal $'+o.remaining_balance+'</span>':''}</div>
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap">
