@@ -2626,39 +2626,39 @@ function oTabDirect(f){
 function openOrderDetail(id,showSched){
   const o=orders.find(x=>x.id==id);if(!o)return;
   openOrderId=id;
-  document.getElementById('od-title').textContent=(o.pet_name||'—')+' — '+(o.first_name||'')+' '+(o.last_name||'');
-  document.getElementById('od-ref').textContent=o.ref+' · '+(o.submitted_at?new Date(o.submitted_at).toLocaleDateString():'—');
-  document.getElementById('od-owner').textContent=(o.first_name||'')+' '+(o.last_name||'');
-  document.getElementById('od-phone').textContent=o.phone||'—';
-  document.getElementById('od-email').textContent=o.email||'—';
-  document.getElementById('od-pet').textContent=o.pet_name||'—';
-  document.getElementById('od-breed').textContent=(o.pet_type||'')+(o.pet_breed?' — '+o.pet_breed:'');
-  document.getElementById('od-wt').textContent=o.pet_weight||'—';
-  document.getElementById('od-color').textContent=o.pet_color||'—';
-  document.getElementById('od-pu-sec').style.display=o.form_type==='pickup'?'block':'none';
-  if(o.form_type==='pickup'){document.getElementById('od-pu-addr').textContent=o.pickup_address||'—';document.getElementById('od-pu-fee').textContent=o.pickup_fee||'—';}
-  document.getElementById('od-svc').textContent=o.service||'—';
-  document.getElementById('od-urn').textContent=o.urn||'—';
-  document.getElementById('od-eng').textContent=o.engraving||'—';
-  document.getElementById('od-ks').textContent=o.keepsake||'—';
-  document.getElementById('od-fur').textContent=o.fur_clipping||'—';
-  document.getElementById('od-ret').textContent=o.return_method||'—';
-  document.getElementById('od-slot-row').style.display=o.return_method==='Pick up at office'?'flex':'none';
-  document.getElementById('od-slot').textContent=o.pickup_slot||'—';
-  document.getElementById('od-del-row').style.display=o.return_method==='We deliver to you'?'flex':'none';
-  document.getElementById('od-addr').textContent=o.delivery_address||'—';
-  document.getElementById('od-dcost-row').style.display=o.return_method==='We deliver to you'?'flex':'none';
-  document.getElementById('od-dcost').textContent=o.delivery_fee||'—';
-  document.getElementById('od-delivery-time-row').style.display=o.return_method==='We deliver to you'?'block':'none';
+  var _godtitle=document.getElementById('od-title');if(_godtitle)_godtitle.textContent=(o.pet_name||'—')+' — '+(o.first_name||'')+' '+(o.last_name||'')
+  var _godref=document.getElementById('od-ref');if(_godref)_godref.textContent=o.ref+' · '+(o.submitted_at?new Date(o.submitted_at).toLocaleDateString():'—')
+  var _godowner=document.getElementById('od-owner');if(_godowner)_godowner.textContent=(o.first_name||'')+' '+(o.last_name||'')
+  var _godphone=document.getElementById('od-phone');if(_godphone)_godphone.textContent=o.phone||'—'
+  var _godemail=document.getElementById('od-email');if(_godemail)_godemail.textContent=o.email||'—'
+  var _godpet=document.getElementById('od-pet');if(_godpet)_godpet.textContent=o.pet_name||'—'
+  var _godbreed=document.getElementById('od-breed');if(_godbreed)_godbreed.textContent=(o.pet_type||'')+(o.pet_breed?' — '+o.pet_breed:'')
+  var _godwt=document.getElementById('od-wt');if(_godwt)_godwt.textContent=o.pet_weight||'—'
+  var _godcolor=document.getElementById('od-color');if(_godcolor)_godcolor.textContent=o.pet_color||'—'
+  var _godpusec=document.getElementById('od-pu-sec');if(_godpusec)_godpusec.style.display=o.form_type==='pickup'?'block':'none'
+  if(o.form_type==='pickup'){var _godpuaddr=document.getElementById('od-pu-addr');if(_godpuaddr)_godpuaddr.textContent=o.pickup_address||'—';var _godpufee=document.getElementById('od-pu-fee');if(_godpufee)_godpufee.textContent=o.pickup_fee||'—';}
+  var _godsvc=document.getElementById('od-svc');if(_godsvc)_godsvc.textContent=o.service||'—'
+  var _godurn=document.getElementById('od-urn');if(_godurn)_godurn.textContent=o.urn||'—'
+  var _godeng=document.getElementById('od-eng');if(_godeng)_godeng.textContent=o.engraving||'—'
+  var _godks=document.getElementById('od-ks');if(_godks)_godks.textContent=o.keepsake||'—'
+  var _godfur=document.getElementById('od-fur');if(_godfur)_godfur.textContent=o.fur_clipping||'—'
+  var _godret=document.getElementById('od-ret');if(_godret)_godret.textContent=o.return_method||'—'
+  var _godslotrow=document.getElementById('od-slot-row');if(_godslotrow)_godslotrow.style.display=o.return_method==='Pick up at office'?'flex':'none'
+  var _godslot=document.getElementById('od-slot');if(_godslot)_godslot.textContent=o.pickup_slot||'—'
+  var _goddelrow=document.getElementById('od-del-row');if(_goddelrow)_goddelrow.style.display=o.return_method==='We deliver to you'?'flex':'none'
+  var _godaddr=document.getElementById('od-addr');if(_godaddr)_godaddr.textContent=o.delivery_address||'—'
+  var _goddcostrow=document.getElementById('od-dcost-row');if(_goddcostrow)_goddcostrow.style.display=o.return_method==='We deliver to you'?'flex':'none'
+  var _goddcost=document.getElementById('od-dcost');if(_goddcost)_goddcost.textContent=o.delivery_fee||'—'
+  var _goddeliverytimerow=document.getElementById('od-delivery-time-row');if(_goddeliverytimerow)_goddeliverytimerow.style.display=o.return_method==='We deliver to you'?'block':'none'
   const ashesBtn=document.getElementById('od-ashes-btn');
   if(ashesBtn)ashesBtn.textContent=o.return_method==='We deliver to you'?'🚗 Schedule Ashes Delivery →':'🫙 Schedule Ashes Pickup →';
   if(o.delivery_datetime){
     const dt=new Date(o.delivery_datetime);
-    document.getElementById('od-del-date').value=dt.toISOString().slice(0,10);
-    document.getElementById('od-del-time').value=dt.toTimeString().slice(0,5);
+    var _goddeldate=document.getElementById('od-del-date');if(_goddeldate)_goddeldate.value=dt.toISOString().slice(0,10)
+    var _goddeltime=document.getElementById('od-del-time');if(_goddeltime)_goddeltime.value=dt.toTimeString().slice(0,5)
   } else {
-    document.getElementById('od-del-date').value='';
-    document.getElementById('od-del-time').value='';
+    var _goddeldate=document.getElementById('od-del-date');if(_goddeldate)_goddeldate.value=''
+    var _goddeltime=document.getElementById('od-del-time');if(_goddeltime)_goddeltime.value=''
   }
   const ps=o.payment_status||'Unpaid';
   const odPay=document.getElementById('od-payment');
@@ -2670,23 +2670,23 @@ function openOrderDetail(id,showSched){
       odPay.textContent=ps;
     }
   }
-  document.getElementById('od-total').textContent=o.total_amount?'$'+o.total_amount:'—';
+  var _godtotal=document.getElementById('od-total');if(_godtotal)_godtotal.textContent=o.total_amount?'$'+o.total_amount:'—'
   // Map old status values to new ones
   const statusMap={'In Progress':'New / Received','Ready for Collection':'Ashes Ready'};
   const mappedStatus=statusMap[o.status]||o.status||'New / Received';
-  document.getElementById('od-status').value=mappedStatus;
-  document.getElementById('od-balance').value=o.remaining_balance||'';
+  var _godstatus=document.getElementById('od-status');if(_godstatus)_godstatus.value=mappedStatus
+  var _godbalance=document.getElementById('od-balance');if(_godbalance)_godbalance.value=o.remaining_balance||''
   // If order has client-submitted notes and staff notes don't already include them, prepend with !
   let staffNotes=o.notes||'';
   if(o.client_notes&&o.client_notes.trim()&&!staffNotes.includes(o.client_notes.trim())){
     const clientNoteEntry='⚠️ Client note: '+o.client_notes.trim();
     staffNotes=clientNoteEntry+(staffNotes?'\n'+staffNotes:'');
   }
-  document.getElementById('od-notes').value=staffNotes;
-  document.getElementById('od-ot-sec').style.display=o.service==='Private Farewell Ceremony'?'block':'none';
-  document.getElementById('od-ot-qty').textContent=o.overtime_blocks||0;
-  document.getElementById('od-ot-total').textContent='= $'+((o.overtime_blocks||0)*28);
-  document.getElementById('od-sched-sec').style.display=showSched?'block':'none';
+  var _godnotes=document.getElementById('od-notes');if(_godnotes)_godnotes.value=staffNotes
+  var _godotsec=document.getElementById('od-ot-sec');if(_godotsec)_godotsec.style.display=o.service==='Private Farewell Ceremony'?'block':'none'
+  var _godotqty=document.getElementById('od-ot-qty');if(_godotqty)_godotqty.textContent=o.overtime_blocks||0
+  var _godottotal=document.getElementById('od-ot-total');if(_godottotal)_godottotal.textContent='= $'+((o.overtime_blocks||0)*28)
+  var _godschedsec=document.getElementById('od-sched-sec');if(_godschedsec)_godschedsec.style.display=showSched?'block':'none'
   document.getElementById('orderOverlay').classList.add('open');
 }
 async function saveDeliveryTime(){
@@ -2820,7 +2820,8 @@ function confirmAndSchedule(){
   document.getElementById('sched-time').value='10:00';
   // Pre-fill remarks with current staff notes
   const currentNotes=document.getElementById('od-notes').value.trim()||'';
-  document.getElementById('sched-remarks').value=currentNotes;
+  const balanceNote2=o&&o.remaining_balance>0?'💰 Remaining balance: $'+o.remaining_balance:'';
+  document.getElementById('sched-remarks').value=[balanceNote2,currentNotes].filter(x=>x).join('\n\n');
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   schedIsAshes=false;
   document.getElementById('schedOverlay').classList.add('open');
@@ -2837,7 +2838,9 @@ function scheduleAshesPickup(){
     ?'Ashes delivery — deliver to: '+(o.delivery_address||'[address]')
     :'Ashes pickup — client collecting';
   const currentNotes=document.getElementById('od-notes').value.trim()||'';
-  document.getElementById('sched-remarks').value=[ashesBase,currentNotes].filter(x=>x).join('\n\n');
+  const balanceNote=o.remaining_balance>0?'💰 Remaining balance: $'+o.remaining_balance:'';
+  const parts=[ashesBase,balanceNote,currentNotes].filter(x=>x);
+  document.getElementById('sched-remarks').value=parts.join('\n\n');
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   document.querySelector('#schedOverlay .modal-title').textContent=isDelivery?'🚗 Schedule Ashes Delivery':'🫙 Schedule Ashes Pickup';
   schedIsAshes=true;
