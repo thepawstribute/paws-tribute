@@ -2820,8 +2820,11 @@ function confirmAndSchedule(){
   schedOrderId=openOrderId;schedStaff=null;
   document.getElementById('sched-date').value=fmtDateKey(new Date());
   document.getElementById('sched-time').value='10:00';
-  document.getElementById('sched-remarks').value='';
+  // Pre-fill remarks with current staff notes
+  const currentNotes=document.getElementById('od-notes').value||'';
+  document.getElementById('sched-remarks').value=currentNotes;
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+  schedIsAshes=false;
   document.getElementById('schedOverlay').classList.add('open');
 }
 function scheduleAshesPickup(){
@@ -2831,10 +2834,12 @@ function scheduleAshesPickup(){
   schedOrderId=openOrderId;schedStaff=null;
   document.getElementById('sched-date').value=fmtDateKey(new Date());
   document.getElementById('sched-time').value='10:00';
-  // Set note based on delivery method
-  document.getElementById('sched-remarks').value=isDelivery
+  // Set note based on delivery method, append staff notes if any
+  const ashesBase=isDelivery
     ?'Ashes delivery — deliver to: '+(o.delivery_address||'[address]')
     :'Ashes pickup — client collecting';
+  const currentNotes=document.getElementById('od-notes').value||'';
+  document.getElementById('sched-remarks').value=ashesBase+(currentNotes?'\n'+currentNotes:'');
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   document.querySelector('#schedOverlay .modal-title').textContent=isDelivery?'🚗 Schedule Ashes Delivery':'🫙 Schedule Ashes Pickup';
   schedIsAshes=true;
