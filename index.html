@@ -275,7 +275,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .order-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .order-row:active{background:var(--pink-light)}
 .obadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.b-new{background:#ffeaea;color:#c62828}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#e8f5e9;color:#2e7d32}
+.b-new{background:#e8f5e9;color:#2e7d32}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#e8f5e9;color:#2e7d32}
 .order-main{flex:1;min-width:0}
 .order-pet{font-size:15px;font-weight:700;color:#111}
 .order-owner{font-size:13px;color:var(--muted);margin-top:1px}
@@ -356,6 +356,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 20px;border-radius:100px;font-size:14px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:300;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:360px){.urn-grid{grid-template-columns:repeat(2,1fr)}.type-btns{grid-template-columns:repeat(2,1fr)}}
+.ks-section{margin-bottom:4px;}
+.ks-section-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:10px 0;}
 </style>
 </head>
 <body>
@@ -380,16 +382,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
   </div>
   <div class="landing-cards">
     <div class="lcard" onclick="startForm('dropoff')">
-      <div class="lcard-icon">🏢</div>
-      <div><div class="lcard-name">Office Drop-Off</div><div class="lcard-sub">You bring your pet to our Fremont office</div></div>
-    </div>
-    <div class="lcard" onclick="startForm('pickup')">
-      <div class="lcard-icon">🏠</div>
-      <div><div class="lcard-name">Home Pick-Up</div><div class="lcard-sub">Our staff will come to your home</div></div>
+      <div class="lcard-icon">🕊️</div>
+      <div><div class="lcard-name">Begin Arrangements</div><div class="lcard-sub">Start the cremation arrangement process</div></div>
     </div>
     <div class="lcard" onclick="startCollection()">
-      <div class="lcard-icon">📦</div>
-      <div><div class="lcard-name">Collect Ashes / Keepsake</div><div class="lcard-sub">Picking up your pet's ashes or keepsake items</div></div>
+      <div class="lcard-icon">🪴</div>
+      <div><div class="lcard-name">Ashes Pick Up</div><div class="lcard-sub">Collecting your pet's ashes or keepsakes</div></div>
     </div>
   </div>
 </div>
@@ -437,6 +435,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="ferr" id="e-type">Please select a type.</div></div>
       <div class="fg"><label class="fl">Breed <span class="hint">(optional)</span></label>
         <input class="fi" type="text" id="pet-breed" placeholder="e.g. Golden Retriever, Persian…"></div>
+      <div class="fg"><label class="fl">Color / markings <span class="hint">(optional)</span></label>
+        <input class="fi" type="text" id="pet-color" placeholder="e.g. Golden with white chest"></div>
       <div class="fg"><label class="fl">Gender</label>
         <div style="display:flex;gap:8px;margin-top:6px">
           <button type="button" class="pill" id="g-male" onclick="selGender('Male','g-male')">Male</button>
@@ -453,8 +453,6 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
           <div class="wopt" id="wo5" onclick="selWeight('over100','wo5')"><div class="wopt-label">Over 100 lbs</div></div>
         </div>
         <div class="ferr" id="e-weight">Please select a weight range.</div></div>
-      <div class="fg"><label class="fl">Color / markings <span class="hint">(optional)</span></label>
-        <input class="fi" type="text" id="pet-color" placeholder="e.g. Golden with white chest"></div>
       <!-- Pickup address (pickup only) -->
       <div id="pickup-addr-sec" style="display:none">
         <div class="divider"></div>
@@ -565,38 +563,105 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 
     <!-- PAGE 3: Keepsakes -->
     <div class="fstep" id="fp3">
-      <div class="fg"><label class="fl">Paw / Nose print keepsake</label>
-        <div class="ks-opts">
-          <div class="ks-card" id="ks-paw" onclick="selKs('paw',this)"><div class="ks-icon">🐾</div><div class="ks-name">Paw Print</div></div>
-          <div class="ks-card" id="ks-nose" onclick="selKs('nose',this)"><div class="ks-icon">🐽</div><div class="ks-name">Nose Print</div></div>
-          <div class="ks-card sel" id="ks-none" onclick="selKs('none',this)"><div class="ks-icon">💙</div><div class="ks-name">No keepsake</div></div>
-        </div>
-      </div>
-      <div id="ks-details" style="display:none">
-        <div class="two-col" style="margin-bottom:12px">
-          <div class="fg"><label class="fl">Size</label>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;color:#111;font-weight:500"><input type="radio" name="ks-size" value="Small" style="accent-color:var(--pink);width:18px;height:18px" onchange="updatePrice()"> Small — $70</label>
-              <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;color:#111;font-weight:500"><input type="radio" name="ks-size" value="Large" style="accent-color:var(--pink);width:18px;height:18px" onchange="updatePrice()"> Large — $80</label>
+      <!-- PAW PRINT -->
+      <div class="ks-section" id="ks-paw-section">
+        <div class="ks-section-header" onclick="toggleKsSection('paw')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">🐾</span>
+            <div>
+              <div style="font-weight:700;color:var(--pink-deep);font-size:15px;">Paw Print</div>
+              <div style="font-size:12px;color:var(--muted)">Wooden from $70 · Digital $25</div>
             </div>
           </div>
-          <div class="fg"><label class="fl">Quantity</label>
-            <div class="qty-row">
-              <button type="button" class="qty-btn" onclick="chgQty(-1)">−</button>
-              <span class="qty-num" id="ks-qty">1</span>
-              <button type="button" class="qty-btn" onclick="chgQty(1)">+</button>
+          <div id="ks-paw-toggle" style="font-size:13px;color:var(--accent);font-weight:600;">+ Add</div>
+        </div>
+        <div id="ks-paw-body" style="display:none;padding-bottom:8px;">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <div class="ks-card" id="ks-paw-wooden" onclick="selKsType('paw','wooden',this)" style="flex:1;text-align:center;padding:14px 10px;">
+              <div style="font-weight:700;font-size:14px;">Wooden</div>
+              <div style="font-size:12px;color:var(--muted)">From $70</div>
+            </div>
+            <div class="ks-card" id="ks-paw-digital" onclick="selKsType('paw','digital',this)" style="flex:1;text-align:center;padding:14px 10px;">
+              <div style="font-weight:700;font-size:14px;">Digital</div>
+              <div style="font-size:12px;color:var(--muted)">$25</div>
+            </div>
+          </div>
+          <div id="ks-paw-wooden-opts" style="display:none;">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Size</label>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;font-weight:500;"><input type="radio" name="paw-size" value="Small" style="accent-color:var(--pink);width:18px;height:18px;" onchange="updatePrice()"> Small — $70</label>
+                  <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;font-weight:500;"><input type="radio" name="paw-size" value="Large" style="accent-color:var(--pink);width:18px;height:18px;" onchange="updatePrice()"> Large — $80</label>
+                </div>
+              </div>
+              <div class="fg"><label class="fl">Quantity</label>
+                <div class="qty-row">
+                  <button type="button" class="qty-btn" onclick="chgKsQty('paw',-1)">−</button>
+                  <span class="qty-num" id="paw-qty">1</span>
+                  <button type="button" class="qty-btn" onclick="chgKsQty('paw',1)">+</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="fg"><label class="fl">Name on keepsake <span class="hint">(optional)</span></label>
-          <input class="fi" type="text" id="ks-name" maxlength="15" placeholder="e.g. Buddy"></div>
       </div>
       <div class="divider"></div>
-      <div id="fur-sec">
-        <label class="chk-row">
-          <input type="checkbox" id="fur-clipping" onchange="updatePrice()">
-          <div><div class="chk-label">Fur Clipping</div><div class="chk-price">$27</div><div class="chk-sub">A small keepsake of your pet's fur, lovingly preserved.</div></div>
-        </label>
+      <!-- NOSE PRINT -->
+      <div class="ks-section" id="ks-nose-section">
+        <div class="ks-section-header" onclick="toggleKsSection('nose')">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">🐽</span>
+            <div>
+              <div style="font-weight:700;color:var(--pink-deep);font-size:15px;">Nose Print</div>
+              <div style="font-size:12px;color:var(--muted)">Wooden from $70 · Digital $25</div>
+            </div>
+          </div>
+          <div id="ks-nose-toggle" style="font-size:13px;color:var(--accent);font-weight:600;">+ Add</div>
+        </div>
+        <div id="ks-nose-body" style="display:none;padding-bottom:8px;">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <div class="ks-card" id="ks-nose-wooden" onclick="selKsType('nose','wooden',this)" style="flex:1;text-align:center;padding:14px 10px;">
+              <div style="font-weight:700;font-size:14px;">Wooden</div>
+              <div style="font-size:12px;color:var(--muted)">From $70</div>
+            </div>
+            <div class="ks-card" id="ks-nose-digital" onclick="selKsType('nose','digital',this)" style="flex:1;text-align:center;padding:14px 10px;">
+              <div style="font-weight:700;font-size:14px;">Digital</div>
+              <div style="font-size:12px;color:var(--muted)">$25</div>
+            </div>
+          </div>
+          <div id="ks-nose-wooden-opts" style="display:none;">
+            <div class="two-col">
+              <div class="fg"><label class="fl">Size</label>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;font-weight:500;"><input type="radio" name="nose-size" value="Small" style="accent-color:var(--pink);width:18px;height:18px;" onchange="updatePrice()"> Small — $70</label>
+                  <label style="display:flex;align-items:center;gap:10px;font-size:15px;cursor:pointer;font-weight:500;"><input type="radio" name="nose-size" value="Large" style="accent-color:var(--pink);width:18px;height:18px;" onchange="updatePrice()"> Large — $80</label>
+                </div>
+              </div>
+              <div class="fg"><label class="fl">Quantity</label>
+                <div class="qty-row">
+                  <button type="button" class="qty-btn" onclick="chgKsQty('nose',-1)">−</button>
+                  <span class="qty-num" id="nose-qty">1</span>
+                  <button type="button" class="qty-btn" onclick="chgKsQty('nose',1)">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <!-- FUR CLIPPING -->
+      <div class="ks-section" id="ks-fur-section">
+        <div class="ks-section-header" onclick="toggleFur()">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:20px;">✂️</span>
+            <div>
+              <div style="font-weight:700;color:var(--pink-deep);font-size:15px;">Fur Clipping — $30</div>
+              <div style="font-size:12px;color:var(--muted)">A lock of fur to keep close</div>
+            </div>
+          </div>
+          <div id="ks-fur-toggle" style="font-size:13px;color:var(--accent);font-weight:600;">+ Add</div>
+        </div>
+        <input type="checkbox" id="fur-clipping" onchange="updatePrice()" style="display:none;">
       </div>
       <div class="info-box" id="private-fur-note" style="display:none">🌸 Fur clipping is included with your Private Farewell Ceremony — no extra charge.</div>
     </div>
@@ -685,13 +750,6 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="sum-lbl">Order summary</div>
       <div id="summary-lines"></div>
       <div class="sum-total-row"><span>Total</span><span id="sv-total">—</span></div>
-      <!-- Staff who assisted -->
-      <div class="divider"></div>
-      <div class="fg" id="staff-selector-wrap">
-        <label class="fl">Staff member assisting today <span class="req">*</span></label>
-        <div class="staff-pills" id="formStaffPills"></div>
-        <div class="ferr" id="e-form-staff" style="margin-top:6px">Please select who is helping today.</div>
-      </div>
       <!-- Payment -->
       <div style="margin-top:20px;padding-top:20px;border-top:2px solid var(--pink-mid)">
         <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:4px">💳 Payment</div>
@@ -904,7 +962,12 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="stats-row" id="stats-row" style="border:none;padding:0;margin:0;flex-shrink:0;background:transparent"></div>
     </div>
 <div id="pending-section" style="display:none"></div><div id="pending-list" style="display:none"></div>
-
+    <div style="padding:8px 16px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0">
+      <div style="position:relative">
+        <input type="text" id="orderSearch" placeholder="Search by name, pet, ref…" oninput="filterOrders()" style="width:100%;padding:10px 14px 10px 36px;border:2px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:#fafafa">
+        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--muted)">🔍</span>
+      </div>
+    </div>
     <div class="orders-scroll" id="orders-scroll" style="flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch"></div>
   </div>
 
@@ -938,7 +1001,8 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <div style="font-size:12px;font-weight:700;color:var(--pink-deep);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">🚗 Home Pick-Up</div>
             <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--pink-mid)"><span style="color:var(--muted)">Quote to client</span><span style="font-weight:700;font-size:18px;color:var(--pink-deep)" id="calc-pu-client">—</span></div>
             <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--pink-mid)"><span style="color:var(--muted)">Driver pay</span><span style="font-weight:700;color:#111" id="calc-pu-driver">—</span></div>
-            <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0"><span style="color:var(--muted)">Your cut</span><span style="font-weight:700;color:var(--pink)" id="calc-pu-cut">—</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:14px;padding:4px 0;border-bottom:1px solid var(--pink-mid)"><span style="color:var(--muted)">Your cut</span><span style="font-weight:700;color:var(--pink)" id="calc-pu-cut">—</span></div>
+            <div style="margin-top:8px;padding-top:8px;border-top:2px solid var(--pink-border)" id="calc-pu-totals"></div>
           </div>
           <div style="background:var(--gold-light);border:1px solid #e8d4a0;border-radius:12px;padding:14px;margin-bottom:10px">
             <div style="font-size:12px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">📦 Ashes Delivery</div>
@@ -1360,7 +1424,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div style="margin-bottom:10px"><div class="fl2" style="margin-bottom:4px">Fur clipping</div>
           <select class="fi2" id="edit-fur">
             <option value="No">No</option>
-            <option value="Yes — $27">Yes — $27</option>
+            <option value="Yes — $30">Yes — $27</option>
             <option value="Included (Private)">Included (Private)</option>
           </select>
         </div>
@@ -1379,13 +1443,13 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <option value="Unpaid">Unpaid</option>
           </select>
         </div>
-        <button onclick="saveOrderEdits()" style="width:100%;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px">Save changes</button>
+        <button onclick="saveOrderEdits()" style="width:100%;padding:13px;background:var(--pink);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;display:none">Save changes</button>
       </div>
       <div class="msec" style="margin-top:14px"><div class="msec-lbl">Status</div>
         <select class="ssel" id="od-status" onchange="saveOrderStatus()">
-          <option value="New / Received">🔴 New</option>
+          <option value="New / Received">🟢 New</option>
           <option value="Ashes Ready">🟣 Ashes Ready</option>
-          <option value="Completed">🟢 Completed</option>
+          <option value="Completed">⚫ Completed</option>
         </select></div>
       <div class="msec"><div class="msec-lbl">Remaining balance</div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -1411,8 +1475,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     </div>
     <div class="modal-ftr">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('orderOverlay').classList.remove('open')">Close</button>
-      <button class="mbtn" id="od-edit-btn" onclick="toggleOrderEdit()" style="background:var(--pink-light);color:var(--pink-deep);border:1px solid var(--pink-border)">✏️ Edit</button>
-      <button class="mbtn mbtn-pri" onclick="logOrderCall()">📞 Log call</button>
+      <button class="mbtn mbtn-pri" onclick="saveOrderAll()" style="background:#2e7d32">💾 Save</button>
     </div>
   </div>
 </div>
@@ -1554,7 +1617,7 @@ window.addEventListener('load',async()=>{
       const btn=document.createElement('button');
       btn.type='button';btn.className='staff-pill';btn.textContent=s.name;
       btn.onclick=()=>{
-        document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+        document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected')); // formStaffPills removed
         btn.classList.add('selected');formStaff=s.name;
         document.getElementById('e-form-staff').classList.remove('show');
       };
@@ -1591,10 +1654,11 @@ function startForm(type){
   formType=type;fPage=1;
   sSvc='';sUrn='';sUrnEng='';sKs='none';sRet='';sSlot='';sPetType='';sWeight='';petGender='Unknown';
   ksQty=1;overtimeAuth=0;puFeeData=null;delFeeData=null;
+  ksState={paw:{active:false,type:'',qty:1},nose:{active:false,type:'',qty:1}};
   document.getElementById('client-landing').style.display='none';
   document.getElementById('form-view').classList.add('active');
   document.getElementById('ty-view').classList.remove('active');
-  document.getElementById('form-badge').textContent=type==='pickup'?'🏠 Home Pick-Up':'🏢 Office Drop-Off';
+  var fb=document.getElementById('form-badge');if(fb)fb.textContent=type==='pickup'?'🏠 Home Pick-Up':'🏢 Office Drop-Off';
   document.getElementById('pickup-addr-sec').style.display=type==='pickup'?'block':'none';
   ['fn','ln','phone','email-intake','pet-name','pet-breed','pet-color','pu-street','pu-apt','pu-city','pu-zip','eng1','eng2','ks-name','d-street','d-apt','d-city','d-zip'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('legal-chk').checked=false;
@@ -1619,7 +1683,7 @@ function startForm(type){
   document.getElementById('shared-msg').style.display='none';
   document.getElementById('pu-fee-box').style.display='none';
   document.getElementById('pu-quote-box').style.display='none';
-  document.getElementById('fur-sec').style.display='block';
+  var furSecEl=document.getElementById('ks-fur-section');if(furSecEl)furSecEl.style.display='block';
   document.getElementById('private-fur-note').style.display='none';
   // payment handled by Cash/Card/Pending toggle
   formStaff=null;paymentMethod='';
@@ -1627,7 +1691,7 @@ function startForm(type){
   document.getElementById('split-pay-sec').style.display='none';
   const ca=document.getElementById('cash-amount');if(ca)ca.value='';
   // Reset staff pill selection (pills already rendered on init)
-  document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected')); // formStaffPills removed
   setTimeout(()=>setupSig(),100);
   showPage(1);
 }
@@ -1688,7 +1752,7 @@ function validatePage(n){
   if(n===2){clr('e-svc');clr('e-urn');if(!sSvc){err('e-svc');}else if(sSvc!=='shared'&&!sUrn)err('e-urn');}
   if(n===4&&sSvc!=='shared'){clr('e-ret');if(!sRet)err('e-ret');if(sRet==='delivery'&&!gv('d-street').trim())err('e-addr');}
   if(n===5){
-    if(!formStaff){document.getElementById('e-form-staff').classList.add('show');ok=false;}
+    // staff selection removed from client form
     // legal-chk merged into sig-checkbox
     if(!sigDrawn){document.getElementById('e-sig').classList.add('show');ok=false;}
   }
@@ -1711,7 +1775,7 @@ function selSvc(s,card){
   sSvc=s;document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('e-svc').classList.remove('show');
   document.getElementById('overtime-sec').style.display=s==='private'?'block':'none';
   document.getElementById('urn-sec').style.display=s==='shared'?'none':'block';
-  document.getElementById('fur-sec').style.display=s==='private'?'none':'block';
+  var furSecEl2=document.getElementById('ks-fur-section');if(furSecEl2)furSecEl2.style.display=s==='private'?'none':'block';
   document.getElementById('private-fur-note').style.display=s==='private'?'block':'none';
   if(s==='shared')sUrn='N/A';
 }
@@ -1725,26 +1789,73 @@ function updateEngNote(){
 function selUrn(u,id,et){
   sUrn=u;sUrnEng=et;
   const isMetalUrn=u.toLowerCase().includes('metal');
+  const isWooden=(u==='Carved Wood'||u==='Cedar');
+  const limit=isWooden?30:15;
   document.querySelectorAll('.urn-card').forEach(c=>c.classList.remove('sel'));
   document.getElementById(id).classList.add('sel');
   document.getElementById('e-urn').classList.remove('show');
-  // Show engraving for all urns except scattering tube
   const engBox=document.getElementById('eng-box');
   if(engBox)engBox.style.display=et==='none'?'none':'block';
   const engBanner=document.getElementById('eng-banner-text');
   if(engBanner)engBanner.textContent=isMetalUrn?'Optional Engraving (+$20)':'Optional Engraving';
-  // Show second line for 2-line urns
   document.getElementById('eng-l2').style.display=et==='2line'?'block':'none';
-  // Show $20 fee note only for metal urns
+  const e1=document.getElementById('eng1');const e2=document.getElementById('eng2');
+  const e1c=document.getElementById('eng1c');const e2c=document.getElementById('eng2c');
+  if(e1){e1.maxLength=limit;e1.oninput=function(){if(e1c)e1c.textContent=this.value.length+'/'+limit;updateEngNote();};}
+  if(e1c)e1c.textContent=(e1?e1.value.length:0)+'/'+limit;
+  if(e2){e2.maxLength=limit;e2.oninput=function(){if(e2c)e2c.textContent=this.value.length+'/'+limit;updateEngNote();};}
+  if(e2c)e2c.textContent=(e2?e2.value.length:0)+'/'+limit;
   updateEngNote();
 }
-function selKs(k,card){sKs=k;document.querySelectorAll('.ks-card').forEach(c=>c.classList.remove('sel'));card.classList.add('sel');document.getElementById('ks-details').style.display=(k==='paw'||k==='nose')?'block':'none';}
+// ===== NEW KEEPSAKE SYSTEM =====
+var ksState={paw:{active:false,type:'',qty:1},nose:{active:false,type:'',qty:1}};
+function toggleKsSection(which){
+  var state=ksState[which];state.active=!state.active;
+  document.getElementById('ks-'+which+'-body').style.display=state.active?'block':'none';
+  document.getElementById('ks-'+which+'-toggle').textContent=state.active?'− Remove':'+ Add';
+  document.getElementById('ks-'+which+'-section').classList.toggle('active',state.active);
+  if(!state.active){state.type='';state.qty=1;
+    var wc=document.getElementById('ks-'+which+'-wooden');var dc=document.getElementById('ks-'+which+'-digital');
+    if(wc)wc.classList.remove('sel');if(dc)dc.classList.remove('sel');
+    document.getElementById('ks-'+which+'-wooden-opts').style.display='none';
+    document.querySelectorAll('input[name="'+which+'-size"]').forEach(function(r){r.checked=false;});
+    document.getElementById(which+'-qty').textContent='1';}
+  updatePrice();
+}
+function selKsType(which,type,el){
+  ksState[which].type=type;
+  var wc=document.getElementById('ks-'+which+'-wooden');var dc=document.getElementById('ks-'+which+'-digital');
+  if(wc)wc.classList.remove('sel');if(dc)dc.classList.remove('sel');el.classList.add('sel');
+  document.getElementById('ks-'+which+'-wooden-opts').style.display=type==='wooden'?'block':'none';
+  updatePrice();
+}
+function chgKsQty(which,d){ksState[which].qty=Math.max(1,ksState[which].qty+d);document.getElementById(which+'-qty').textContent=ksState[which].qty;updatePrice();}
+function toggleFur(){
+  var chk=document.getElementById('fur-clipping');chk.checked=!chk.checked;
+  document.getElementById('ks-fur-toggle').textContent=chk.checked?'− Remove':'+ Add';
+  document.getElementById('ks-fur-section').classList.toggle('active',chk.checked);updatePrice();
+}
+function buildKsStr(){
+  var parts=[];
+  if(ksState.paw.active&&ksState.paw.type){var s=ksState.paw.type==='digital'?'Paw Print · Digital — $25':'Paw Print · Wooden';if(ksState.paw.type==='wooden'){var sz=document.querySelector('input[name="paw-size"]:checked');if(sz)s+=' · '+sz.value+' ($'+(sz.value==='Small'?'70':'80')+')';if(ksState.paw.qty>1)s+=' × '+ksState.paw.qty;}parts.push(s);}
+  if(ksState.nose.active&&ksState.nose.type){var s2=ksState.nose.type==='digital'?'Nose Print · Digital — $25':'Nose Print · Wooden';if(ksState.nose.type==='wooden'){var sz2=document.querySelector('input[name="nose-size"]:checked');if(sz2)s2+=' · '+sz2.value+' ($'+(sz2.value==='Small'?'70':'80')+')';if(ksState.nose.qty>1)s2+=' × '+ksState.nose.qty;}parts.push(s2);}
+  return parts.length?parts.join(' + '):'None';
+}
+function getKsPrice(){
+  var total=0;
+  if(ksState.paw.active){if(ksState.paw.type==='digital')total+=25;else if(ksState.paw.type==='wooden'){var sz=document.querySelector('input[name="paw-size"]:checked');total+=(sz?(sz.value==='Small'?70:80):70)*ksState.paw.qty;}}
+  if(ksState.nose.active){if(ksState.nose.type==='digital')total+=25;else if(ksState.nose.type==='wooden'){var sz2=document.querySelector('input[name="nose-size"]:checked');total+=(sz2?(sz2.value==='Small'?70:80):70)*ksState.nose.qty;}}
+  return total;
+}
+// Legacy stubs
+function selKs(){}
+function chgQty(){}
 function selRet(r,card){
   sRet=r;
   document.querySelectorAll('.ret-card').forEach(c=>c.classList.remove('sel'));
   card.classList.add('sel');
   document.getElementById('e-ret').classList.remove('show');
-  document.getElementById('slot-sec').style.display=r==='pickup'?'block':'none';
+  document.getElementById('slot-sec').style.display='none';
   const delSec=document.getElementById('del-sec');
   if(delSec){delSec.style.display=r==='delivery'?'block':'none';}
 }
@@ -1871,8 +1982,8 @@ async function calcDelFee(){
 // PRICE CALC
 // ═══════════════════════════════════════
 const getSvcPrice=()=>(!sSvc||!sWeight)?0:SVC_PRICE[sSvc]?.[sWeight]||0;
-const getKsPrice=()=>{if(sKs==='none')return 0;const sz=document.querySelector('input[name="ks-size"]:checked');return sz?(sz.value==='Small'?70:80)*ksQty:0;};
-const getFurPrice=()=>{if(sSvc==='private')return 0;const c=document.getElementById('fur-clipping');return(c&&c.checked)?27:0;};
+// getKsPrice defined in new keepsake system
+const getFurPrice=()=>{if(sSvc==='private')return 0;const c=document.getElementById('fur-clipping');return(c&&c.checked)?30:0;};
 const getPuFee=()=>puFeeData?puFeeData.clientFee:0;
 const getDelFee=()=>delFeeData&&sRet==='delivery'?delFeeData.fee:0;
 const getEngravingFee=()=>{
@@ -1933,9 +2044,7 @@ function clearCollSig(){const c=document.getElementById('coll-sig-canvas');if(c&
 function buildSummary(){
   const svcL={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Farewell Ceremony'};
   const retL={pickup:'Pick up at office',delivery:'We deliver to you'};
-  const sz=document.querySelector('input[name="ks-size"]:checked'),nm=gv('ks-name');
-  let ksStr='None';
-  if(sKs==='paw'||sKs==='nose')ksStr=(sKs==='paw'?'Paw Print':'Nose Print')+(sz?' · '+sz.value+' ($'+(sz.value==='Small'?'70':'80')+')'  :'')+(ksQty>1?' · Qty '+ksQty:'')+(nm?' · "'+nm+'"':'');
+  const ksStr=buildKsStr();
   const fur=document.getElementById('fur-clipping').checked&&sSvc!=='private';
   const row=(k,v)=>`<div class="sum-row"><span class="sum-key">${k}</span><span class="sum-val">${v}</span></div>`;
   let html=`<div class="sum-sec"><div class="sum-lbl">Owner</div>${row('Name',gv('fn')+' '+gv('ln'))}${row('Phone',gv('phone'))}${gv('email-intake')?row('Email',gv('email-intake')):''}` + '</div>';
@@ -1947,7 +2056,7 @@ function buildSummary(){
   if(sSvc!=='shared'&&sUrnEng!=='none'&&engStr){const ef=getEngravingFee();html+=row('Engraving',engStr+(ef>0?' (+$20)':''));}
   if(sSvc==='private'&&overtimeAuth>0)html+=row('Overtime','Up to '+overtimeAuth+' block'+(overtimeAuth>1?'s':'')+' ($'+overtimeAuth*28+' if used)');
   if(ksStr!=='None')html+=row('Keepsake',ksStr);
-  if(fur)html+=row('Fur clipping','$27');
+  if(fur)html+=row('Fur clipping','$30');
   if(sSvc!=='shared')html+=row('Return',retL[sRet]||'—');
   if(sRet==='pickup'&&sSlot)html+=row('Pick-up window',sSlot);
   if(sRet==='delivery'&&delFeeData)html+=row('Delivery fee','$'+delFeeData.fee);
@@ -1969,9 +2078,7 @@ function buildSummary(){
 async function doSubmit(){
   const svcL={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Farewell Ceremony'};
   const retL={na:'N/A',pickup:'Pick up at office',delivery:'We deliver to you'};
-  const sz=document.querySelector('input[name="ks-size"]:checked'),nm=gv('ks-name');
-  let ksStr='None';
-  if(sKs==='paw'||sKs==='nose')ksStr=(sKs==='paw'?'Paw Print':'Nose Print')+(sz?' · '+sz.value:'')+(ksQty>1?' · Qty '+ksQty:'')+(nm?' · "'+nm+'"':'');
+  const ksStr=buildKsStr();
   const fur=document.getElementById('fur-clipping').checked&&sSvc!=='private';
   const total=calcTotal();
   const driverPay=(formType==='pickup'&&puFeeData?puFeeData.driverPay:0)+(sRet==='delivery'&&delFeeData?delFeeData.driver:0);
@@ -1991,7 +2098,7 @@ async function doSubmit(){
       pet_name:gv('pet-name'),pet_type:sPetType,pet_breed:gv('pet-breed')||'—',pet_gender:petGender||'Unknown',pet_weight:WT_LABEL[sWeight]||'—',pet_color:gv('pet-color')||'—',
       service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',
       engraving:sUrnEng==='none'?'—':[gv('eng1'),gv('eng2')].filter(x=>x).join(' / ')||'—',
-      keepsake:ksStr,fur_clipping:fur?'Yes — $27':'No',
+      keepsake:ksStr,fur_clipping:fur?'Yes — $30':'No',
       pickup_address:formType==='pickup'?puAddr:'',pickup_fee:formType==='pickup'&&puFeeData?'$'+puFeeData.clientFee:'',
       return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
@@ -2009,7 +2116,7 @@ async function doSubmit(){
     alert('Submit failed: '+(err.message||JSON.stringify(err)));
   }
   nb.disabled=false;
-  window._lastSub={ref,toName:gv('fn')+' '+gv('ln'),petName:gv('pet-name'),service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',keepsake:ksStr==='None'?'—':ksStr,furClipping:fur?'Yes — $27':'—',total:total>0?'$'+total:'To be confirmed',returnMethod:retL[sRet]||'—',submittedDate:new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})};
+  window._lastSub={ref,toName:gv('fn')+' '+gv('ln'),petName:gv('pet-name'),service:svcL[sSvc]||'—',urn:sSvc==='shared'?'N/A':sUrn||'—',keepsake:ksStr==='None'?'—':ksStr,furClipping:fur?'Yes — $30':'—',total:total>0?'$'+total:'To be confirmed',returnMethod:retL[sRet]||'—',submittedDate:new Date().toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})};
   // Auto-send if email provided
   const em=gv('email-intake');
   if(em&&em.includes('@')){
@@ -2034,7 +2141,7 @@ async function doSubmit(){
     document.getElementById('ty-email-sec').style.display='none';
   }
   document.getElementById('ty-pet').textContent=gv('pet-name');
-  document.getElementById('ty-body').innerHTML=sSvc==='shared'?'Your pet will be respectfully cared for and their ashes scattered peacefully in the Pacific Ocean.':'We will contact you when the ashes and any keepsakes are ready. <strong>Estimated: 7–10 business days.</strong>';
+  document.getElementById('ty-body').innerHTML=sSvc==='shared'?'Your pet will be respectfully cared for and their ashes scattered peacefully in the Pacific Ocean.':'We will contact you when the ashes and any keepsakes are ready.<br><br><strong>Estimated timeline: 7–10 business days.</strong>';
   document.getElementById('ty-ref').textContent='Reference: '+ref+' · '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   document.getElementById('ty-email-sec').style.display=em?'none':'block';
   document.getElementById('form-view').classList.remove('active');
@@ -2440,7 +2547,7 @@ async function loadOrders(){
   const rev=orders.filter(o=>o.status==='Completed').reduce((s,o)=>s+(o.total_amount||0),0);
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-box" onclick="oTabDirect('all')" style="cursor:pointer"><div class="stat-n">${all}</div><div class="stat-l">All</div></div>
-    <div class="stat-box" onclick="oTabDirect('New / Received')" style="cursor:pointer"><div class="stat-n" style="color:#c62828">${nw}</div><div class="stat-l">🔴 New</div></div>
+    <div class="stat-box" onclick="oTabDirect('New / Received')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${nw}</div><div class="stat-l">🟢 New</div></div>
     <div class="stat-box" onclick="oTabDirect('Ashes Ready')" style="cursor:pointer"><div class="stat-n" style="color:#6b3a8c">${rd}</div><div class="stat-l">🟣 Ashes Ready</div></div>
     <div class="stat-box" onclick="oTabDirect('Completed')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${dn}</div><div class="stat-l">🟢 Done</div></div>`;
 }
@@ -2449,14 +2556,19 @@ function renderOrders(){
   document.getElementById('pending-section').style.display=pending.length?'block':'none';
   document.getElementById('pending-list').innerHTML=pending.slice(0,5).map(o=>`<div class="pending-item"><div class="pending-ttl">${o.pet_name} — ${o.first_name} ${o.last_name}</div><div class="pending-sub">${o.ref} · ${o.service} · ${o.form_type==='pickup'?'🏠 Home Pickup':'🏢 Drop-Off'} · ${o.submitted_at?new Date(o.submitted_at).toLocaleDateString():'—'}</div><button class="confirm-btn" onclick="openOrderDetail('${o.id}',true)">View &amp; Schedule →</button></div>`).join('');
   let list=curOFilter==='all'?orders:orders.filter(o=>o.status===curOFilter);
+  const sq=(document.getElementById('orderSearch')||{}).value||'';
+  if(sq.trim()){const q=sq.toLowerCase();list=list.filter(o=>[o.first_name,o.last_name,o.pet_name,o.ref,o.phone,o.email,o.notes].filter(Boolean).join(' ').toLowerCase().includes(q));}
   const bc={'New / Received':'b-new','Ashes Ready':'b-ready','Completed':'b-done'};
   document.getElementById('orders-scroll').innerHTML=list.length===0?'<div style="padding:32px;text-align:center;font-size:14px;color:var(--muted)">No orders found</div>':list.map(o=>{
-    const statusLabel=o.status==='New / Received'?'🔴 New':o.status==='Ashes Ready'?'🟣 Ashes Ready':'🟢 Done';
+    const statusLabel=o.status==='New / Received'?'🟢 New':o.status==='Ashes Ready'?'🟣 Ashes Ready':'🟢 Done';
     const date=o.submitted_at?new Date(o.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     return `<div class="order-row" onclick="openOrderDetail('${o.id}',false)" style="padding:16px;flex-direction:column;align-items:stretch;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div style="font-size:16px;font-weight:700;color:#111">${o.pet_name||'—'} <span style="font-size:13px;font-weight:400;color:var(--muted)">${o.pet_type||''}</span></div>
-        <span class="obadge ${bc[o.status]||'b-new'}">${statusLabel}</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          ${(o.notes||o.remaining_balance>0)?'<span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:#ff9800;color:#fff;font-size:13px;font-weight:800;flex-shrink:0" title="Has notes / collect money">!</span>':''}
+          <span class="obadge ${bc[o.status]||'b-new'}">${statusLabel}</span>
+        </div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
@@ -2465,7 +2577,7 @@ function renderOrders(){
         </div>
         <div style="text-align:right">
           <div style="font-size:15px;font-weight:700;color:var(--pink-deep)">${o.total_amount?'$'+o.total_amount:'—'}</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:2px">${o.payment_status||'Unpaid'}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${o.payment_status||'Unpaid'}${o.remaining_balance>0?' · <span style=\"color:#e65100;font-weight:700\">Bal $'+o.remaining_balance+'</span>':''}</div>
         </div>
       </div>
       <div style="font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap">
@@ -2479,6 +2591,7 @@ function renderOrders(){
     </div>`;
   }).join('');
 }
+function filterOrders(){renderOrders();setTimeout(fixOrdersScroll,50);}
 function oTab(f,el){curOFilter=f;document.querySelectorAll('.otab').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');renderOrders();setTimeout(fixOrdersScroll,50);}
 function oTabDirect(f){
   curOFilter=f;
@@ -2654,6 +2767,15 @@ async function saveOrderStatus(){
 }
 async function saveOrderBalance(){await sb.from('orders').update({remaining_balance:parseFloat(document.getElementById('od-balance').value)||0}).eq('id',openOrderId);}
 async function saveOrderNote(){await sb.from('orders').update({notes:document.getElementById('od-notes').value}).eq('id',openOrderId);}
+async function saveOrderAll(){
+  const status=document.getElementById('od-status').value;
+  const balance=parseFloat(document.getElementById('od-balance').value)||0;
+  const notes=document.getElementById('od-notes').value;
+  const ot=parseInt(document.getElementById('od-ot-qty').textContent)||0;
+  await sb.from('orders').update({status,remaining_balance:balance,notes,overtime_blocks:ot}).eq('id',openOrderId);
+  const o=orders.find(x=>x.id==openOrderId);if(o){o.status=status;o.remaining_balance=balance;o.notes=notes;o.overtime_blocks=ot;}
+  renderOrders();showToast('Order saved ✓');
+}
 function chgOrdOt(d){const cur=parseInt(document.getElementById('od-ot-qty').textContent)||0;const nv=Math.max(0,cur+d);document.getElementById('od-ot-qty').textContent=nv;document.getElementById('od-ot-total').textContent='= $'+(nv*28);sb.from('orders').update({overtime_blocks:nv}).eq('id',openOrderId);}
 function logOrderCall(){const o=orders.find(x=>x.id==openOrderId);if(!o)return;const note=document.getElementById('od-notes').value,ts=new Date().toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});const updated=note+(note?'\n':'')+'📞 Called owner — '+ts;document.getElementById('od-notes').value=updated;sb.from('orders').update({notes:updated}).eq('id',openOrderId);showToast('Call logged ✓');}
 function confirmAndSchedule(){
@@ -2719,7 +2841,7 @@ function renderPricing(){
   </div>
   <div style="margin-bottom:20px">
     <div style="font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Add-ons</div>
-    ${[{n:'Paw / Nose Print — Small',p:'$70'},{n:'Paw / Nose Print — Large',p:'$80'},{n:'Fur Clipping (not Private)',p:'$27'}].map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
+    ${[{n:'Paw / Nose Print — Wooden Small',p:'$70'},{n:'Paw / Nose Print — Wooden Large',p:'$80'},{n:'Paw / Nose Print — Digital',p:'$25'},{n:'Fur Clipping (not Private)',p:'$30'}].map(i=>`<div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--surface);border-radius:8px;margin-bottom:6px;border:1px solid var(--border)"><span style="font-size:14px;color:#111">${i.n}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">${i.p}</span></div>`).join('')}
   </div>
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;margin-bottom:24px">
     <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:4px">Questions? Call anytime</div>
@@ -2743,6 +2865,18 @@ async function runCalc(){
   document.getElementById('calc-pu-client').textContent='$'+pu.clientFee+(pu.toll?' (incl. $9 bridge toll)':'');
   document.getElementById('calc-pu-driver').textContent=pu.twoPersonJob?'$'+pu.driverPerPerson+' × 2 people = $'+pu.driverPay:'$'+pu.driverPay;
   document.getElementById('calc-pu-cut').textContent='$'+pu.you+(pu.twoPersonJob?' (2-person job 👥)':'');
+  // Total with cremation
+  const cremTypes=['shared','individual','private'];
+  const totalEl=document.getElementById('calc-pu-totals');
+  if(totalEl){
+    const puFee=pu.clientFee;
+    const labels={shared:'Shared Farewell',individual:'Individual Farewell',private:'Private Ceremony'};
+    totalEl.innerHTML=cremTypes.map((t,i)=>{
+      const cp=SVC_PRICE[t]&&SVC_PRICE[t][wt]?SVC_PRICE[t][wt]:0;
+      const border=i<cremTypes.length-1?'border-bottom:1px solid var(--pink-mid)':'';
+      return `<div style="display:flex;justify-content:space-between;font-size:14px;padding:6px 0;${border}"><span style="color:var(--muted)">${labels[t]} ($${cp}${t!=='shared'?' + $'+puFee+' pickup':''})</span><span style="font-weight:700;font-size:16px;color:var(--pink-deep)">$${t==='shared'?cp:puFee+cp}</span></div>`;
+    }).join('');
+  }
   document.getElementById('calc-del-client').textContent='$'+del.fee+(del.toll?' (incl. $9 bridge toll)':'');
   document.getElementById('calc-del-driver').textContent='$'+del.driver;
   document.getElementById('calc-del-cut').textContent='$'+del.you;
