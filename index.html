@@ -2382,9 +2382,8 @@ function renderGrid(){
           const big=ht>=44,mid=ht>=24;
           bHTML+=`<div onclick="jobClick('${job.id}')" style="position:absolute;top:${topOff}px;left:2px;right:2px;height:${ht}px;border-radius:6px;padding:3px 5px;cursor:pointer;z-index:10;overflow:hidden;border-left:3px solid ${cfg.color||'#ccc'};background:${cfg.bg||'#f5f5f5'};box-shadow:0 1px 3px rgba(0,0,0,.1)">
             ${big?`<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:${cfg.color||'#333'}">${cfg.label||job.type}</div>`:''}
-            ${mid?`<div style="font-size:11px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.owner_name.split(' ')[0]}</div>`:''}
+            ${mid?`<div style="font-size:11px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.owner_name.split(' ')[0]}${job.remarks?` <span style="color:#d32f2f;font-weight:900">!</span>`:''}</div>`:''}
             ${big&&job.pet_name?`<div style="font-size:10px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.pet_name}</div>`:''}
-            <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:${job.paid?'#e8f5e9':'#fff3e0'};color:${job.paid?'#2e7d32':'#e65100'}"></span>
           </div>`;
         }
       }));
@@ -2850,7 +2849,9 @@ async function doScheduleJob(){
   if(!date||!time){showToast('Please select date and time');return;}
   const cremType=o.service==='Shared Farewell'?'communal':o.service==='Private Farewell Ceremony'?'ceremony_crem':'individual';
   const jobTypeVal=schedIsAshes?'ashes':(o.form_type==='pickup'?'pickup':'dropoff');
-  const{error}=await sb.from('jobs').insert({type:jobTypeVal,cremation_type:schedIsAshes?null:cremType,staff_name:schedStaff,job_date:date,job_time:time+':00',duration_mins:o.form_type==='pickup'?60:15,owner_name:(o.first_name||'')+' '+(o.last_name||''),owner_phone:o.phone||'',pet_name:o.pet_name||'',pet_breed:o.pet_breed||'',address:o.pickup_address||'',paid:o.payment_status==='Paid',remarks:(document.getElementById('sched-remarks').value||'')+' | Ref: '+o.ref});
+  const schedNote=document.getElementById('sched-remarks').value||'';
+  const finalRemarks=[schedNote,'Ref: '+o.ref].filter(x=>x).join('\n');
+  const{error}=await sb.from('jobs').insert({type:jobTypeVal,cremation_type:schedIsAshes?null:cremType,staff_name:schedStaff,job_date:date,job_time:time+':00',duration_mins:o.form_type==='pickup'?60:15,owner_name:(o.first_name||'')+' '+(o.last_name||''),owner_phone:o.phone||'',pet_name:o.pet_name||'',pet_breed:o.pet_breed||'',address:o.pickup_address||'',paid:false,remarks:finalRemarks});
   if(error){showToast('Error adding job.');return;}
   const newStatus=schedIsAshes?'Ashes Ready':'New / Received';
   await sb.from('orders').update({status:newStatus}).eq('id',schedOrderId);
