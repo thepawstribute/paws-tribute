@@ -275,7 +275,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
 .order-row{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid var(--border);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .order-row:active{background:var(--pink-light)}
 .obadge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.b-new{background:#e8f5e9;color:#2e7d32}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#e8f5e9;color:#2e7d32}
+.b-new{background:#e8f5e9;color:#2e7d32}.b-prog{background:#e3f2fd;color:#1565c0}.b-ready{background:#f3e5f5;color:#6b3a8c}.b-done{background:#f0f0f0;color:#111}
 .order-main{flex:1;min-width:0}
 .order-pet{font-size:15px;font-weight:700;color:#111}
 .order-owner{font-size:13px;color:var(--muted);margin-top:1px}
@@ -777,7 +777,6 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
             <div style="font-size:20px;margin-bottom:4px">🔀</div>
             <div class="wopt-label">Split</div>
           </div>
-
         </div>
         <div id="split-pay-sec" style="display:none;margin-top:14px;background:var(--surface);border-radius:12px;padding:14px;border:1px solid var(--border)">
           <div style="font-size:13px;font-weight:700;color:#111;margin-bottom:10px">Split payment details</div>
@@ -1259,12 +1258,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         </div>
       </div>
       <div class="fg2" id="addrGrp" style="display:none"><div class="fl2">Delivery address</div><input type="text" class="fi2" id="ownerAddress" placeholder="Full address"></div>
-      <div class="fg2"><div class="fl2">Payment</div>
-        <div class="toggle-btns">
-          <button class="toggle-btn" id="paidBtn" onclick="setPaid(true)">✓ Paid</button>
-          <button class="toggle-btn" id="unpaidBtn" onclick="setPaid(false)">⏳ Unpaid</button>
-        </div></div>
-      <div class="fg2"><div class="fl2">Remarks</div><input type="text" class="fi2" id="remarks" placeholder="Notes…"></div>
+      <div class="fg2"><div class="fl2">Remarks</div><input type="text" class="fi2" id="remarks" placeholder="Notes… e.g. Paid cash $250"></div>
     </div>
     <div class="modal-ftr">
       <button class="mbtn mbtn-sec" onclick="document.getElementById('addOverlay').classList.remove('open')">Cancel</button>
@@ -1305,12 +1299,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="fg2"><div class="fl2">Weight (lb)</div><input type="number" class="fi2" id="editPetWeight"></div>
       </div>
       <div class="fg2" id="editAddrGrp" style="display:none"><div class="fl2">Address</div><input type="text" class="fi2" id="editOwnerAddress"></div>
-      <div class="fg2"><div class="fl2">Payment</div>
-        <div class="toggle-btns">
-          <button class="toggle-btn" id="editPaidBtn" onclick="editSetPaid(true)">✓ Paid</button>
-          <button class="toggle-btn" id="editUnpaidBtn" onclick="editSetPaid(false)">⏳ Unpaid</button>
-        </div></div>
-      <div class="fg2"><div class="fl2">Remarks</div><input type="text" class="fi2" id="editRemarks"></div>
+      <div class="fg2"><div class="fl2">Remarks</div><input type="text" class="fi2" id="editRemarks" placeholder="Notes… e.g. Paid cash $250"></div>
     </div>
     <div class="modal-ftr">
       <button class="mbtn mbtn-del" onclick="deleteJob()">Delete</button>
@@ -2123,7 +2112,7 @@ async function doSubmit(){
       return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
-      payment_status:paymentMethod||'Unpaid',staff_name:'',
+      payment_status:'Unpaid',staff_name:'',
       status:'New / Received',notes:'',submitted_at:new Date().toISOString()
     };
     const res=await fetch(SUPABASE_URL+'/rest/v1/orders',{
@@ -2391,7 +2380,7 @@ function renderGrid(){
             ${big?`<div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:${cfg.color||'#333'}">${cfg.label||job.type}</div>`:''}
             ${mid?`<div style="font-size:11px;font-weight:700;color:#111;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.owner_name.split(' ')[0]}</div>`:''}
             ${big&&job.pet_name?`<div style="font-size:10px;color:#555;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${job.pet_name}</div>`:''}
-            <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:${job.paid?'#e8f5e9':'#fff3e0'};color:${job.paid?'#2e7d32':'#e65100'}">${job.paid?'Paid':'Unpaid'}</span>
+            <span style="display:inline-block;font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;background:${job.paid?'#e8f5e9':'#fff3e0'};color:${job.paid?'#2e7d32':'#e65100'}"></span>
           </div>`;
         }
       }));
@@ -2458,7 +2447,7 @@ function openAddModal(){
   ['pickup','dropoff','ashes','ceremony'].forEach(t=>document.getElementById(`type-${t}`).className='type-btn');
   document.querySelectorAll('#staffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   document.querySelectorAll('#cremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));
-  document.getElementById('paidBtn').className='toggle-btn';document.getElementById('unpaidBtn').className='toggle-btn';
+  // paid removed
   document.getElementById('overlapWarn').style.display='none';document.getElementById('cremGrp').style.display='block';document.getElementById('addrGrp').style.display='none';
   ['jobTime','jobDuration','ownerName','ownerPhone','petName','petBreed','petWeight','ownerAddress','remarks'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='jobTime'?'09:00':'';});
 }
@@ -2486,7 +2475,7 @@ function selectType(t){
 function selectCrem(t){jobCrem=t;const m={individual:'crem-individual',communal:'crem-communal',ceremony_crem:'crem-ceremony'};Object.entries(m).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===t));}
 function checkOverlap(){const w=document.getElementById('overlapWarn'),tv=document.getElementById('jobTime').value,dv=document.getElementById('jobDuration').value;if(!jobStaff||!tv||!dv){w.style.display='none';return;}const ns=t2m(tv),ne=ns+parseInt(dv);const has=jobs.some(j=>{if(j.staff_name!==jobStaff)return false;const js=t2m(j.job_time.slice(0,5)),je=js+j.duration_mins;return ns<je&&ne>js;});w.style.display=has?'block':'none';}
 function toggleStaffPill(btn,n){document.querySelectorAll('#staffPills .staff-pill').forEach(p=>p.classList.remove('selected'));btn.classList.add('selected');jobStaff=n;checkOverlap();}
-function setPaid(v){isPaid=v;document.getElementById('paidBtn').className='toggle-btn'+(v?' active-paid':'');document.getElementById('unpaidBtn').className='toggle-btn'+(!v?' active-unpaid':'');}
+function setPaid(v){isPaid=v;}
 async function addJob(){
   document.querySelectorAll('.field-error').forEach(e=>e.remove());let valid=true;
   const err=(id,msg)=>{const el=document.getElementById(id);if(!el)return;const e=document.createElement('div');e.className='field-error';e.textContent='⚠ '+msg;el.parentNode.appendChild(e);valid=false;};
@@ -2495,7 +2484,7 @@ async function addJob(){
   if(!jobStaff)err('staffPills','Please assign a staff member');
   if(!document.getElementById('ownerName').value.trim())err('ownerName','Please enter owner name');
   if(!valid)return;
-  const{error}=await sb.from('jobs').insert({type:jobType,cremation_type:jobCrem,staff_name:jobStaff,job_date:fmtDateKey(curDate),job_time:document.getElementById('jobTime').value+':00',duration_mins:parseInt(document.getElementById('jobDuration').value)||30,owner_name:document.getElementById('ownerName').value.trim(),owner_phone:document.getElementById('ownerPhone').value,pet_name:document.getElementById('petName').value,pet_breed:document.getElementById('petBreed').value,pet_weight:parseFloat(document.getElementById('petWeight').value)||null,address:document.getElementById('ownerAddress').value,ashes_type:jobType==='ashes'?(ashesDelivery?'delivery':'office'):null,paid:isPaid===true,remarks:document.getElementById('remarks').value});
+  const{error}=await sb.from('jobs').insert({type:jobType,cremation_type:jobCrem,staff_name:jobStaff,job_date:fmtDateKey(curDate),job_time:document.getElementById('jobTime').value+':00',duration_mins:parseInt(document.getElementById('jobDuration').value)||30,owner_name:document.getElementById('ownerName').value.trim(),owner_phone:document.getElementById('ownerPhone').value,pet_name:document.getElementById('petName').value,pet_breed:document.getElementById('petBreed').value,pet_weight:parseFloat(document.getElementById('petWeight').value)||null,address:document.getElementById('ownerAddress').value,ashes_type:jobType==='ashes'?(ashesDelivery?'delivery':'office'):null,paid:false,remarks:document.getElementById('remarks').value});
   if(error){showToast('Error saving. Try again.');return;}
   document.getElementById('addOverlay').classList.remove('open');showToast('Job added ✓');await loadJobs();renderGrid();
 }
@@ -2523,14 +2512,14 @@ function openEditModal(job){
   document.getElementById('editCremGrp').style.display=job.type==='ashes'?'none':'block';document.getElementById('editAddrGrp').style.display=job.type==='pickup'?'flex':'none';
   const m={individual:'edit-crem-individual',communal:'edit-crem-communal',ceremony_crem:'edit-crem-ceremony'};Object.entries(m).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===job.cremation_type));
   document.querySelectorAll('#editStaffPills .staff-pill').forEach(p=>p.classList.toggle('selected',p.textContent===job.staff_name));
-  document.getElementById('editPaidBtn').className='toggle-btn'+(job.paid?' active-paid':'');document.getElementById('editUnpaidBtn').className='toggle-btn'+(!job.paid?' active-unpaid':'');
+  // paid buttons removed
   document.getElementById('editJobTime').value=job.job_time.slice(0,5);document.getElementById('editJobDuration').value=job.duration_mins;document.getElementById('editOwnerName').value=job.owner_name||'';document.getElementById('editOwnerPhone').value=job.owner_phone||'';document.getElementById('editPetName').value=job.pet_name||'';document.getElementById('editPetBreed').value=job.pet_breed||'';document.getElementById('editPetWeight').value=job.pet_weight||'';document.getElementById('editOwnerAddress').value=job.address||'';document.getElementById('editRemarks').value=job.remarks||'';
   document.getElementById('editOverlay').classList.add('open');
 }
 function editSelType(t){editType=t;['pickup','dropoff','ashes','ceremony'].forEach(x=>document.getElementById(`edit-type-${x}`).className='type-btn'+(x===t?` sel-${t}`:''));document.getElementById('editAddrGrp').style.display=t==='pickup'?'flex':'none';const hide=t==='ashes';document.getElementById('editCremGrp').style.display=hide?'none':'block';if(hide){editCrem=null;document.querySelectorAll('#editCremGrp .crem-btn').forEach(b=>b.classList.remove('selected'));}}
 function editSelCrem(t){editCrem=t;const m={individual:'edit-crem-individual',communal:'edit-crem-communal',ceremony_crem:'edit-crem-ceremony'};Object.entries(m).forEach(([k,id])=>document.getElementById(id).classList.toggle('selected',k===t));}
 function editToggleStaffPill(btn,n){document.querySelectorAll('#editStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));btn.classList.add('selected');editStaff=n;}
-function editSetPaid(v){editPaid=v;document.getElementById('editPaidBtn').className='toggle-btn'+(v?' active-paid':'');document.getElementById('editUnpaidBtn').className='toggle-btn'+(!v?' active-unpaid':'');}
+function editSetPaid(v){editPaid=v;}
 async function saveEdit(){
   if(!editType||!editStaff||!document.getElementById('editOwnerName').value.trim()){showToast('Please fill required fields');return;}
   const{error}=await sb.from('jobs').update({type:editType,cremation_type:editCrem,staff_name:editStaff,job_time:document.getElementById('editJobTime').value+':00',duration_mins:parseInt(document.getElementById('editJobDuration').value)||30,owner_name:document.getElementById('editOwnerName').value.trim(),owner_phone:document.getElementById('editOwnerPhone').value,pet_name:document.getElementById('editPetName').value,pet_breed:document.getElementById('editPetBreed').value,pet_weight:parseFloat(document.getElementById('editPetWeight').value)||null,address:document.getElementById('editOwnerAddress').value,paid:editPaid===true,remarks:document.getElementById('editRemarks').value,updated_at:new Date().toISOString()}).eq('id',editJobId);
@@ -2580,7 +2569,7 @@ async function loadOrders(){
     <div class="stat-box" onclick="oTabDirect('all')" style="cursor:pointer"><div class="stat-n">${all}</div><div class="stat-l">All</div></div>
     <div class="stat-box" onclick="oTabDirect('New / Received')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${nw}</div><div class="stat-l">🟢 New</div></div>
     <div class="stat-box" onclick="oTabDirect('Ashes Ready')" style="cursor:pointer"><div class="stat-n" style="color:#6b3a8c">${rd}</div><div class="stat-l">🟣 Ashes Ready</div></div>
-    <div class="stat-box" onclick="oTabDirect('Completed')" style="cursor:pointer"><div class="stat-n" style="color:#2e7d32">${dn}</div><div class="stat-l">🟢 Done</div></div>`;
+    <div class="stat-box" onclick="oTabDirect('Completed')" style="cursor:pointer"><div class="stat-n" style="color:#111">${dn}</div><div class="stat-l">⚫ Completed</div></div>`;
 }
 function renderOrders(){
   const pending=orders.filter(o=>o.status==='New / Received');
@@ -2591,7 +2580,7 @@ function renderOrders(){
   if(sq.trim()){const q=sq.toLowerCase();list=list.filter(o=>[o.first_name,o.last_name,o.pet_name,o.ref,o.phone,o.email,o.notes].filter(Boolean).join(' ').toLowerCase().includes(q));}
   const bc={'New / Received':'b-new','Ashes Ready':'b-ready','Completed':'b-done'};
   document.getElementById('orders-scroll').innerHTML=list.length===0?'<div style="padding:32px;text-align:center;font-size:14px;color:var(--muted)">No orders found</div>':list.map(o=>{
-    const statusLabel=o.status==='New / Received'?'🟢 New':o.status==='Ashes Ready'?'🟣 Ashes Ready':'🟢 Done';
+    const statusLabel=o.status==='New / Received'?'🟢 New':o.status==='Ashes Ready'?'🟣 Ashes Ready':'⚫ Completed';
     const date=o.submitted_at?new Date(o.submitted_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'—';
     return `<div class="order-row" onclick="openOrderDetail('${o.id}',false)" style="padding:16px;flex-direction:column;align-items:stretch;gap:8px">
       <div style="display:flex;justify-content:space-between;align-items:center">
@@ -2854,7 +2843,7 @@ async function doScheduleJob(){
   const jobTypeVal=schedIsAshes?'ashes':(o.form_type==='pickup'?'pickup':'dropoff');
   const{error}=await sb.from('jobs').insert({type:jobTypeVal,cremation_type:schedIsAshes?null:cremType,staff_name:schedStaff,job_date:date,job_time:time+':00',duration_mins:o.form_type==='pickup'?60:15,owner_name:(o.first_name||'')+' '+(o.last_name||''),owner_phone:o.phone||'',pet_name:o.pet_name||'',pet_breed:o.pet_breed||'',address:o.pickup_address||'',paid:o.payment_status==='Paid',remarks:(document.getElementById('sched-remarks').value||'')+' | Ref: '+o.ref});
   if(error){showToast('Error adding job.');return;}
-  const newStatus=schedIsAshes?'Ready for Collection':'In Progress';
+  const newStatus=schedIsAshes?'Ashes Ready':'New / Received';
   await sb.from('orders').update({status:newStatus}).eq('id',schedOrderId);
   document.getElementById('schedOverlay').classList.remove('open');
   document.querySelector('#schedOverlay .modal-title').textContent='📅 Schedule Drop-Off';
