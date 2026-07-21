@@ -809,7 +809,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
     <div class="ty-title">Thank you for trusting us with <span id="ty-pet"></span>.</div>
     <div class="ty-body" id="ty-body"></div>
     <div class="ty-ref" id="ty-ref"></div>
-    <div class="ty-email-sec" id="ty-email-sec">
+    <div class="ty-email-sec" id="ty-email-sec" style="display:none">
       <div style="font-size:14px;font-weight:700;color:#111;margin-bottom:6px">Send yourself a confirmation</div>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:12px">We'll email a summary of everything you selected.</div>
       <input class="fi" type="email" id="ty-email" placeholder="your@email.com" inputmode="email" style="margin-bottom:10px">
@@ -2164,10 +2164,10 @@ async function doSubmit(){
     }catch(e){console.error('Email error:',e);}
     document.getElementById('ty-email-sec').style.display='none';
   }
-  document.getElementById('ty-pet').textContent=gv('pet-name');
+  document.getElementById('ty-pet').textContent=gv('pet-name')||'your pet';
   document.getElementById('ty-body').innerHTML=sSvc==='shared'?'Your pet will be respectfully cared for and their ashes scattered peacefully in the Pacific Ocean.':'We will contact you when the ashes and any keepsakes are ready.<br><br><strong>Estimated timeline: 7–10 business days.</strong>';
   document.getElementById('ty-ref').textContent='Reference: '+ref+' · '+new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  document.getElementById('ty-email-sec').style.display=em?'none':'block';
+  document.getElementById('ty-email-sec').style.display='none';
   document.getElementById('form-view').classList.remove('active');
   document.getElementById('ty-view').classList.add('active');
 }
