@@ -2544,7 +2544,7 @@ function openViewModal(job){
   if(job.owner_phone)b+=row('📞','Phone',job.owner_phone);
   if(job.address)b+=row('📍','Address',job.address);
   b+=row(job.paid?'✅':'⏳','Payment',job.paid?'Paid':'Unpaid');
-  if(job.remarks)b+=row('📝','Remarks',job.remarks);
+  if(job.remarks)b+=row('📝','Remarks',job.remarks.replace(/\n/g,'<br>'));
   document.getElementById('viewBody').innerHTML=b;
   document.getElementById('viewOverlay').classList.add('open');
 }
