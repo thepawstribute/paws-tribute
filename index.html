@@ -2821,7 +2821,7 @@ function confirmAndSchedule(){
   document.getElementById('sched-date').value=fmtDateKey(new Date());
   document.getElementById('sched-time').value='10:00';
   // Pre-fill remarks with current staff notes
-  const currentNotes=document.getElementById('od-notes').value||'';
+  const currentNotes=document.getElementById('od-notes').value.trim()||'';
   document.getElementById('sched-remarks').value=currentNotes;
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   schedIsAshes=false;
@@ -2838,8 +2838,8 @@ function scheduleAshesPickup(){
   const ashesBase=isDelivery
     ?'Ashes delivery — deliver to: '+(o.delivery_address||'[address]')
     :'Ashes pickup — client collecting';
-  const currentNotes=document.getElementById('od-notes').value||'';
-  document.getElementById('sched-remarks').value=ashesBase+(currentNotes?'\n'+currentNotes:'');
+  const currentNotes=document.getElementById('od-notes').value.trim()||'';
+  document.getElementById('sched-remarks').value=[ashesBase,currentNotes].filter(x=>x).join('\n\n');
   document.querySelectorAll('#schedStaffPills .staff-pill').forEach(p=>p.classList.remove('selected'));
   document.querySelector('#schedOverlay .modal-title').textContent=isDelivery?'🚗 Schedule Ashes Delivery':'🫙 Schedule Ashes Pickup';
   schedIsAshes=true;
@@ -2853,7 +2853,7 @@ async function doScheduleJob(){
   const cremType=o.service==='Shared Farewell'?'communal':o.service==='Private Farewell Ceremony'?'ceremony_crem':'individual';
   const jobTypeVal=schedIsAshes?'ashes':(o.form_type==='pickup'?'pickup':'dropoff');
   const schedNote=document.getElementById('sched-remarks').value||'';
-  const finalRemarks=[schedNote,'Ref: '+o.ref].filter(x=>x).join('\n');
+  const finalRemarks=[schedNote.trim(),'Ref: '+o.ref].filter(x=>x).join('\n\n');
   const{error}=await sb.from('jobs').insert({type:jobTypeVal,cremation_type:schedIsAshes?null:cremType,staff_name:schedStaff,job_date:date,job_time:time+':00',duration_mins:o.form_type==='pickup'?60:15,owner_name:(o.first_name||'')+' '+(o.last_name||''),owner_phone:o.phone||'',pet_name:o.pet_name||'',pet_breed:o.pet_breed||'',address:o.pickup_address||'',paid:false,remarks:finalRemarks});
   if(error){showToast('Error adding job.');return;}
   const newStatus=schedIsAshes?'Ashes Ready':'New / Received';
