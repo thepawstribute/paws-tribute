@@ -760,6 +760,18 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
       <div class="sum-lbl">Order summary</div>
       <div id="summary-lines"></div>
       <div class="sum-total-row"><span>Total</span><span id="sv-total">—</span></div>
+      <!-- Staff who assisted -->
+      <div class="divider"></div>
+      <div class="fg">
+        <label class="fl">Who helped you today? <span class="hint">(optional)</span></label>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px" id="formStaffPills">
+          <div class="pill" onclick="selFormStaff('Saskia',this)">Saskia</div>
+          <div class="pill" onclick="selFormStaff('Jesse',this)">Jesse</div>
+          <div class="pill" onclick="selFormStaff('Claire',this)">Claire</div>
+          <div class="pill" onclick="selFormStaff('K',this)">K</div>
+          <div class="pill" onclick="selFormStaff('Jamie',this)">Jamie</div>
+        </div>
+      </div>
       <!-- Payment -->
       <div style="margin-top:20px;padding-top:20px;border-top:2px solid var(--pink-mid)">
         <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:4px">💳 Payment</div>
@@ -1541,7 +1553,7 @@ const BREVO_API_KEY='xkeysib-fccbeea5f7b757ccabe33c41d4bafc14a5620167553f438e2b7
 const BREVO_LIST_ID=6;
 
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const STAFF_ORDER=['Saskia','Jesse','Sophie','Claire','K','Jamie'];
+const STAFF_ORDER=['Saskia','Jesse','Claire','K','Jamie'];
 
 // ═══════════════════════════════════════
 // PRICING
@@ -1691,6 +1703,7 @@ function startForm(type){
   var furSecEl=document.getElementById('ks-fur-section');if(furSecEl)furSecEl.style.display='block';
   var pfn=document.getElementById('private-fur-note');if(pfn)pfn.style.display='none';
   formStaff=null;paymentMethod='';
+  document.querySelectorAll('#formStaffPills .pill').forEach(p=>p.classList.remove('sel'));
   document.querySelectorAll('#pay-cash,#pay-card,#pay-split').forEach(el=>el.classList.remove('sel'));
   var spSec=document.getElementById('split-pay-sec');if(spSec)spSec.style.display='none';
   const ca=document.getElementById('cash-amount');if(ca)ca.value='';
@@ -1857,6 +1870,11 @@ function getKsPrice(){
   if(ksState.paw.active){if(ksState.paw.type==='digital')total+=25;else if(ksState.paw.type==='wooden'){var sz=document.querySelector('input[name="paw-size"]:checked');total+=(sz?(sz.value==='Small'?70:80):70)*ksState.paw.qty;}}
   if(ksState.nose.active){if(ksState.nose.type==='digital')total+=25;else if(ksState.nose.type==='wooden'){var sz2=document.querySelector('input[name="nose-size"]:checked');total+=(sz2?(sz2.value==='Small'?70:80):70)*ksState.nose.qty;}}
   return total;
+}
+function selFormStaff(name,el){
+  formStaff=name;
+  document.querySelectorAll('#formStaffPills .pill').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
 }
 // Legacy stubs
 function selKs(){}
@@ -2116,7 +2134,7 @@ async function doSubmit(){
       return_method:retL[sRet]||'—',pickup_slot:sRet==='pickup'?sSlot:'—',
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
-      payment_status:paymentMethod||'Unpaid',staff_name:'',
+      payment_status:paymentMethod||'Unpaid',staff_name:formStaff||'',
       status:'New / Received',notes:getAfterHoursPrice()>0?'⚠️ After-hours service ($30)':'',
       submitted_at:new Date().toISOString()
     };
