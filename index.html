@@ -1358,6 +1358,7 @@ body{font-family:"DM Sans",system-ui,sans-serif;font-size:16px;font-weight:400;c
         <div class="mrow"><span>Engraving</span><span class="mval" id="od-eng">—</span></div>
         <div class="mrow"><span>Paw / Nose print</span><span class="mval" id="od-ks">—</span></div>
         <div class="mrow"><span>Fur clipping</span><span class="mval" id="od-fur">—</span></div>
+        <div class="mrow"><span>Staff who helped</span><span class="mval" id="od-staff-name">—</span></div>
       </div>
       <div class="msec"><div class="msec-lbl">Ashes return</div>
         <div class="mrow"><span>Method</span><span class="mval" id="od-ret">—</span></div>
@@ -1625,21 +1626,6 @@ window.addEventListener('load',async()=>{
   document.getElementById('phone').addEventListener('input',function(){this.value=this.value.replace(/\D/g,'').slice(0,10)});
   showLoading(true);
   await loadStaff();
-  // Pre-render form staff pills so they show when client form is opened
-  const fp=document.getElementById('formStaffPills');
-  if(fp){
-    fp.innerHTML='';
-    staffList.filter(s=>s.role==='staff').forEach(s=>{
-      const btn=document.createElement('button');
-      btn.type='button';btn.className='staff-pill';btn.textContent=s.name;
-      btn.onclick=()=>{
-        document.querySelectorAll('#formStaffPills .staff-pill').forEach(p=>p.classList.remove('selected')); // formStaffPills removed
-        btn.classList.add('selected');formStaff=s.name;
-        document.getElementById('e-form-staff').classList.remove('show');
-      };
-      fp.appendChild(btn);
-    });
-  }
   const saved=sessionStorage.getItem('pawsUser');
   if(saved){currentUser=JSON.parse(saved);showScr('staff-app');showApp();}
   else{showScr('client');showLanding();}
@@ -2135,7 +2121,7 @@ async function doSubmit(){
       delivery_address:sRet==='delivery'?delAddr:'',delivery_fee:sRet==='delivery'&&delFeeData?'$'+delFeeData.fee:'',
       total_amount:total,driver_pay:driverPay,overtime_blocks:overtimeAuth,
       payment_status:paymentMethod||'Unpaid',staff_name:formStaff||'',
-      status:'New / Received',notes:getAfterHoursPrice()>0?'⚠️ After-hours service ($30)':'',
+      status:'New / Received',notes:'',
       submitted_at:new Date().toISOString()
     };
     const{error}=await sb.from('orders').insert(row);
@@ -2660,6 +2646,7 @@ function openOrderDetail(id,showSched){
   var _godeng=document.getElementById('od-eng');if(_godeng)_godeng.textContent=o.engraving||'—'
   var _godks=document.getElementById('od-ks');if(_godks)_godks.textContent=o.keepsake||'—'
   var _godfur=document.getElementById('od-fur');if(_godfur)_godfur.textContent=o.fur_clipping||'—'
+  var _godstaff=document.getElementById('od-staff-name');if(_godstaff)_godstaff.textContent=o.staff_name||'—'
   var _godret=document.getElementById('od-ret');if(_godret)_godret.textContent=o.return_method||'—'
   var _godslotrow=document.getElementById('od-slot-row');if(_godslotrow)_godslotrow.style.display=o.return_method==='Pick up at office'?'flex':'none'
   var _godslot=document.getElementById('od-slot');if(_godslot)_godslot.textContent=o.pickup_slot||'—'
